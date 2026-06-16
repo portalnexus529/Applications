@@ -1,0 +1,1261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXUS PORTAL</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg-deep:#070B14;--bg-panel:#0D1220;--bg-card:#111827;--bg-hover:#1A2236;
+  --accent:#3B6EFF;--accent-dim:rgba(59,110,255,0.15);--accent-dim2:rgba(59,110,255,0.08);
+  --green:#22C55E;--red:#EF4444;--yellow:#F59E0B;
+  --text-1:#EDF2FF;--text-2:#8B95A9;--text-3:#4B5568;
+  --border:rgba(59,110,255,0.18);--border-dim:rgba(255,255,255,0.06);
+  --sidebar-w:260px;--mono:'JetBrains Mono',monospace;--sans:'Inter',sans-serif;
+}
+html,body{height:100%;font-family:var(--sans);background:var(--bg-deep);color:var(--text-1);}
+
+/* ══ SETUP SCREEN ══ */
+#setup-screen{
+  position:fixed;inset:0;z-index:10000;background:var(--bg-deep);
+  display:flex;align-items:center;justify-content:center;flex-direction:column;
+}
+.setup-box{background:var(--bg-panel);border:1px solid var(--border);border-radius:16px;padding:40px 44px;width:480px;position:relative;}
+.setup-box::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:60%;height:1px;background:linear-gradient(90deg,transparent,var(--accent),transparent);}
+.setup-step{display:none;} .setup-step.active{display:block;}
+.setup-title{font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:0.2em;color:var(--accent);text-transform:uppercase;margin-bottom:6px;}
+.setup-sub{font-size:13px;color:var(--text-2);margin-bottom:24px;line-height:1.6;}
+.setup-hint{background:var(--accent-dim);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:12px;color:var(--text-2);margin-bottom:20px;line-height:1.7;font-family:var(--mono);}
+.setup-hint a{color:var(--accent);text-decoration:none;}
+.setup-hint a:hover{text-decoration:underline;}
+
+/* ══ AUTH SCREENS ══ */
+#auth-screen{
+  position:fixed;inset:0;z-index:9999;background:var(--bg-deep);
+  display:none;align-items:center;justify-content:center;flex-direction:column;
+}
+#auth-screen.visible{display:flex;}
+.auth-bg{position:absolute;inset:0;overflow:hidden;pointer-events:none;}
+.auth-bg::before{content:'';position:absolute;top:-20%;left:50%;transform:translateX(-50%);width:900px;height:900px;background:radial-gradient(circle,rgba(59,110,255,0.12) 0%,transparent 65%);}
+.auth-logo{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:0.4em;color:var(--accent);text-transform:uppercase;margin-bottom:10px;position:relative;z-index:1;}
+.auth-title{font-family:var(--mono);font-size:26px;font-weight:700;color:var(--text-1);letter-spacing:0.06em;margin-bottom:6px;position:relative;z-index:1;text-shadow:0 0 40px rgba(59,110,255,0.4);}
+.auth-subtitle{font-size:13px;color:var(--text-2);margin-bottom:36px;font-family:var(--mono);letter-spacing:0.12em;position:relative;z-index:1;}
+.auth-tabs{display:flex;gap:0;margin-bottom:28px;position:relative;z-index:1;background:var(--bg-card);border:1px solid var(--border-dim);border-radius:10px;padding:4px;}
+.auth-tab{flex:1;text-align:center;padding:9px;font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-2);cursor:pointer;border-radius:8px;transition:all 0.2s;}
+.auth-tab.active{background:var(--accent);color:#fff;}
+.auth-box{background:var(--bg-panel);border:1px solid var(--border);border-radius:16px;padding:36px 44px;width:420px;position:relative;z-index:1;box-shadow:0 0 80px rgba(59,110,255,0.08),0 32px 64px rgba(0,0,0,0.6);}
+.auth-box::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:60%;height:1px;background:linear-gradient(90deg,transparent,var(--accent),transparent);}
+.auth-form{display:none;} .auth-form.active{display:block;}
+.field-label{font-family:var(--mono);font-size:10px;font-weight:600;color:var(--accent);letter-spacing:0.3em;text-transform:uppercase;margin-bottom:8px;display:block;}
+.field-input{width:100%;background:var(--bg-deep);border:1px solid var(--border-dim);border-radius:8px;padding:12px 16px;font-family:var(--mono);font-size:14px;color:var(--text-1);outline:none;transition:border-color 0.2s,box-shadow 0.2s;margin-bottom:16px;}
+.field-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59,110,255,0.15);}
+.field-input::placeholder{color:var(--text-3);}
+.auth-btn{width:100%;background:var(--accent);color:#fff;border:none;border-radius:8px;padding:14px;font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:0.2em;cursor:pointer;transition:background 0.2s,box-shadow 0.2s;text-transform:uppercase;margin-top:4px;}
+.auth-btn:hover{background:#2A5CE8;box-shadow:0 0 30px rgba(59,110,255,0.35);}
+.auth-error{font-family:var(--mono);font-size:11px;color:var(--red);text-align:center;margin-top:12px;min-height:14px;}
+.auth-footer{margin-top:24px;text-align:center;font-family:var(--mono);font-size:10px;color:var(--text-3);letter-spacing:0.2em;position:relative;z-index:1;}
+
+/* ══ APP ══ */
+#app{display:none;height:100vh;flex-direction:column;}
+#app.active{display:flex;}
+.topbar{height:56px;flex-shrink:0;background:var(--bg-panel);border-bottom:1px solid var(--border-dim);display:flex;align-items:center;padding:0 24px;gap:16px;position:relative;z-index:100;}
+.topbar-logo{font-family:var(--mono);font-size:14px;font-weight:700;color:var(--text-1);letter-spacing:0.1em;display:flex;align-items:center;gap:10px;}
+.topbar-logo-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.5;}}
+.topbar-status{font-family:var(--mono);font-size:11px;color:var(--green);letter-spacing:0.15em;display:flex;align-items:center;gap:6px;margin-left:4px;}
+.topbar-status::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--green);display:inline-block;}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:20px;}
+.topbar-clock{font-family:var(--mono);font-size:12px;color:var(--text-2);letter-spacing:0.1em;}
+.topbar-user{font-family:var(--mono);font-size:11px;color:var(--accent);letter-spacing:0.15em;font-weight:600;text-transform:uppercase;}
+.topbar-logout{background:none;border:1px solid var(--border-dim);color:var(--text-2);font-family:var(--mono);font-size:11px;padding:6px 14px;border-radius:6px;cursor:pointer;letter-spacing:0.1em;text-transform:uppercase;transition:border-color 0.2s,color 0.2s;}
+.topbar-logout:hover{border-color:var(--red);color:var(--red);}
+.main-layout{display:flex;flex:1;overflow:hidden;}
+
+/* ══ SIDEBAR ══ */
+.sidebar{width:var(--sidebar-w);flex-shrink:0;background:var(--bg-panel);border-right:1px solid var(--border-dim);display:flex;flex-direction:column;overflow-y:auto;padding:20px 0;}
+.nav-section-label{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.3em;color:var(--text-3);text-transform:uppercase;padding:0 20px;margin:16px 0 6px;}
+.nav-item{display:flex;align-items:center;gap:12px;padding:11px 20px;cursor:pointer;font-size:13px;font-weight:500;color:var(--text-2);border-left:3px solid transparent;transition:background 0.15s,color 0.15s,border-color 0.15s;user-select:none;}
+.nav-item:hover{background:var(--bg-hover);color:var(--text-1);}
+.nav-item.active{background:var(--accent-dim2);color:var(--accent);border-left-color:var(--accent);}
+.nav-icon{font-size:15px;width:20px;text-align:center;flex-shrink:0;}
+.nav-badge{margin-left:auto;background:var(--accent);color:#fff;font-family:var(--mono);font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;}
+.nav-badge.yellow{background:var(--yellow);}
+.nav-badge.green{background:var(--green);}
+.sidebar-divider{height:1px;background:var(--border-dim);margin:14px 20px;}
+
+/* ══ CONTENT ══ */
+.content{flex:1;overflow-y:auto;padding:32px;background:var(--bg-deep);}
+.page-section{display:none;}
+.page-section.active{display:block;}
+.page-header{margin-bottom:28px;}
+.page-header-eyebrow{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.3em;color:var(--accent);text-transform:uppercase;margin-bottom:6px;}
+.page-header h1{font-size:24px;font-weight:700;color:var(--text-1);}
+.page-header p{font-size:13px;color:var(--text-2);margin-top:5px;}
+
+/* ══ STAT CARDS ══ */
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:32px;}
+.stat-card{background:var(--bg-card);border:1px solid var(--border-dim);border-radius:12px;padding:20px;position:relative;overflow:hidden;}
+.stat-card::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:var(--accent);}
+.stat-card.green::before{background:var(--green);}
+.stat-card.yellow::before{background:var(--yellow);}
+.stat-card.red::before{background:var(--red);}
+.stat-label{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.25em;color:var(--text-2);text-transform:uppercase;margin-bottom:10px;}
+.stat-value{font-family:var(--mono);font-size:32px;font-weight:700;color:var(--text-1);}
+.stat-sub{font-size:12px;color:var(--text-2);margin-top:4px;}
+
+/* ══ CARDS ══ */
+.card{background:var(--bg-card);border:1px solid var(--border-dim);border-radius:12px;padding:24px;margin-bottom:20px;}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+.card-title{font-size:14px;font-weight:600;color:var(--text-1);}
+
+/* ══ BUTTONS ══ */
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:8px;border:none;font-family:var(--sans);font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;white-space:nowrap;}
+.btn-primary{background:var(--accent);color:#fff;}
+.btn-primary:hover{background:#2A5CE8;box-shadow:0 0 20px rgba(59,110,255,0.3);}
+.btn-ghost{background:transparent;color:var(--text-2);border:1px solid var(--border-dim);}
+.btn-ghost:hover{border-color:var(--border);color:var(--text-1);background:var(--bg-hover);}
+.btn-danger{background:transparent;color:var(--red);border:1px solid rgba(239,68,68,0.3);}
+.btn-danger:hover{background:rgba(239,68,68,0.1);}
+.btn-success{background:rgba(34,197,94,0.15);color:var(--green);border:1px solid rgba(34,197,94,0.3);}
+.btn-success:hover{background:rgba(34,197,94,0.25);}
+.btn-sm{padding:6px 12px;font-size:12px;}
+
+/* ══ TABLE ══ */
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+thead{border-bottom:1px solid var(--border-dim);}
+th{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.2em;color:var(--text-3);text-transform:uppercase;padding:10px 14px;text-align:left;}
+td{padding:14px;border-bottom:1px solid rgba(255,255,255,0.03);vertical-align:middle;}
+tr:hover td{background:var(--bg-hover);}
+tr:last-child td{border-bottom:none;}
+.badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;font-family:var(--mono);}
+.badge::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor;}
+.badge-pending{background:rgba(245,158,11,0.12);color:var(--yellow);}
+.badge-accepted{background:rgba(34,197,94,0.12);color:var(--green);}
+.badge-rejected{background:rgba(239,68,68,0.12);color:var(--red);}
+.badge-review{background:rgba(59,110,255,0.12);color:var(--accent);}
+
+/* ══ MODAL ══ */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--bg-panel);border:1px solid var(--border);border-radius:16px;width:620px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:0 32px 80px rgba(0,0,0,0.7);position:relative;}
+.modal::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:50%;height:1px;background:linear-gradient(90deg,transparent,var(--accent),transparent);}
+.modal-header{padding:24px 28px 0;display:flex;justify-content:space-between;align-items:center;}
+.modal-title{font-size:16px;font-weight:700;}
+.modal-close{background:none;border:none;color:var(--text-2);font-size:20px;cursor:pointer;line-height:1;padding:4px;transition:color 0.2s;}
+.modal-close:hover{color:var(--text-1);}
+.modal-body{padding:24px 28px;}
+.modal-footer{padding:0 28px 24px;display:flex;gap:10px;justify-content:flex-end;}
+
+/* ══ FORM FIELDS ══ */
+.form-group{margin-bottom:18px;}
+.form-label{display:block;font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.25em;color:var(--text-2);text-transform:uppercase;margin-bottom:7px;}
+.form-input,.form-textarea,.form-select{width:100%;background:var(--bg-deep);border:1px solid var(--border-dim);border-radius:8px;padding:11px 14px;font-family:var(--sans);font-size:13px;color:var(--text-1);outline:none;transition:border-color 0.2s,box-shadow 0.2s;}
+.form-input:focus,.form-textarea:focus,.form-select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59,110,255,0.12);}
+.form-textarea{resize:vertical;min-height:100px;line-height:1.6;}
+.form-select option{background:var(--bg-panel);}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+
+/* ══ APP DETAIL ══ */
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;}
+.detail-key{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.25em;color:var(--text-3);text-transform:uppercase;margin-bottom:5px;}
+.detail-val{font-size:13px;color:var(--text-1);line-height:1.5;}
+.answer-block{margin-bottom:16px;}
+.answer-question{font-size:12px;font-weight:600;color:var(--text-2);margin-bottom:5px;}
+.answer-text{font-size:13px;color:var(--text-1);background:var(--bg-deep);border-radius:8px;padding:12px 14px;border:1px solid var(--border-dim);line-height:1.6;}
+
+/* ══ FORM BUILDER ══ */
+.form-builder-field{background:var(--bg-deep);border:1px solid var(--border-dim);border-radius:10px;padding:16px;margin-bottom:12px;display:flex;gap:12px;align-items:flex-start;}
+.fb-field-body{flex:1;}
+
+/* ══ ACTIVITY ══ */
+.activity-item{display:flex;gap:14px;padding:12px 0;border-bottom:1px solid var(--border-dim);}
+.activity-item:last-child{border-bottom:none;}
+.activity-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);margin-top:5px;flex-shrink:0;box-shadow:0 0 8px var(--accent);}
+.activity-dot.green{background:var(--green);box-shadow:0 0 8px var(--green);}
+.activity-dot.yellow{background:var(--yellow);box-shadow:0 0 8px var(--yellow);}
+.activity-dot.red{background:var(--red);box-shadow:0 0 8px var(--red);}
+.activity-text{font-size:13px;color:var(--text-1);}
+.activity-time{font-family:var(--mono);font-size:11px;color:var(--text-3);margin-top:3px;}
+
+/* ══ PUBLIC FORM PAGE ══ */
+#public-app-page{display:none;position:fixed;inset:0;z-index:500;background:var(--bg-deep);overflow-y:auto;}
+#public-app-page.open{display:block;}
+.pub-wrap{max-width:700px;margin:0 auto;padding:60px 24px;}
+.pub-header{margin-bottom:40px;}
+.pub-header-badge{display:inline-block;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:0.3em;color:var(--accent);text-transform:uppercase;background:var(--accent-dim);border:1px solid var(--border);border-radius:4px;padding:5px 12px;margin-bottom:16px;}
+.pub-header h1{font-size:30px;font-weight:700;color:var(--text-1);margin-bottom:10px;}
+.pub-header p{font-size:14px;color:var(--text-2);line-height:1.7;}
+.pub-card{background:var(--bg-card);border:1px solid var(--border-dim);border-radius:14px;padding:32px;}
+.pub-form-group{margin-bottom:20px;}
+.pub-form-label{display:block;font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.25em;color:var(--accent);text-transform:uppercase;margin-bottom:8px;}
+.pub-form-label .req{color:var(--red);}
+.pub-form-input,.pub-form-textarea,.pub-form-select{width:100%;background:var(--bg-deep);border:1px solid var(--border-dim);border-radius:8px;padding:12px 16px;font-family:var(--sans);font-size:14px;color:var(--text-1);outline:none;transition:border-color 0.2s,box-shadow 0.2s;}
+.pub-form-input:focus,.pub-form-textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59,110,255,0.12);}
+.pub-form-textarea{resize:vertical;min-height:120px;line-height:1.6;}
+.pub-submit{width:100%;background:var(--accent);color:#fff;border:none;border-radius:10px;padding:16px;font-size:15px;font-weight:700;font-family:var(--mono);letter-spacing:0.15em;text-transform:uppercase;cursor:pointer;transition:background 0.2s,box-shadow 0.2s;margin-top:8px;}
+.pub-submit:hover{background:#2A5CE8;box-shadow:0 0 30px rgba(59,110,255,0.4);}
+.pub-success{text-align:center;padding:40px 0;display:none;}
+.pub-success-icon{font-size:52px;margin-bottom:20px;}
+.pub-success h2{font-size:22px;font-weight:700;margin-bottom:10px;}
+.pub-success p{font-size:14px;color:var(--text-2);}
+
+/* ══ APPLICANT PORTAL ══ */
+#applicant-portal{display:none;height:100vh;flex-direction:column;}
+#applicant-portal.active{display:flex;}
+.ap-header{height:56px;flex-shrink:0;background:var(--bg-panel);border-bottom:1px solid var(--border-dim);display:flex;align-items:center;padding:0 24px;gap:16px;}
+.ap-content{flex:1;overflow-y:auto;padding:40px 32px;background:var(--bg-deep);}
+.ap-welcome{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--text-1);margin-bottom:6px;}
+.ap-sub{font-size:13px;color:var(--text-2);margin-bottom:32px;}
+.ap-card{background:var(--bg-card);border:1px solid var(--border-dim);border-radius:14px;padding:28px;margin-bottom:20px;}
+.ap-app-title{font-size:16px;font-weight:700;color:var(--text-1);margin-bottom:6px;}
+.ap-app-meta{font-family:var(--mono);font-size:11px;color:var(--text-3);margin-bottom:20px;letter-spacing:0.1em;}
+.status-big{display:inline-flex;align-items:center;gap:10px;padding:10px 20px;border-radius:10px;font-family:var(--mono);font-weight:700;font-size:14px;letter-spacing:0.1em;text-transform:uppercase;}
+.status-big.pending{background:rgba(245,158,11,0.1);color:var(--yellow);border:1px solid rgba(245,158,11,0.25);}
+.status-big.accepted{background:rgba(34,197,94,0.1);color:var(--green);border:1px solid rgba(34,197,94,0.25);}
+.status-big.rejected{background:rgba(239,68,68,0.1);color:var(--red);border:1px solid rgba(239,68,68,0.25);}
+.status-big.review{background:rgba(59,110,255,0.1);color:var(--accent);border:1px solid rgba(59,110,255,0.25);}
+.ap-no-apps{text-align:center;padding:60px 20px;color:var(--text-2);}
+.ap-no-apps-icon{font-size:40px;margin-bottom:16px;opacity:0.4;}
+.ap-note-box{margin-top:20px;background:var(--bg-deep);border:1px solid var(--border-dim);border-radius:8px;padding:14px 16px;}
+.ap-note-label{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.25em;color:var(--text-3);text-transform:uppercase;margin-bottom:6px;}
+.ap-note-text{font-size:13px;color:var(--text-2);line-height:1.6;}
+
+/* ══ MISC ══ */
+.empty-state{text-align:center;padding:60px 20px;color:var(--text-2);}
+.empty-state-icon{font-size:40px;margin-bottom:16px;opacity:0.5;}
+.empty-state h3{font-size:16px;font-weight:600;color:var(--text-1);margin-bottom:6px;}
+.empty-state p{font-size:13px;}
+.divider{height:1px;background:var(--border-dim);margin:24px 0;}
+.notice{background:var(--accent-dim);border:1px solid var(--border);border-radius:10px;padding:14px 18px;display:flex;align-items:flex-start;gap:12px;font-size:13px;color:var(--text-2);margin-bottom:20px;}
+.notice-icon{font-size:16px;flex-shrink:0;margin-top:1px;}
+.text-accent{color:var(--accent);} .text-green{color:var(--green);} .text-yellow{color:var(--yellow);} .text-red{color:var(--red);} .text-muted{color:var(--text-2);font-size:12px;} .mono{font-family:var(--mono);}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.fade-in{animation:fadeIn 0.3s ease;}
+.loading-bar{width:100%;height:3px;background:var(--border-dim);border-radius:3px;overflow:hidden;margin-bottom:12px;}
+.loading-bar-fill{height:100%;background:var(--accent);border-radius:3px;animation:loadBar 1.5s ease-in-out infinite;}
+@keyframes loadBar{0%{width:0%;margin-left:0;}50%{width:60%;margin-left:20%;}100%{width:0%;margin-left:100%;}  }
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--text-3);border-radius:10px;}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════
+     SETUP SCREEN (first-time JSONBin config)
+══════════════════════════════════════ -->
+<div id="setup-screen">
+  <div style="font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:0.4em;color:var(--accent);text-transform:uppercase;margin-bottom:10px;">NEXUS PORTAL</div>
+  <div style="font-family:var(--mono);font-size:22px;font-weight:700;color:var(--text-1);margin-bottom:6px;text-shadow:0 0 40px rgba(59,110,255,0.4);">FIRST-TIME SETUP</div>
+  <div style="font-size:13px;color:var(--text-2);margin-bottom:28px;font-family:var(--mono);letter-spacing:0.1em;">Connect your JSONBin database</div>
+
+  <div class="setup-box">
+    <div class="setup-step active" id="setup-step-1">
+      <div class="setup-title">Step 1 — Create your JSONBin</div>
+      <div class="setup-sub">You need a free JSONBin account to store all data permanently across devices.</div>
+      <div class="setup-hint">
+        1. Go to <a href="https://jsonbin.io" target="_blank">jsonbin.io</a> and create a free account<br>
+        2. Click <b>+ CREATE BIN</b> and paste this as the content:<br><br>
+        <span style="color:var(--accent);">{"forms":[],"applications":[],"users":[],"activity":[]}</span><br><br>
+        3. Click <b>CREATE BIN</b> — copy the <b>BIN ID</b> from the URL<br>
+        4. Go to <b>API Keys</b> in your account → create a key → copy it
+      </div>
+      <div class="form-group">
+        <label class="form-label">JSONBin API Key</label>
+        <input class="form-input" id="setup-apikey" placeholder="$2a$10$..." />
+      </div>
+      <div class="form-group">
+        <label class="form-label">JSONBin Bin ID</label>
+        <input class="form-input" id="setup-binid" placeholder="64abc123def456..." />
+      </div>
+      <div style="font-size:12px;color:var(--text-3);margin-bottom:16px;font-family:var(--mono);">These are saved in your browser and never sent anywhere except JSONBin.</div>
+      <button class="auth-btn" onclick="saveSetup()">CONNECT DATABASE</button>
+      <div class="auth-error" id="setup-error"></div>
+    </div>
+  </div>
+  <div style="margin-top:20px;font-family:var(--mono);font-size:10px;color:var(--text-3);letter-spacing:0.2em;">NEXUS PORTAL v2.0 — PRIVATE SYSTEM</div>
+</div>
+
+<!-- ══════════════════════════════════════
+     AUTH SCREEN (Login / Register)
+══════════════════════════════════════ -->
+<div id="auth-screen">
+  <div class="auth-bg"></div>
+  <div class="auth-logo">NEXUS PORTAL</div>
+  <div class="auth-title" id="auth-title">PORTAL ACCESS</div>
+  <div class="auth-subtitle">// SECURE APPLICATION MANAGEMENT</div>
+
+  <div class="auth-tabs" id="auth-tabs">
+    <div class="auth-tab active" onclick="switchAuthTab('login')">LOGIN</div>
+    <div class="auth-tab" onclick="switchAuthTab('register')">REGISTER</div>
+  </div>
+
+  <div class="auth-box">
+    <!-- Login -->
+    <div class="auth-form active" id="form-login">
+      <label class="field-label">Username</label>
+      <input class="field-input" id="li-user" type="text" placeholder="Enter username" autocomplete="off" />
+      <label class="field-label">Password</label>
+      <input class="field-input" id="li-pass" type="password" placeholder="••••••••" autocomplete="off" />
+      <button class="auth-btn" onclick="doLogin()">AUTHENTICATE</button>
+      <div class="auth-error" id="li-error"></div>
+    </div>
+    <!-- Register -->
+    <div class="auth-form" id="form-register">
+      <label class="field-label">Choose Username</label>
+      <input class="field-input" id="reg-user" type="text" placeholder="Username" autocomplete="off" />
+      <label class="field-label">Choose Password</label>
+      <input class="field-input" id="reg-pass" type="password" placeholder="Min 4 characters" autocomplete="off" />
+      <label class="field-label">Confirm Password</label>
+      <input class="field-input" id="reg-pass2" type="password" placeholder="Repeat password" autocomplete="off" />
+      <button class="auth-btn" onclick="doRegister()">CREATE ACCOUNT</button>
+      <div class="auth-error" id="reg-error"></div>
+    </div>
+  </div>
+  <div class="auth-footer">NEXUS PORTAL v2.0 &nbsp;|&nbsp; PRIVATE SYSTEM — AUTHORISED ACCESS ONLY</div>
+</div>
+
+<!-- ══════════════════════════════════════
+     ADMIN APP
+══════════════════════════════════════ -->
+<div id="app">
+  <div class="topbar">
+    <div class="topbar-logo"><div class="topbar-logo-dot"></div>NEXUS PORTAL</div>
+    <div class="topbar-status">SYSTEMS ONLINE</div>
+    <div class="topbar-right">
+      <div class="topbar-clock" id="clock"></div>
+      <div class="topbar-user" id="topbar-username">⬡ ADMIN</div>
+      <button class="topbar-logout" onclick="logout()">LOGOUT</button>
+    </div>
+  </div>
+  <div class="main-layout">
+    <div class="sidebar">
+      <div class="nav-section-label">Overview</div>
+      <div class="nav-item active" id="nav-dashboard" onclick="navigate('dashboard',this)"><span class="nav-icon">◈</span>Dashboard</div>
+      <div class="nav-section-label">Applications</div>
+      <div class="nav-item" id="nav-all-apps" onclick="navigate('all-apps',this)"><span class="nav-icon">◧</span>All Applications<span class="nav-badge" id="badge-all">0</span></div>
+      <div class="nav-item" id="nav-pending" onclick="navigate('pending',this)"><span class="nav-icon">◌</span>Pending Review<span class="nav-badge yellow" id="badge-pending">0</span></div>
+      <div class="nav-item" id="nav-accepted" onclick="navigate('accepted',this)"><span class="nav-icon">◉</span>Accepted<span class="nav-badge green" id="badge-accepted">0</span></div>
+      <div class="sidebar-divider"></div>
+      <div class="nav-section-label">Management</div>
+      <div class="nav-item" id="nav-forms" onclick="navigate('forms',this)"><span class="nav-icon">▣</span>Application Forms</div>
+      <div class="nav-item" id="nav-create-form" onclick="navigate('create-form',this)"><span class="nav-icon">✦</span>Create New Form</div>
+      <div class="nav-item" id="nav-users" onclick="navigate('users',this)"><span class="nav-icon">◎</span>User Accounts<span class="nav-badge" id="badge-users">0</span></div>
+      <div class="sidebar-divider"></div>
+      <div class="nav-section-label">System</div>
+      <div class="nav-item" id="nav-activity" onclick="navigate('activity',this)"><span class="nav-icon">◈</span>Activity Log</div>
+    </div>
+
+    <div class="content">
+
+      <!-- DASHBOARD -->
+      <div class="page-section active fade-in" id="page-dashboard">
+        <div class="page-header">
+          <div class="page-header-eyebrow">Overview</div>
+          <h1>Dashboard</h1>
+          <p>Welcome back, Administrator. Here's your current system overview.</p>
+        </div>
+        <div class="stat-grid" id="stat-grid"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+          <div class="card">
+            <div class="card-header"><div class="card-title">Recent Applications</div><button class="btn btn-ghost btn-sm" onclick="navigate('all-apps',document.getElementById('nav-all-apps'))">View All</button></div>
+            <div id="recent-apps-list"></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">Active Forms</div><button class="btn btn-ghost btn-sm" onclick="navigate('forms',document.getElementById('nav-forms'))">Manage</button></div>
+            <div id="active-forms-list"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ALL APPS -->
+      <div class="page-section fade-in" id="page-all-apps">
+        <div class="page-header"><div class="page-header-eyebrow">Applications</div><h1>All Applications</h1><p>Review and manage every submitted application.</p></div>
+        <div class="card">
+          <div class="card-header" style="flex-wrap:wrap;gap:10px;">
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <input class="form-input" style="width:220px;" placeholder="Search applicants…" oninput="filterApps(this.value,'all-apps')" id="search-all" />
+              <select class="form-select" style="width:160px;" onchange="filterStatus(this.value)">
+                <option value="">All Statuses</option>
+                <option value="pending">Pending</option>
+                <option value="review">In Review</option>
+                <option value="accepted">Accepted</option>
+                <option value="rejected">Rejected</option>
+              </select>
+            </div>
+          </div>
+          <div class="table-wrap"><table><thead><tr><th>#</th><th>Applicant</th><th>Form</th><th>Submitted</th><th>Status</th><th>Actions</th></tr></thead><tbody id="all-apps-tbody"></tbody></table></div>
+        </div>
+      </div>
+
+      <!-- PENDING -->
+      <div class="page-section fade-in" id="page-pending">
+        <div class="page-header"><div class="page-header-eyebrow">Applications</div><h1>Pending Review</h1><p>Applications awaiting your decision.</p></div>
+        <div class="card"><div class="table-wrap"><table><thead><tr><th>#</th><th>Applicant</th><th>Form</th><th>Submitted</th><th>Status</th><th>Actions</th></tr></thead><tbody id="pending-tbody"></tbody></table></div></div>
+      </div>
+
+      <!-- ACCEPTED -->
+      <div class="page-section fade-in" id="page-accepted">
+        <div class="page-header"><div class="page-header-eyebrow">Applications</div><h1>Accepted</h1><p>Successfully accepted applications.</p></div>
+        <div class="card"><div class="table-wrap"><table><thead><tr><th>#</th><th>Applicant</th><th>Form</th><th>Submitted</th><th>Actions</th></tr></thead><tbody id="accepted-tbody"></tbody></table></div></div>
+      </div>
+
+      <!-- FORMS -->
+      <div class="page-section fade-in" id="page-forms">
+        <div class="page-header"><div class="page-header-eyebrow">Management</div><h1>Application Forms</h1><p>Manage your public-facing application forms.</p></div>
+        <div id="forms-grid"></div>
+        <div class="empty-state" id="forms-empty" style="display:none"><div class="empty-state-icon">▣</div><h3>No forms yet</h3><p>Create your first application form to get started.</p><button class="btn btn-primary" style="margin-top:16px;" onclick="navigate('create-form',document.getElementById('nav-create-form'))">Create Form</button></div>
+      </div>
+
+      <!-- CREATE FORM -->
+      <div class="page-section fade-in" id="page-create-form">
+        <div class="page-header"><div class="page-header-eyebrow">Management</div><h1>Create Application Form</h1><p>Build a new public-facing form for applicants to fill out.</p></div>
+        <div class="notice"><div class="notice-icon">ℹ</div>Each form gets a unique shareable link. Submissions are immediately visible in your dashboard.</div>
+        <div class="card">
+          <div class="form-group"><label class="form-label">Form Title</label><input class="form-input" id="cf-title" placeholder="e.g. DayZ Staff Application" /></div>
+          <div class="form-group"><label class="form-label">Category / Server</label><input class="form-input" id="cf-category" placeholder="e.g. DayZ Chernarus Server" /></div>
+          <div class="form-group"><label class="form-label">Description (shown to applicants)</label><textarea class="form-textarea" id="cf-desc" placeholder="Describe the role, requirements, expectations…"></textarea></div>
+          <div class="divider"></div>
+          <div class="card-header" style="margin-bottom:14px;"><div class="card-title">Questions</div><button class="btn btn-ghost btn-sm" onclick="addQuestion()">+ Add Question</button></div>
+          <div id="questions-list"></div>
+          <div class="divider"></div>
+          <div style="display:flex;gap:10px;justify-content:flex-end;">
+            <button class="btn btn-ghost" onclick="navigate('forms',document.getElementById('nav-forms'))">Cancel</button>
+            <button class="btn btn-primary" onclick="saveForm()">Publish Form</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- USERS -->
+      <div class="page-section fade-in" id="page-users">
+        <div class="page-header"><div class="page-header-eyebrow">Management</div><h1>User Accounts</h1><p>View and manage all registered applicant accounts. You can also create accounts manually.</p></div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">All Accounts</div>
+            <button class="btn btn-primary btn-sm" onclick="openCreateUserModal()">+ Create Account</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Username</th><th>Role</th><th>Registered</th><th>Applications</th><th>Actions</th></tr></thead>
+              <tbody id="users-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ACTIVITY -->
+      <div class="page-section fade-in" id="page-activity">
+        <div class="page-header"><div class="page-header-eyebrow">System</div><h1>Activity Log</h1><p>A record of all admin actions, registrations, and submissions.</p></div>
+        <div class="card" id="activity-log"></div>
+      </div>
+
+    </div><!-- /content -->
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     APPLICANT PORTAL
+══════════════════════════════════════ -->
+<div id="applicant-portal">
+  <div class="ap-header">
+    <div class="topbar-logo"><div class="topbar-logo-dot"></div>NEXUS PORTAL</div>
+    <div class="topbar-status">MY APPLICATIONS</div>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:16px;">
+      <div class="topbar-user" id="ap-username"></div>
+      <button class="topbar-logout" onclick="logout()">LOGOUT</button>
+    </div>
+  </div>
+  <div class="ap-content">
+    <div class="ap-welcome" id="ap-welcome"></div>
+    <div class="ap-sub">Here is the current status of your application(s). The admin will update your status as they review.</div>
+    <div id="ap-apps-list"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     PUBLIC APPLICATION FORM
+══════════════════════════════════════ -->
+<div id="public-app-page">
+  <div class="pub-wrap">
+    <button class="btn btn-ghost" onclick="closePubForm()" style="margin-bottom:24px;">← Back</button>
+    <div class="pub-header">
+      <div class="pub-header-badge" id="pub-badge">NOW ACCEPTING APPLICATIONS</div>
+      <h1 id="pub-title"></h1>
+      <p id="pub-desc"></p>
+    </div>
+    <div class="pub-card">
+      <div id="pub-form-area">
+        <div id="pub-fields"></div>
+        <button class="pub-submit" onclick="submitApplication()">SUBMIT APPLICATION</button>
+      </div>
+      <div class="pub-success" id="pub-success">
+        <div class="pub-success-icon">✓</div>
+        <h2>Application Submitted</h2>
+        <p>Thank you for applying. Log in to your account to track the status of your application.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODALS ══ -->
+
+<!-- View Application -->
+<div class="modal-overlay" id="modal-view">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">Application Details</div><button class="modal-close" onclick="closeModal('modal-view')">✕</button></div>
+    <div class="modal-body" id="modal-view-body"></div>
+    <div class="modal-footer" id="modal-view-footer"></div>
+  </div>
+</div>
+
+<!-- Edit Application -->
+<div class="modal-overlay" id="modal-edit">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">Edit Application</div><button class="modal-close" onclick="closeModal('modal-edit')">✕</button></div>
+    <div class="modal-body" id="modal-edit-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-edit')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEditApp()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Delete -->
+<div class="modal-overlay" id="modal-confirm">
+  <div class="modal" style="width:440px;">
+    <div class="modal-header"><div class="modal-title text-red">Confirm Delete</div><button class="modal-close" onclick="closeModal('modal-confirm')">✕</button></div>
+    <div class="modal-body"><p style="color:var(--text-2);font-size:13px;">Are you sure you want to permanently delete this? This cannot be undone.</p></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-confirm')">Cancel</button>
+      <button class="btn btn-danger" id="confirm-delete-btn">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- Form Link -->
+<div class="modal-overlay" id="modal-link">
+  <div class="modal" style="width:500px;">
+    <div class="modal-header"><div class="modal-title">Share Application Link</div><button class="modal-close" onclick="closeModal('modal-link')">✕</button></div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--text-2);margin-bottom:16px;">Share this link with potential applicants.</p>
+      <div style="display:flex;gap:10px;">
+        <input class="form-input" id="link-input" readonly style="font-family:var(--mono);font-size:12px;" />
+        <button class="btn btn-primary" onclick="copyLink()">Copy</button>
+      </div>
+      <div style="margin-top:12px;font-family:var(--mono);font-size:11px;color:var(--green);" id="copy-confirm"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Create User (Admin) -->
+<div class="modal-overlay" id="modal-create-user">
+  <div class="modal" style="width:440px;">
+    <div class="modal-header"><div class="modal-title">Create User Account</div><button class="modal-close" onclick="closeModal('modal-create-user')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Username</label><input class="form-input" id="cu-user" placeholder="Choose a username" /></div>
+      <div class="form-group"><label class="form-label">Password</label><input class="form-input" id="cu-pass" type="password" placeholder="Choose a password" /></div>
+      <div class="auth-error" id="cu-error"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-create-user')">Cancel</button>
+      <button class="btn btn-primary" onclick="adminCreateUser()">Create Account</button>
+    </div>
+  </div>
+</div>
+
+<!-- Loading overlay -->
+<div id="loading-overlay" style="position:fixed;inset:0;background:rgba(7,11,20,0.85);z-index:99999;display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px;">
+  <div style="font-family:var(--mono);font-size:12px;color:var(--accent);letter-spacing:0.3em;">SYNCING DATABASE…</div>
+  <div style="width:200px;"><div class="loading-bar"><div class="loading-bar-fill"></div></div></div>
+</div>
+
+<script>
+/* ════════════════════════════════════════
+   JSONBIN CONFIG
+════════════════════════════════════════ */
+let JSONBIN_KEY = '';
+let JSONBIN_ID  = '';
+
+const BIN_URL = () => `https://api.jsonbin.io/v3/b/${JSONBIN_ID}`;
+const HEADERS = () => ({
+  'Content-Type': 'application/json',
+  'X-Master-Key': JSONBIN_KEY,
+  'X-Bin-Versioning': 'false'
+});
+
+/* ════════════════════════════════════════
+   DATA
+════════════════════════════════════════ */
+let db = { forms:[], applications:[], users:[], activity:[] };
+let currentUser = null; // { username, role:'admin'|'user' }
+
+/* ════════════════════════════════════════
+   JSONBIN CRUD
+════════════════════════════════════════ */
+function showLoading(v){ document.getElementById('loading-overlay').style.display = v?'flex':'none'; }
+
+async function loadDB(){
+  showLoading(true);
+  try{
+    const r = await fetch(BIN_URL(), { headers: HEADERS() });
+    if(!r.ok) throw new Error('fetch failed');
+    const j = await r.json();
+    db = j.record || { forms:[], applications:[], users:[], activity:[] };
+    if(!db.users) db.users=[];
+    if(!db.activity) db.activity=[];
+    // Ensure admin account always exists
+    if(!db.users.find(u=>u.username==='1877')){
+      db.users.unshift({ username:'1877', password:'1877', role:'admin', created: nowStr() });
+      await saveDB();
+    }
+  } catch(e){ showErr('Could not reach JSONBin. Check your API key and Bin ID.'); }
+  finally{ showLoading(false); }
+}
+
+async function saveDB(){
+  try{
+    await fetch(BIN_URL(), {
+      method:'PUT',
+      headers: HEADERS(),
+      body: JSON.stringify(db)
+    });
+  } catch(e){ console.error('Save failed',e); }
+}
+
+/* ════════════════════════════════════════
+   SETUP
+════════════════════════════════════════ */
+async function saveSetup(){
+  const key = document.getElementById('setup-apikey').value.trim();
+  const id  = document.getElementById('setup-binid').value.trim();
+  if(!key||!id){ showSetupErr('Both fields are required.'); return; }
+  showLoading(true);
+  try{
+    // Test connection
+    const r = await fetch(`https://api.jsonbin.io/v3/b/${id}`, { headers:{ 'X-Master-Key':key, 'X-Bin-Versioning':'false' } });
+    if(!r.ok) throw new Error('bad');
+    localStorage.setItem('nx_key', key);
+    localStorage.setItem('nx_id', id);
+    JSONBIN_KEY = key; JSONBIN_ID = id;
+    await loadDB();
+    showLoading(false);
+    document.getElementById('setup-screen').style.display='none';
+    showAuth();
+  } catch(e){
+    showLoading(false);
+    showSetupErr('Connection failed. Double-check your API key and Bin ID.');
+  }
+}
+
+function showSetupErr(msg){ document.getElementById('setup-error').textContent=msg; }
+
+/* ════════════════════════════════════════
+   AUTH
+════════════════════════════════════════ */
+function showAuth(){
+  document.getElementById('auth-screen').classList.add('visible');
+}
+
+function switchAuthTab(tab){
+  document.querySelectorAll('.auth-tab').forEach((t,i)=>t.classList.toggle('active',['login','register'][i]===tab));
+  document.getElementById('form-login').classList.toggle('active', tab==='login');
+  document.getElementById('form-register').classList.toggle('active', tab==='register');
+  document.getElementById('li-error').textContent='';
+  document.getElementById('reg-error').textContent='';
+}
+
+async function doLogin(){
+  const u = document.getElementById('li-user').value.trim();
+  const p = document.getElementById('li-pass').value.trim();
+  if(!u||!p){ setAuthErr('li','Username and password required.'); return; }
+  showLoading(true);
+  await loadDB(); // always re-fetch fresh data
+  showLoading(false);
+  const user = db.users.find(x=>x.username===u && x.password===p);
+  if(!user){ setAuthErr('li','Invalid username or password.'); return; }
+  currentUser = { username: user.username, role: user.role };
+  logActivity(`${user.username} logged in`, 'accent');
+  await saveDB();
+  document.getElementById('auth-screen').classList.remove('visible');
+  if(user.role==='admin') launchAdmin();
+  else launchApplicantPortal();
+}
+
+async function doRegister(){
+  const u = document.getElementById('reg-user').value.trim();
+  const p = document.getElementById('reg-pass').value.trim();
+  const p2= document.getElementById('reg-pass2').value.trim();
+  if(!u||!p){ setAuthErr('reg','All fields are required.'); return; }
+  if(p.length < 4){ setAuthErr('reg','Password must be at least 4 characters.'); return; }
+  if(p!==p2){ setAuthErr('reg','Passwords do not match.'); return; }
+  showLoading(true);
+  await loadDB();
+  if(db.users.find(x=>x.username.toLowerCase()===u.toLowerCase())){
+    showLoading(false); setAuthErr('reg','That username is already taken.'); return;
+  }
+  const newUser = { username:u, password:p, role:'user', created: nowStr() };
+  db.users.push(newUser);
+  logActivity(`New account registered: ${u}`, 'green');
+  await saveDB();
+  showLoading(false);
+  currentUser = { username:u, role:'user' };
+  document.getElementById('auth-screen').classList.remove('visible');
+  launchApplicantPortal();
+}
+
+function setAuthErr(prefix, msg){ document.getElementById(prefix+'-error').textContent=msg; }
+
+function logout(){
+  currentUser=null;
+  document.getElementById('app').classList.remove('active');
+  document.getElementById('applicant-portal').classList.remove('active');
+  document.getElementById('public-app-page').classList.remove('open');
+  switchAuthTab('login');
+  document.getElementById('li-user').value='';
+  document.getElementById('li-pass').value='';
+  document.getElementById('auth-screen').classList.add('visible');
+}
+
+/* ════════════════════════════════════════
+   ADMIN LAUNCH
+════════════════════════════════════════ */
+function launchAdmin(){
+  document.getElementById('topbar-username').textContent='⬡ '+currentUser.username.toUpperCase();
+  document.getElementById('app').classList.add('active');
+  startClock();
+  refreshAll();
+}
+
+/* ════════════════════════════════════════
+   APPLICANT PORTAL
+════════════════════════════════════════ */
+function launchApplicantPortal(){
+  document.getElementById('ap-username').textContent='⬡ '+currentUser.username.toUpperCase();
+  document.getElementById('ap-welcome').textContent='Welcome, '+currentUser.username;
+  document.getElementById('applicant-portal').classList.add('active');
+  renderApplicantApps();
+}
+
+function renderApplicantApps(){
+  const myApps = db.applications.filter(a=>a.submittedBy===currentUser.username);
+  const el = document.getElementById('ap-apps-list');
+  if(!myApps.length){
+    el.innerHTML=`<div class="ap-no-apps"><div class="ap-no-apps-icon">◧</div><h3 style="font-size:16px;font-weight:600;color:var(--text-1);margin-bottom:8px;">No Applications Found</h3><p>You haven't submitted any applications yet. Use a form link to apply.</p></div>`;
+    return;
+  }
+  el.innerHTML = [...myApps].reverse().map(a=>`
+    <div class="ap-card">
+      <div class="ap-app-title">${esc(a.formTitle)}</div>
+      <div class="ap-app-meta">APPLICATION #${a.id} &nbsp;·&nbsp; SUBMITTED ${a.date}</div>
+      <div class="status-big ${a.status}">
+        ${{pending:'⏳ Pending Review',review:'🔍 Under Review',accepted:'✓ Accepted',rejected:'✕ Rejected'}[a.status]||a.status}
+      </div>
+      ${a.adminNote?`<div class="ap-note-box"><div class="ap-note-label">Message from Admin</div><div class="ap-note-text">${esc(a.adminNote)}</div></div>`:''}
+    </div>
+  `).join('');
+}
+
+/* ════════════════════════════════════════
+   CLOCK
+════════════════════════════════════════ */
+function startClock(){
+  const el=document.getElementById('clock');
+  const t=()=>el.textContent=new Date().toLocaleTimeString('en-GB',{hour12:false});
+  t(); setInterval(t,1000);
+}
+
+/* ════════════════════════════════════════
+   NAVIGATION
+════════════════════════════════════════ */
+function navigate(page, el){
+  document.querySelectorAll('.page-section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const sec=document.getElementById('page-'+page);
+  if(sec){sec.classList.add('active');sec.classList.add('fade-in');}
+  if(el) el.classList.add('active');
+  refreshPage(page);
+}
+
+function refreshPage(page){
+  if(page==='dashboard') renderDashboard();
+  if(page==='all-apps') renderAllApps();
+  if(page==='pending') renderFiltered(['pending','review'],'pending-tbody',true);
+  if(page==='accepted') renderFiltered(['accepted'],'accepted-tbody',false);
+  if(page==='forms') renderForms();
+  if(page==='create-form') initCreateForm();
+  if(page==='users') renderUsers();
+  if(page==='activity') renderActivity();
+}
+
+async function refreshAll(){
+  showLoading(true);
+  await loadDB();
+  showLoading(false);
+  updateBadges();
+  renderDashboard();
+}
+
+/* ════════════════════════════════════════
+   DASHBOARD
+════════════════════════════════════════ */
+function renderDashboard(){
+  updateBadges();
+  const total=db.applications.length;
+  const pending=db.applications.filter(a=>a.status==='pending'||a.status==='review').length;
+  const accepted=db.applications.filter(a=>a.status==='accepted').length;
+  const rejected=db.applications.filter(a=>a.status==='rejected').length;
+  const forms=db.forms.length;
+  const users=db.users.filter(u=>u.role!=='admin').length;
+  document.getElementById('stat-grid').innerHTML=`
+    <div class="stat-card"><div class="stat-label">Total Applications</div><div class="stat-value">${total}</div><div class="stat-sub">All time</div></div>
+    <div class="stat-card yellow"><div class="stat-label">Pending Review</div><div class="stat-value">${pending}</div><div class="stat-sub">Awaiting decision</div></div>
+    <div class="stat-card green"><div class="stat-label">Accepted</div><div class="stat-value">${accepted}</div><div class="stat-sub">Total approved</div></div>
+    <div class="stat-card red"><div class="stat-label">Rejected</div><div class="stat-value">${rejected}</div><div class="stat-sub">Total declined</div></div>
+    <div class="stat-card"><div class="stat-label">Active Forms</div><div class="stat-value">${forms}</div><div class="stat-sub">Published</div></div>
+    <div class="stat-card"><div class="stat-label">Registered Users</div><div class="stat-value">${users}</div><div class="stat-sub">Applicant accounts</div></div>
+  `;
+  const recent=[...db.applications].reverse().slice(0,5);
+  const recEl=document.getElementById('recent-apps-list');
+  if(!recent.length){recEl.innerHTML='<div class="empty-state" style="padding:30px 0;"><div class="empty-state-icon" style="font-size:24px;">◧</div><p>No applications yet</p></div>';}
+  else recEl.innerHTML=recent.map(a=>`
+    <div class="activity-item" style="cursor:pointer;" onclick="openViewModal(${a.id})">
+      <div class="activity-dot ${a.status==='accepted'?'green':a.status==='rejected'?'red':''}"></div>
+      <div>
+        <div class="activity-text">${esc(a.applicantName)} — <span class="text-muted">${esc(a.formTitle)}</span></div>
+        <div class="activity-time">${a.date} · <span class="badge badge-${a.status}">${a.status}</span></div>
+      </div>
+    </div>`).join('');
+  const formsEl=document.getElementById('active-forms-list');
+  if(!db.forms.length){formsEl.innerHTML='<div class="empty-state" style="padding:30px 0;"><div class="empty-state-icon" style="font-size:24px;">▣</div><p>No forms yet</p></div>';}
+  else formsEl.innerHTML=db.forms.slice(-5).reverse().map(f=>{
+    const cnt=db.applications.filter(a=>a.formId===f.id).length;
+    return`<div class="activity-item"><div class="activity-dot"></div><div style="flex:1;"><div class="activity-text">${esc(f.title)}</div><div class="activity-time">${esc(f.category)} · ${cnt} submission${cnt!==1?'s':''}</div></div><button class="btn btn-ghost btn-sm" onclick="openPublicForm(${f.id})">Preview</button></div>`;
+  }).join('');
+}
+
+function updateBadges(){
+  document.getElementById('badge-all').textContent=db.applications.length;
+  document.getElementById('badge-pending').textContent=db.applications.filter(a=>a.status==='pending'||a.status==='review').length;
+  document.getElementById('badge-accepted').textContent=db.applications.filter(a=>a.status==='accepted').length;
+  document.getElementById('badge-users').textContent=db.users.filter(u=>u.role!=='admin').length;
+}
+
+/* ════════════════════════════════════════
+   APPLICATIONS TABLE
+════════════════════════════════════════ */
+function appRow(a, showStatus=true){
+  return`<tr>
+    <td class="mono text-muted" style="font-size:11px;">#${a.id}</td>
+    <td style="font-weight:500;">${esc(a.applicantName)}</td>
+    <td class="text-muted">${esc(a.formTitle)}</td>
+    <td class="mono text-muted" style="font-size:11px;">${a.date}</td>
+    ${showStatus?`<td><span class="badge badge-${a.status}">${a.status}</span></td>`:''}
+    <td><div style="display:flex;gap:6px;">
+      <button class="btn btn-ghost btn-sm" onclick="openViewModal(${a.id})">View</button>
+      <button class="btn btn-ghost btn-sm" onclick="openEditModal(${a.id})">Edit</button>
+      <button class="btn btn-danger btn-sm" onclick="confirmDelete(${a.id},'app')">Del</button>
+    </div></td>
+  </tr>`;
+}
+
+let _filter='',_statusFilter='';
+function renderAllApps(){
+  let apps=[...db.applications].reverse();
+  if(_filter) apps=apps.filter(a=>a.applicantName.toLowerCase().includes(_filter.toLowerCase()));
+  if(_statusFilter) apps=apps.filter(a=>a.status===_statusFilter);
+  const tb=document.getElementById('all-apps-tbody');
+  tb.innerHTML=apps.length?apps.map(a=>appRow(a,true)).join(''):'<tr><td colspan="6"><div class="empty-state" style="padding:40px 0"><div class="empty-state-icon">◧</div><p>No applications found</p></div></td></tr>';
+}
+function filterApps(v){ _filter=v; renderAllApps(); }
+function filterStatus(v){ _statusFilter=v; renderAllApps(); }
+function renderFiltered(statuses,tbodyId,showStatus){
+  const apps=[...db.applications].filter(a=>statuses.includes(a.status)).reverse();
+  const tb=document.getElementById(tbodyId);
+  const cols=showStatus?6:5;
+  tb.innerHTML=apps.length?apps.map(a=>appRow(a,showStatus)).join(''):`<tr><td colspan="${cols}"><div class="empty-state" style="padding:40px 0"><div class="empty-state-icon">◌</div><p>Nothing here yet</p></div></td></tr>`;
+}
+
+/* ════════════════════════════════════════
+   VIEW MODAL
+════════════════════════════════════════ */
+function openViewModal(id){
+  const a=db.applications.find(x=>x.id===id);
+  if(!a) return;
+  document.getElementById('modal-view-body').innerHTML=`
+    <div class="detail-grid">
+      <div><div class="detail-key">Applicant</div><div class="detail-val">${esc(a.applicantName)}</div></div>
+      <div><div class="detail-key">Account</div><div class="detail-val mono">${esc(a.submittedBy||'—')}</div></div>
+      <div><div class="detail-key">Form</div><div class="detail-val">${esc(a.formTitle)}</div></div>
+      <div><div class="detail-key">ID</div><div class="detail-val mono">#${a.id}</div></div>
+      <div><div class="detail-key">Submitted</div><div class="detail-val mono">${a.date}</div></div>
+      <div><div class="detail-key">Status</div><div class="detail-val"><span class="badge badge-${a.status}">${a.status}</span></div></div>
+    </div>
+    <div class="divider"></div>
+    <div style="font-size:10px;font-weight:600;color:var(--text-2);margin-bottom:14px;font-family:var(--mono);letter-spacing:0.2em;">RESPONSES</div>
+    ${a.answers.map(q=>`<div class="answer-block"><div class="answer-question">${esc(q.question)}</div><div class="answer-text">${esc(q.answer)||'<span style="color:var(--text-3);font-style:italic;">No answer</span>'}</div></div>`).join('')}
+    ${a.adminNote?`<div class="divider"></div><div class="detail-key">Admin Note</div><div class="answer-text">${esc(a.adminNote)}</div>`:''}
+  `;
+  document.getElementById('modal-view-footer').innerHTML=`
+    <button class="btn btn-ghost" onclick="closeModal('modal-view')">Close</button>
+    ${a.status!=='accepted'?`<button class="btn btn-success" onclick="setStatus(${id},'accepted')">✓ Accept</button>`:''}
+    ${a.status!=='rejected'?`<button class="btn btn-danger" onclick="setStatus(${id},'rejected')">✕ Reject</button>`:''}
+    ${a.status==='pending'?`<button class="btn btn-ghost" onclick="setStatus(${id},'review')">Mark In Review</button>`:''}
+  `;
+  openModal('modal-view');
+}
+
+/* ════════════════════════════════════════
+   EDIT MODAL
+════════════════════════════════════════ */
+let editingId=null;
+function openEditModal(id){
+  editingId=id;
+  const a=db.applications.find(x=>x.id===id);
+  if(!a) return;
+  document.getElementById('modal-edit-body').innerHTML=`
+    <div class="form-group"><label class="form-label">Applicant Name</label><input class="form-input" id="edit-name" value="${esc(a.applicantName)}" /></div>
+    <div class="form-group"><label class="form-label">Status</label>
+      <select class="form-select" id="edit-status">
+        ${['pending','review','accepted','rejected'].map(s=>`<option value="${s}" ${a.status===s?'selected':''}>${s.charAt(0).toUpperCase()+s.slice(1)}</option>`).join('')}
+      </select></div>
+    <div class="form-group"><label class="form-label">Admin Note (visible to applicant)</label><textarea class="form-textarea" id="edit-note" placeholder="Leave a message for the applicant…">${esc(a.adminNote||'')}</textarea></div>
+    ${a.answers.map((q,i)=>`<div class="form-group"><label class="form-label">${esc(q.question)}</label><textarea class="form-textarea" id="edit-ans-${i}" style="min-height:70px;">${esc(q.answer)}</textarea></div>`).join('')}
+  `;
+  openModal('modal-edit');
+}
+
+async function saveEditApp(){
+  const a=db.applications.find(x=>x.id===editingId);
+  if(!a) return;
+  const oldStatus=a.status;
+  a.applicantName=document.getElementById('edit-name').value.trim()||a.applicantName;
+  a.status=document.getElementById('edit-status').value;
+  a.adminNote=document.getElementById('edit-note').value.trim();
+  a.answers.forEach((q,i)=>{const el=document.getElementById('edit-ans-'+i);if(el)q.answer=el.value.trim();});
+  if(oldStatus!==a.status) logActivity(`Application #${a.id} status: ${oldStatus} → ${a.status}`, a.status==='accepted'?'green':a.status==='rejected'?'red':'yellow');
+  showLoading(true); await saveDB(); showLoading(false);
+  closeModal('modal-edit'); refreshAll();
+}
+
+/* ════════════════════════════════════════
+   STATUS
+════════════════════════════════════════ */
+async function setStatus(id,status){
+  const a=db.applications.find(x=>x.id===id);
+  if(!a) return;
+  logActivity(`Application #${id} (${a.applicantName}) → ${status}`, status==='accepted'?'green':status==='rejected'?'red':'yellow');
+  a.status=status;
+  showLoading(true); await saveDB(); showLoading(false);
+  closeModal('modal-view'); refreshAll();
+}
+
+/* ════════════════════════════════════════
+   DELETE
+════════════════════════════════════════ */
+function confirmDelete(id, type='app'){
+  document.getElementById('confirm-delete-btn').onclick=async()=>{
+    if(type==='app'){
+      db.applications=db.applications.filter(a=>a.id!==id);
+      logActivity(`Application #${id} deleted`,'red');
+    } else if(type==='user'){
+      db.users=db.users.filter(u=>u.username!==id);
+      logActivity(`User "${id}" deleted`,'red');
+    }
+    showLoading(true); await saveDB(); showLoading(false);
+    closeModal('modal-confirm'); refreshAll();
+    refreshPage(document.querySelector('.page-section.active').id.replace('page-',''));
+  };
+  openModal('modal-confirm');
+}
+
+/* ════════════════════════════════════════
+   USERS
+════════════════════════════════════════ */
+function renderUsers(){
+  const tb=document.getElementById('users-tbody');
+  const users=db.users.filter(u=>u.username!=='1877');
+  if(!users.length){ tb.innerHTML='<tr><td colspan="5"><div class="empty-state" style="padding:40px 0"><div class="empty-state-icon">◎</div><p>No user accounts yet</p></div></td></tr>'; return; }
+  tb.innerHTML=users.map(u=>{
+    const cnt=db.applications.filter(a=>a.submittedBy===u.username).length;
+    return`<tr>
+      <td style="font-weight:500;">${esc(u.username)}</td>
+      <td><span class="badge ${u.role==='admin'?'badge-review':'badge-pending'}">${u.role}</span></td>
+      <td class="mono text-muted" style="font-size:11px;">${u.created}</td>
+      <td class="mono">${cnt}</td>
+      <td><button class="btn btn-danger btn-sm" onclick="confirmDelete('${esc(u.username)}','user')">Delete</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function openCreateUserModal(){
+  document.getElementById('cu-user').value='';
+  document.getElementById('cu-pass').value='';
+  document.getElementById('cu-error').textContent='';
+  openModal('modal-create-user');
+}
+
+async function adminCreateUser(){
+  const u=document.getElementById('cu-user').value.trim();
+  const p=document.getElementById('cu-pass').value.trim();
+  if(!u||!p){ document.getElementById('cu-error').textContent='Both fields required.'; return; }
+  if(db.users.find(x=>x.username.toLowerCase()===u.toLowerCase())){ document.getElementById('cu-error').textContent='Username already exists.'; return; }
+  db.users.push({ username:u, password:p, role:'user', created:nowStr() });
+  logActivity(`Admin created account: ${u}`, 'green');
+  showLoading(true); await saveDB(); showLoading(false);
+  closeModal('modal-create-user'); renderUsers(); updateBadges();
+}
+
+/* ════════════════════════════════════════
+   FORMS
+════════════════════════════════════════ */
+function renderForms(){
+  const el=document.getElementById('forms-grid');
+  const empty=document.getElementById('forms-empty');
+  if(!db.forms.length){el.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  el.innerHTML=db.forms.map(f=>{
+    const cnt=db.applications.filter(a=>a.formId===f.id).length;
+    return`<div class="card" style="margin-bottom:16px;">
+      <div class="card-header">
+        <div><div class="card-title">${esc(f.title)}</div><div class="text-muted" style="margin-top:4px;">${esc(f.category)} · ${f.questions.length} questions · ${cnt} submissions</div></div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-ghost btn-sm" onclick="getFormLink(${f.id})">🔗 Link</button>
+          <button class="btn btn-ghost btn-sm" onclick="openPublicForm(${f.id})">Preview</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteForm(${f.id})">Delete</button>
+        </div>
+      </div>
+      <div style="font-size:13px;color:var(--text-2);line-height:1.6;">${esc((f.description||'').substring(0,160))}${(f.description||'').length>160?'…':''}</div>
+    </div>`;
+  }).join('');
+}
+
+async function deleteForm(id){
+  if(!confirm('Delete this form? Submissions will be kept.')) return;
+  db.forms=db.forms.filter(f=>f.id!==id);
+  logActivity(`Form deleted`,'red');
+  showLoading(true); await saveDB(); showLoading(false);
+  renderForms();
+}
+
+/* ════════════════════════════════════════
+   CREATE FORM
+════════════════════════════════════════ */
+let questions=[],questionCount=0;
+
+function initCreateForm(){
+  questions=[];questionCount=0;
+  ['cf-title','cf-category','cf-desc'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('questions-list').innerHTML='';
+  addQuestion('What is your in-game name / username?','text');
+  addQuestion('How old are you?','text');
+  addQuestion('Tell us about yourself and your experience.','textarea');
+  addQuestion('Why do you want to join?','textarea');
+  addQuestion('How many hours per week can you commit?','text');
+}
+
+function addQuestion(label='',type='text'){
+  questionCount++;
+  const id=questionCount;
+  questions.push({id,label,type});
+  const el=document.createElement('div');
+  el.className='form-builder-field';
+  el.id='qfield-'+id;
+  el.innerHTML=`
+    <div style="color:var(--text-3);font-size:18px;padding-top:20px;cursor:grab;">⠿</div>
+    <div class="fb-field-body">
+      <div class="form-row" style="margin-bottom:0;">
+        <div><label class="form-label" style="font-size:9px;">Question Label</label><input class="form-input" style="font-size:12px;" value="${esc(label)}" placeholder="Enter question…" oninput="updateQ(${id},'label',this.value)" /></div>
+        <div><label class="form-label" style="font-size:9px;">Field Type</label>
+          <select class="form-select" style="font-size:12px;" onchange="updateQ(${id},'type',this.value)">
+            <option value="text" ${type==='text'?'selected':''}>Short Text</option>
+            <option value="textarea" ${type==='textarea'?'selected':''}>Long Text</option>
+            <option value="number" ${type==='number'?'selected':''}>Number</option>
+          </select></div>
+      </div>
+    </div>
+    <button class="btn btn-danger btn-sm" onclick="removeQ(${id})" style="margin-top:20px;">✕</button>
+  `;
+  document.getElementById('questions-list').appendChild(el);
+}
+
+function updateQ(id,key,val){const q=questions.find(x=>x.id===id);if(q)q[key]=val;}
+function removeQ(id){questions=questions.filter(q=>q.id!==id);document.getElementById('qfield-'+id)?.remove();}
+
+async function saveForm(){
+  const title=document.getElementById('cf-title').value.trim();
+  const category=document.getElementById('cf-category').value.trim();
+  const desc=document.getElementById('cf-desc').value.trim();
+  if(!title){alert('Please enter a form title.');return;}
+  if(!questions.length){alert('Please add at least one question.');return;}
+  const form={id:Date.now(),title,category,description:desc,questions:questions.map(q=>({label:q.label,type:q.type})),created:nowStr()};
+  db.forms.push(form);
+  logActivity(`New form created: "${title}"`,'accent');
+  showLoading(true); await saveDB(); showLoading(false);
+  navigate('forms',document.getElementById('nav-forms'));
+}
+
+/* ════════════════════════════════════════
+   FORM LINK
+════════════════════════════════════════ */
+function getFormLink(id){
+  document.getElementById('link-input').value=`${location.origin}${location.pathname}?form=${id}`;
+  document.getElementById('copy-confirm').textContent='';
+  openModal('modal-link');
+}
+function copyLink(){
+  navigator.clipboard.writeText(document.getElementById('link-input').value).then(()=>{
+    document.getElementById('copy-confirm').textContent='✓ Link copied to clipboard';
+  });
+}
+
+/* ════════════════════════════════════════
+   PUBLIC FORM
+════════════════════════════════════════ */
+let pubFormId=null;
+
+function openPublicForm(id){
+  const form=db.forms.find(f=>f.id===id);
+  if(!form) return;
+  pubFormId=id;
+  document.getElementById('pub-badge').textContent=form.category||'NOW ACCEPTING APPLICATIONS';
+  document.getElementById('pub-title').textContent=form.title;
+  document.getElementById('pub-desc').textContent=form.description||'';
+  document.getElementById('pub-fields').innerHTML=`
+    <div class="pub-form-group">
+      <label class="pub-form-label">Full Name / Username <span class="req">*</span></label>
+      <input class="pub-form-input" id="pub-name" required placeholder="Your name or username" />
+    </div>
+    ${form.questions.map((q,i)=>`
+      <div class="pub-form-group">
+        <label class="pub-form-label">${esc(q.label)} <span class="req">*</span></label>
+        ${q.type==='textarea'
+          ?`<textarea class="pub-form-textarea" id="pubq-${i}" required placeholder="Your answer…"></textarea>`
+          :`<input class="pub-form-input" type="${q.type}" id="pubq-${i}" required placeholder="Your answer…" />`}
+      </div>`).join('')}
+  `;
+  document.getElementById('pub-success').style.display='none';
+  document.getElementById('pub-form-area').style.display='block';
+  document.getElementById('public-app-page').classList.add('open');
+}
+
+function closePubForm(){
+  document.getElementById('public-app-page').classList.remove('open');
+}
+
+async function submitApplication(){
+  const form=db.forms.find(f=>f.id===pubFormId);
+  if(!form) return;
+  const name=document.getElementById('pub-name').value.trim();
+  if(!name){alert('Please enter your name.');return;}
+  const answers=form.questions.map((q,i)=>({question:q.label,answer:document.getElementById('pubq-'+i)?.value?.trim()||''}));
+  const missingRequired=answers.some(a=>!a.answer);
+  if(missingRequired){alert('Please answer all questions.');return;}
+  const app={
+    id:db.applications.length+1,
+    formId:form.id,
+    formTitle:form.title,
+    applicantName:name,
+    submittedBy:currentUser?currentUser.username:'anonymous',
+    answers,
+    status:'pending',
+    adminNote:'',
+    date:nowStr()
+  };
+  db.applications.push(app);
+  logActivity(`New application from "${name}" for "${form.title}"`,'green');
+  showLoading(true); await saveDB(); showLoading(false);
+  document.getElementById('pub-form-area').style.display='none';
+  document.getElementById('pub-success').style.display='block';
+  updateBadges();
+}
+
+/* ════════════════════════════════════════
+   ACTIVITY
+════════════════════════════════════════ */
+function logActivity(text,color='accent'){
+  if(!db.activity) db.activity=[];
+  db.activity.unshift({text,color,time:nowStr()});
+  if(db.activity.length>200) db.activity.pop();
+}
+
+function renderActivity(){
+  const el=document.getElementById('activity-log');
+  if(!db.activity||!db.activity.length){el.innerHTML='<div class="empty-state"><div class="empty-state-icon">◈</div><h3>No activity yet</h3><p>Actions will appear here.</p></div>';return;}
+  el.innerHTML=db.activity.map(a=>`
+    <div class="activity-item">
+      <div class="activity-dot ${a.color==='green'?'green':a.color==='red'?'red':a.color==='yellow'?'yellow':''}"></div>
+      <div><div class="activity-text">${esc(a.text)}</div><div class="activity-time">${a.time}</div></div>
+    </div>`).join('');
+}
+
+/* ════════════════════════════════════════
+   MODALS
+════════════════════════════════════════ */
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.modal-overlay').forEach(m=>{
+  m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');});
+});
+
+/* ════════════════════════════════════════
+   UTILS
+════════════════════════════════════════ */
+function esc(s){if(s==null)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function nowStr(){return new Date().toLocaleString('en-GB',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});}
+function showErr(msg){console.error(msg);}
+
+/* ════════════════════════════════════════
+   BOOT
+════════════════════════════════════════ */
+(async function boot(){
+  // Hardcoded credentials (pre-configured)
+  const HARDCODED_KEY = '$2a$10$TO05PANXis1Ueo3ZNfC24OATctFcWl4fEFHc2.GYdvL2PN3sNbKEm';
+  const HARDCODED_ID  = '6a315432f5f4af5e29fb5a0b';
+  localStorage.setItem('nx_key', HARDCODED_KEY);
+  localStorage.setItem('nx_id',  HARDCODED_ID);
+  JSONBIN_KEY = HARDCODED_KEY;
+  JSONBIN_ID  = HARDCODED_ID;
+
+  const params=new URLSearchParams(location.search);
+  const formParam=params.get('form');
+
+  document.getElementById('setup-screen').style.display='none';
+  await loadDB();
+
+  if(formParam){
+    // Direct form link — show auth first, then form after login
+    showAuth();
+    // After login, open form
+    window._pendingForm = parseInt(formParam);
+    return;
+  }
+
+  showAuth();
+
+  // Override doLogin to handle pending form
+  const origLogin = window.doLogin;
+  window.doLogin = async function(){
+    const u=document.getElementById('li-user').value.trim();
+    const p=document.getElementById('li-pass').value.trim();
+    if(!u||!p){setAuthErr('li','Username and password required.');return;}
+    showLoading(true);
+    await loadDB();
+    showLoading(false);
+    const user=db.users.find(x=>x.username===u&&x.password===p);
+    if(!user){setAuthErr('li','Invalid username or password.');return;}
+    currentUser={username:user.username,role:user.role};
+    logActivity(`${user.username} logged in`,'accent');
+    await saveDB();
+    document.getElementById('auth-screen').classList.remove('visible');
+    if(user.role==='admin') launchAdmin();
+    else launchApplicantPortal();
+    if(window._pendingForm){
+      setTimeout(()=>openPublicForm(window._pendingForm),300);
+      window._pendingForm=null;
+    }
+  };
+})();
+</script>
+</body>
+</html>
