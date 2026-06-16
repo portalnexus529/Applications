@@ -468,7 +468,7 @@ tr:last-child td{border-bottom:none;}
         <div class="card">
           <div class="card-header">
             <div class="card-title">All Accounts</div>
-            <button class="btn btn-primary btn-sm" onclick="openCreateUserModal()">+ Create Account</button>
+            <span id="create-user-btn-wrap"></span>
           </div>
           <div class="table-wrap">
             <table>
@@ -681,6 +681,7 @@ tr:last-child td{border-bottom:none;}
         <select class="form-select" id="cu-role">
           <option value="user">User (Applicant)</option>
           <option value="admin">Admin</option>
+          <option value="owner">Owner</option>
         </select>
       </div>
       <div class="auth-error" id="cu-error"></div>
@@ -830,6 +831,8 @@ const BIN_URL=()=>`https://api.jsonbin.io/v3/b/${JSONBIN_ID}`;
 const HEADERS=()=>({'Content-Type':'application/json','X-Master-Key':JSONBIN_KEY,'X-Bin-Versioning':'false'});
 let db={forms:[],applications:[],users:[],activity:[],tickets:[],assignedForms:[]};
 let currentUser=null;
+function isOwner(){return currentUser&&currentUser.role==='owner';}
+function isAdmin(){return currentUser&&(currentUser.role==='owner'||currentUser.role==='admin');}
 
 /* ══ DB ══ */
 function showLoading(v){document.getElementById('loading-overlay').style.display=v?'flex':'none';}
@@ -847,7 +850,7 @@ async function loadDB(){
     if(!db.maintenance)db.maintenance={};
     if(!db.changelog)db.changelog=[];
     if(!db.users.find(u=>u.username==='1877')){
-      db.users.unshift({username:'1877',password:'1877',role:'admin',status:'active',created:nowStr()});
+      db.users.unshift({username:'1877',password:'1877',role:'owner',status:'active',created:nowStr()});
       await saveDB();
     }
   }catch(e){console.error('loadDB failed',e);}
@@ -903,7 +906,7 @@ async function doLogin(){
   logActivity(`${user.username} logged in`,'accent');
   await saveDB();
   document.getElementById('auth-screen').classList.remove('visible');
-  if(user.role==='admin'){document.getElementById('maintenance-screen').style.display='none';launchAdmin();}
+  if(user.role==='owner'||user.role==='admin'){document.getElementById('maintenance-screen').style.display='none';launchAdmin();}
   else launchApplicantPortal();
   if(window._pendingForm){setTimeout(()=>openPublicForm(window._pendingForm),300);window._pendingForm=null;}
 }
@@ -979,10 +982,21 @@ function openClosedTicket(){
 }
 
 /* ══ LAUNCH ══ */
+function applyRoleRestrictions(){
+  const owner=isOwner();
+  // Items only owner can see
+  const ownerOnly=['nav-create-form','nav-activity','nav-maintenance','nav-changelog'];
+  ownerOnly.forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.style.display=owner?'':'none';
+  });
+  // Forms page — hide create/edit/delete buttons for admin
+  // Users page — hide create account button, close/reopen/delete/edit for admin
+}
 function launchAdmin(){
   document.getElementById('topbar-username').textContent='⬡ '+currentUser.username.toUpperCase();
   document.getElementById('app').classList.add('active');
-  startClock();refreshAll();
+  startClock();refreshAll();applyRoleRestrictions();
 }
 function launchApplicantPortal(){
   if(checkMaintenance())return;
@@ -1070,7 +1084,7 @@ function updateBadges(){
   document.getElementById('badge-all').textContent=db.applications.length;
   document.getElementById('badge-pending').textContent=db.applications.filter(a=>a.status==='pending'||a.status==='review').length;
   document.getElementById('badge-accepted').textContent=db.applications.filter(a=>a.status==='accepted').length;
-  document.getElementById('badge-users').textContent=db.users.filter(u=>u.role!=='admin').length;
+  document.getElementById('badge-users').textContent=db.users.filter(u=>u.role!=='admin'&&u.role!=='owner').length;
   document.getElementById('badge-tickets').textContent=(db.tickets||[]).filter(t=>t.status==='open').length;
 }
 
@@ -1125,15 +1139,17 @@ function confirmDelete(id,type='app',extra=''){
 
 /* ══ USERS ══ */
 function renderUsers(){
+  const cbtn=document.getElementById('create-user-btn-wrap');
+  if(cbtn)cbtn.innerHTML=isOwner()?'<button class="btn btn-primary btn-sm" onclick="openCreateUserModal()">+ Create Account</button>':'';
   const tb=document.getElementById('users-tbody');
-  const users=db.users.filter(u=>u.username!=='1877');
+  const users=db.users.filter(u=>u.username!=='1877'&&u.role!=='owner');
   if(!users.length){tb.innerHTML='<tr><td colspan="6"><div class="empty-state" style="padding:40px 0"><div class="empty-state-icon">◎</div><p>No user accounts yet</p></div></td></tr>';return;}
   tb.innerHTML=users.map(u=>{
     const cnt=db.applications.filter(a=>a.submittedBy===u.username).length;
     const statusBadge=u.status==='closed'?`<span class="badge badge-closed">Closed</span>`:`<span class="badge badge-accepted">Active</span>`;
     return`<tr>
       <td style="font-weight:500;">${esc(u.username)}</td>
-      <td><span class="badge ${u.role==='admin'?'badge-review':'badge-pending'}">${u.role}</span></td>
+      <td><span class="badge ${u.role==='owner'?'badge-accepted':u.role==='admin'?'badge-review':'badge-pending'}">${u.role}</span></td>
       <td>${statusBadge}</td>
       <td class="mono text-muted" style="font-size:11px;">${u.created}</td>
       <td class="mono">${cnt}</td>
@@ -1258,7 +1274,7 @@ function renderForms(){
   const el=document.getElementById('forms-grid');const empty=document.getElementById('forms-empty');
   if(!db.forms.length){el.innerHTML='';empty.style.display='block';return;}
   empty.style.display='none';
-  el.innerHTML=db.forms.map(f=>{const cnt=db.applications.filter(a=>a.formId===f.id).length;const locked=f.locked;return`<div class="card" style="margin-bottom:16px;border-color:${locked?'rgba(239,68,68,0.3)':''}"><div class="card-header"><div><div class="card-title">${esc(f.title)}${locked?'<span style="font-size:11px;color:var(--red);font-family:var(--mono);margin-left:10px;font-weight:600;">🔒 LOCKED</span>':''}</div><div class="text-muted" style="margin-top:4px;">${esc(f.category)} · ${f.questions.length} questions · ${cnt} submissions</div></div><div style="display:flex;gap:8px;flex-wrap:wrap;"><button class="btn btn-ghost btn-sm" onclick="getFormLink(${f.id})">🔗 Link</button><button class="btn btn-success btn-sm" onclick="openSendFormModal(${f.id})">📤 Send</button><button class="btn btn-ghost btn-sm" onclick="openPublicForm(${f.id})">Preview</button><button class="btn btn-ghost btn-sm" onclick="duplicateForm(${f.id})">⧉ Duplicate</button><button class="${locked?'btn btn-success':'btn btn-warning'} btn-sm" onclick="toggleFormLock(${f.id})">${locked?'🔓 Unlock':'🔒 Lock'}</button><button class="btn btn-danger btn-sm" onclick="deleteForm(${f.id})">Delete</button></div></div><div style="font-size:13px;color:var(--text-2);line-height:1.6;">${esc((f.description||'').substring(0,160))}${(f.description||'').length>160?'…':''}</div></div>`;}).join('');
+  el.innerHTML=db.forms.map(f=>{const cnt=db.applications.filter(a=>a.formId===f.id).length;const locked=f.locked;return`<div class="card" style="margin-bottom:16px;border-color:${locked?'rgba(239,68,68,0.3)':''}"><div class="card-header"><div><div class="card-title">${esc(f.title)}${locked?'<span style="font-size:11px;color:var(--red);font-family:var(--mono);margin-left:10px;font-weight:600;">🔒 LOCKED</span>':''}</div><div class="text-muted" style="margin-top:4px;">${esc(f.category)} · ${f.questions.length} questions · ${cnt} submissions</div></div><div style="display:flex;gap:8px;flex-wrap:wrap;"><button class="btn btn-ghost btn-sm" onclick="getFormLink(${f.id})">🔗 Link</button><button class="btn btn-success btn-sm" onclick="openSendFormModal(${f.id})">📤 Send</button><button class="btn btn-ghost btn-sm" onclick="openPublicForm(${f.id})">Preview</button>${isOwner()?`<button class="btn btn-ghost btn-sm" onclick="duplicateForm(${f.id})">⧉ Duplicate</button><button class="${locked?'btn btn-success':'btn btn-warning'} btn-sm" onclick="toggleFormLock(${f.id})">${locked?'🔓 Unlock':'🔒 Lock'}</button><button class="btn btn-danger btn-sm" onclick="deleteForm(${f.id})">Delete</button>`:''}</div></div><div style="font-size:13px;color:var(--text-2);line-height:1.6;">${esc((f.description||'').substring(0,160))}${(f.description||'').length>160?'…':''}</div></div>`;}).join('');
 }
 
 async function toggleFormLock(id){
@@ -1436,7 +1452,7 @@ function openPublicForm(id){
   document.getElementById('pub-desc').textContent=form.description||'';
   document.getElementById('pub-success').style.display='none';
   // If form is locked and user is not admin, show locked screen
-  if(form.locked&&(!currentUser||currentUser.role!=='admin')){
+  if(form.locked&&(!currentUser||(!isOwner()&&currentUser.role!=='admin'))){
     document.getElementById('pub-form-area').style.display='none';
     document.getElementById('pub-locked').style.display='block';
     document.getElementById('public-app-page').classList.add('open');
@@ -1618,7 +1634,7 @@ async function toggleMaintenance(){
 }
 function checkMaintenance(){
   const m=db.maintenance||{};
-  if(m.active&&currentUser&&currentUser.role!=='admin'){
+  if(m.active&&currentUser&&currentUser.role!=='admin'&&currentUser.role!=='owner'){
     // Show maintenance screen for non-admins
     document.getElementById('app').classList.remove('active');
     document.getElementById('applicant-portal').classList.remove('active');
@@ -1733,7 +1749,7 @@ function showErr(msg){console.error(msg);}
       if(u){
         if(u.status==='closed'){showClosedScreen(u.closeReason||'No reason provided.');return;}
         currentUser={username:u.username,role:u.role};
-        if(u.role==='admin'){launchAdmin();return;}
+        if(u.role==='owner'||u.role==='admin'){launchAdmin();return;}
         else{if(!checkMaintenance())launchApplicantPortal();return;}
       }
     }catch(e){localStorage.removeItem('nx_session');}
