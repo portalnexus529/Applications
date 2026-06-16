@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
+<html lang="en"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NEXUS PORTAL</title>
@@ -16,38 +15,25 @@
   --sidebar-w:260px;--mono:'JetBrains Mono',monospace;--sans:'Inter',sans-serif;
 }
 html,body{height:100%;font-family:var(--sans);background:var(--bg-deep);color:var(--text-1);}
-
-/* ══ SETUP SCREEN ══ */
-#setup-screen{
-  position:fixed;inset:0;z-index:10000;background:var(--bg-deep);
-  display:flex;align-items:center;justify-content:center;flex-direction:column;
-}
+#setup-screen{position:fixed;inset:0;z-index:10000;background:var(--bg-deep);display:flex;align-items:center;justify-content:center;flex-direction:column;}
 .setup-box{background:var(--bg-panel);border:1px solid var(--border);border-radius:16px;padding:40px 44px;width:480px;position:relative;}
 .setup-box::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:60%;height:1px;background:linear-gradient(90deg,transparent,var(--accent),transparent);}
-.setup-step{display:none;} .setup-step.active{display:block;}
-.setup-title{font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:0.2em;color:var(--accent);text-transform:uppercase;margin-bottom:6px;}
-.setup-sub{font-size:13px;color:var(--text-2);margin-bottom:24px;line-height:1.6;}
+.setup-step{display:none;}.setup-step.active{display:block;}
 .setup-hint{background:var(--accent-dim);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:12px;color:var(--text-2);margin-bottom:20px;line-height:1.7;font-family:var(--mono);}
 .setup-hint a{color:var(--accent);text-decoration:none;}
-.setup-hint a:hover{text-decoration:underline;}
-
-/* ══ AUTH SCREENS ══ */
-#auth-screen{
-  position:fixed;inset:0;z-index:9999;background:var(--bg-deep);
-  display:none;align-items:center;justify-content:center;flex-direction:column;
-}
+#auth-screen{position:fixed;inset:0;z-index:9999;background:var(--bg-deep);display:none;align-items:center;justify-content:center;flex-direction:column;}
 #auth-screen.visible{display:flex;}
 .auth-bg{position:absolute;inset:0;overflow:hidden;pointer-events:none;}
 .auth-bg::before{content:'';position:absolute;top:-20%;left:50%;transform:translateX(-50%);width:900px;height:900px;background:radial-gradient(circle,rgba(59,110,255,0.12) 0%,transparent 65%);}
 .auth-logo{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:0.4em;color:var(--accent);text-transform:uppercase;margin-bottom:10px;position:relative;z-index:1;}
 .auth-title{font-family:var(--mono);font-size:26px;font-weight:700;color:var(--text-1);letter-spacing:0.06em;margin-bottom:6px;position:relative;z-index:1;text-shadow:0 0 40px rgba(59,110,255,0.4);}
 .auth-subtitle{font-size:13px;color:var(--text-2);margin-bottom:36px;font-family:var(--mono);letter-spacing:0.12em;position:relative;z-index:1;}
-.auth-tabs{display:flex;gap:0;margin-bottom:28px;position:relative;z-index:1;background:var(--bg-card);border:1px solid var(--border-dim);border-radius:10px;padding:4px;}
+.auth-tabs{display:flex;margin-bottom:28px;position:relative;z-index:1;background:var(--bg-card);border:1px solid var(--border-dim);border-radius:10px;padding:4px;}
 .auth-tab{flex:1;text-align:center;padding:9px;font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-2);cursor:pointer;border-radius:8px;transition:all 0.2s;}
 .auth-tab.active{background:var(--accent);color:#fff;}
 .auth-box{background:var(--bg-panel);border:1px solid var(--border);border-radius:16px;padding:36px 44px;width:420px;position:relative;z-index:1;box-shadow:0 0 80px rgba(59,110,255,0.08),0 32px 64px rgba(0,0,0,0.6);}
 .auth-box::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:60%;height:1px;background:linear-gradient(90deg,transparent,var(--accent),transparent);}
-.auth-form{display:none;} .auth-form.active{display:block;}
+.auth-form{display:none;}.auth-form.active{display:block;}
 .field-label{font-family:var(--mono);font-size:10px;font-weight:600;color:var(--accent);letter-spacing:0.3em;text-transform:uppercase;margin-bottom:8px;display:block;}
 .field-input{width:100%;background:var(--bg-deep);border:1px solid var(--border-dim);border-radius:8px;padding:12px 16px;font-family:var(--mono);font-size:14px;color:var(--text-1);outline:none;transition:border-color 0.2s,box-shadow 0.2s;margin-bottom:16px;}
 .field-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59,110,255,0.15);}
@@ -56,8 +42,6 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg-deep);color:va
 .auth-btn:hover{background:#2A5CE8;box-shadow:0 0 30px rgba(59,110,255,0.35);}
 .auth-error{font-family:var(--mono);font-size:11px;color:var(--red);text-align:center;margin-top:12px;min-height:14px;}
 .auth-footer{margin-top:24px;text-align:center;font-family:var(--mono);font-size:10px;color:var(--text-3);letter-spacing:0.2em;position:relative;z-index:1;}
-
-/* ══ APP ══ */
 #app{display:none;height:100vh;flex-direction:column;}
 #app.active{display:flex;}
 .topbar{height:56px;flex-shrink:0;background:var(--bg-panel);border-bottom:1px solid var(--border-dim);display:flex;align-items:center;padding:0 24px;gap:16px;position:relative;z-index:100;}
@@ -72,8 +56,6 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg-deep);color:va
 .topbar-logout{background:none;border:1px solid var(--border-dim);color:var(--text-2);font-family:var(--mono);font-size:11px;padding:6px 14px;border-radius:6px;cursor:pointer;letter-spacing:0.1em;text-transform:uppercase;transition:border-color 0.2s,color 0.2s;}
 .topbar-logout:hover{border-color:var(--red);color:var(--red);}
 .main-layout{display:flex;flex:1;overflow:hidden;}
-
-/* ══ SIDEBAR ══ */
 .sidebar{width:var(--sidebar-w);flex-shrink:0;background:var(--bg-panel);border-right:1px solid var(--border-dim);display:flex;flex-direction:column;overflow-y:auto;padding:20px 0;}
 .nav-section-label{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.3em;color:var(--text-3);text-transform:uppercase;padding:0 20px;margin:16px 0 6px;}
 .nav-item{display:flex;align-items:center;gap:12px;padding:11px 20px;cursor:pointer;font-size:13px;font-weight:500;color:var(--text-2);border-left:3px solid transparent;transition:background 0.15s,color 0.15s,border-color 0.15s;user-select:none;}
@@ -83,9 +65,8 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg-deep);color:va
 .nav-badge{margin-left:auto;background:var(--accent);color:#fff;font-family:var(--mono);font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;}
 .nav-badge.yellow{background:var(--yellow);}
 .nav-badge.green{background:var(--green);}
+.nav-badge.red{background:var(--red);}
 .sidebar-divider{height:1px;background:var(--border-dim);margin:14px 20px;}
-
-/* ══ CONTENT ══ */
 .content{flex:1;overflow-y:auto;padding:32px;background:var(--bg-deep);}
 .page-section{display:none;}
 .page-section.active{display:block;}
@@ -93,8 +74,6 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg-deep);color:va
 .page-header-eyebrow{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.3em;color:var(--accent);text-transform:uppercase;margin-bottom:6px;}
 .page-header h1{font-size:24px;font-weight:700;color:var(--text-1);}
 .page-header p{font-size:13px;color:var(--text-2);margin-top:5px;}
-
-/* ══ STAT CARDS ══ */
 .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:32px;}
 .stat-card{background:var(--bg-card);border:1px solid var(--border-dim);border-radius:12px;padding:20px;position:relative;overflow:hidden;}
 .stat-card::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:var(--accent);}
@@ -104,13 +83,9 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg-deep);color:va
 .stat-label{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.25em;color:var(--text-2);text-transform:uppercase;margin-bottom:10px;}
 .stat-value{font-family:var(--mono);font-size:32px;font-weight:700;color:var(--text-1);}
 .stat-sub{font-size:12px;color:var(--text-2);margin-top:4px;}
-
-/* ══ CARDS ══ */
 .card{background:var(--bg-card);border:1px solid var(--border-dim);border-radius:12px;padding:24px;margin-bottom:20px;}
 .card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
 .card-title{font-size:14px;font-weight:600;color:var(--text-1);}
-
-/* ══ BUTTONS ══ */
 .btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:8px;border:none;font-family:var(--sans);font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;white-space:nowrap;}
 .btn-primary{background:var(--accent);color:#fff;}
 .btn-primary:hover{background:#2A5CE8;box-shadow:0 0 20px rgba(59,110,255,0.3);}
@@ -120,9 +95,9 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg-deep);color:va
 .btn-danger:hover{background:rgba(239,68,68,0.1);}
 .btn-success{background:rgba(34,197,94,0.15);color:var(--green);border:1px solid rgba(34,197,94,0.3);}
 .btn-success:hover{background:rgba(34,197,94,0.25);}
+.btn-warning{background:rgba(245,158,11,0.15);color:var(--yellow);border:1px solid rgba(245,158,11,0.3);}
+.btn-warning:hover{background:rgba(245,158,11,0.25);}
 .btn-sm{padding:6px 12px;font-size:12px;}
-
-/* ══ TABLE ══ */
 .table-wrap{overflow-x:auto;}
 table{width:100%;border-collapse:collapse;font-size:13px;}
 thead{border-bottom:1px solid var(--border-dim);}
@@ -136,8 +111,7 @@ tr:last-child td{border-bottom:none;}
 .badge-accepted{background:rgba(34,197,94,0.12);color:var(--green);}
 .badge-rejected{background:rgba(239,68,68,0.12);color:var(--red);}
 .badge-review{background:rgba(59,110,255,0.12);color:var(--accent);}
-
-/* ══ MODAL ══ */
+.badge-closed{background:rgba(239,68,68,0.12);color:var(--red);}
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
 .modal-overlay.open{display:flex;}
 .modal{background:var(--bg-panel);border:1px solid var(--border);border-radius:16px;width:620px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:0 32px 80px rgba(0,0,0,0.7);position:relative;}
@@ -148,8 +122,6 @@ tr:last-child td{border-bottom:none;}
 .modal-close:hover{color:var(--text-1);}
 .modal-body{padding:24px 28px;}
 .modal-footer{padding:0 28px 24px;display:flex;gap:10px;justify-content:flex-end;}
-
-/* ══ FORM FIELDS ══ */
 .form-group{margin-bottom:18px;}
 .form-label{display:block;font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.25em;color:var(--text-2);text-transform:uppercase;margin-bottom:7px;}
 .form-input,.form-textarea,.form-select{width:100%;background:var(--bg-deep);border:1px solid var(--border-dim);border-radius:8px;padding:11px 14px;font-family:var(--sans);font-size:13px;color:var(--text-1);outline:none;transition:border-color 0.2s,box-shadow 0.2s;}
@@ -157,20 +129,14 @@ tr:last-child td{border-bottom:none;}
 .form-textarea{resize:vertical;min-height:100px;line-height:1.6;}
 .form-select option{background:var(--bg-panel);}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
-
-/* ══ APP DETAIL ══ */
 .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;}
 .detail-key{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.25em;color:var(--text-3);text-transform:uppercase;margin-bottom:5px;}
 .detail-val{font-size:13px;color:var(--text-1);line-height:1.5;}
 .answer-block{margin-bottom:16px;}
 .answer-question{font-size:12px;font-weight:600;color:var(--text-2);margin-bottom:5px;}
 .answer-text{font-size:13px;color:var(--text-1);background:var(--bg-deep);border-radius:8px;padding:12px 14px;border:1px solid var(--border-dim);line-height:1.6;}
-
-/* ══ FORM BUILDER ══ */
 .form-builder-field{background:var(--bg-deep);border:1px solid var(--border-dim);border-radius:10px;padding:16px;margin-bottom:12px;display:flex;gap:12px;align-items:flex-start;}
 .fb-field-body{flex:1;}
-
-/* ══ ACTIVITY ══ */
 .activity-item{display:flex;gap:14px;padding:12px 0;border-bottom:1px solid var(--border-dim);}
 .activity-item:last-child{border-bottom:none;}
 .activity-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);margin-top:5px;flex-shrink:0;box-shadow:0 0 8px var(--accent);}
@@ -179,8 +145,6 @@ tr:last-child td{border-bottom:none;}
 .activity-dot.red{background:var(--red);box-shadow:0 0 8px var(--red);}
 .activity-text{font-size:13px;color:var(--text-1);}
 .activity-time{font-family:var(--mono);font-size:11px;color:var(--text-3);margin-top:3px;}
-
-/* ══ PUBLIC FORM PAGE ══ */
 #public-app-page{display:none;position:fixed;inset:0;z-index:500;background:var(--bg-deep);overflow-y:auto;}
 #public-app-page.open{display:block;}
 .pub-wrap{max-width:700px;margin:0 auto;padding:60px 24px;}
@@ -201,12 +165,16 @@ tr:last-child td{border-bottom:none;}
 .pub-success-icon{font-size:52px;margin-bottom:20px;}
 .pub-success h2{font-size:22px;font-weight:700;margin-bottom:10px;}
 .pub-success p{font-size:14px;color:var(--text-2);}
-
 /* ══ APPLICANT PORTAL ══ */
 #applicant-portal{display:none;height:100vh;flex-direction:column;}
 #applicant-portal.active{display:flex;}
 .ap-header{height:56px;flex-shrink:0;background:var(--bg-panel);border-bottom:1px solid var(--border-dim);display:flex;align-items:center;padding:0 24px;gap:16px;}
+.ap-nav{display:flex;gap:4px;margin-left:24px;}
+.ap-nav-item{padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;color:var(--text-2);transition:all 0.2s;}
+.ap-nav-item:hover{background:var(--bg-hover);color:var(--text-1);}
+.ap-nav-item.active{background:var(--accent-dim2);color:var(--accent);}
 .ap-content{flex:1;overflow-y:auto;padding:40px 32px;background:var(--bg-deep);}
+.ap-page{display:none;}.ap-page.active{display:block;}
 .ap-welcome{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--text-1);margin-bottom:6px;}
 .ap-sub{font-size:13px;color:var(--text-2);margin-bottom:32px;}
 .ap-card{background:var(--bg-card);border:1px solid var(--border-dim);border-radius:14px;padding:28px;margin-bottom:20px;}
@@ -222,7 +190,43 @@ tr:last-child td{border-bottom:none;}
 .ap-note-box{margin-top:20px;background:var(--bg-deep);border:1px solid var(--border-dim);border-radius:8px;padding:14px 16px;}
 .ap-note-label{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.25em;color:var(--text-3);text-transform:uppercase;margin-bottom:6px;}
 .ap-note-text{font-size:13px;color:var(--text-2);line-height:1.6;}
-
+/* ══ ACCOUNT CLOSED ══ */
+#closed-screen{display:none;position:fixed;inset:0;z-index:9998;background:var(--bg-deep);align-items:center;justify-content:center;flex-direction:column;}
+#closed-screen.visible{display:flex;}
+.closed-box{background:var(--bg-panel);border:1px solid rgba(239,68,68,0.3);border-radius:16px;padding:48px;width:520px;text-align:center;position:relative;}
+.closed-box::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:60%;height:1px;background:linear-gradient(90deg,transparent,var(--red),transparent);}
+.closed-icon{font-size:48px;margin-bottom:20px;}
+.closed-title{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--red);margin-bottom:10px;letter-spacing:0.05em;}
+.closed-reason{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:10px;padding:16px 20px;font-size:13px;color:var(--text-2);line-height:1.7;margin:20px 0;text-align:left;}
+/* ══ CHAT / TICKETS ══ */
+.ticket-list-item{background:var(--bg-deep);border:1px solid var(--border-dim);border-radius:10px;padding:16px 20px;margin-bottom:10px;cursor:pointer;transition:border-color 0.2s,background 0.2s;display:flex;align-items:center;gap:14px;}
+.ticket-list-item:hover{border-color:var(--border);background:var(--bg-hover);}
+.ticket-list-item.unread{border-left:3px solid var(--accent);}
+.ticket-cat-badge{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;padding:3px 10px;border-radius:4px;background:var(--accent-dim);color:var(--accent);flex-shrink:0;}
+.ticket-cat-badge.general{background:rgba(139,149,169,0.12);color:var(--text-2);}
+.ticket-cat-badge.ban{background:rgba(239,68,68,0.12);color:var(--red);}
+.ticket-cat-badge.account{background:rgba(245,158,11,0.12);color:var(--yellow);}
+.ticket-cat-badge.bug{background:rgba(34,197,94,0.12);color:var(--green);}
+.ticket-info{flex:1;}
+.ticket-subject{font-size:13px;font-weight:600;color:var(--text-1);margin-bottom:3px;}
+.ticket-meta{font-family:var(--mono);font-size:10px;color:var(--text-3);}
+.ticket-status-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.ticket-status-dot.open{background:var(--green);box-shadow:0 0 6px var(--green);}
+.ticket-status-dot.closed{background:var(--text-3);}
+/* Chat window */
+.chat-window{display:flex;flex-direction:column;height:500px;background:var(--bg-deep);border:1px solid var(--border-dim);border-radius:12px;overflow:hidden;}
+.chat-messages{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:12px;}
+.chat-msg{max-width:75%;padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.6;}
+.chat-msg.user{background:var(--accent-dim);border:1px solid var(--border);align-self:flex-end;color:var(--text-1);}
+.chat-msg.admin{background:var(--bg-card);border:1px solid var(--border-dim);align-self:flex-start;color:var(--text-1);}
+.chat-msg-meta{font-family:var(--mono);font-size:10px;color:var(--text-3);margin-bottom:4px;}
+.chat-input-row{display:flex;gap:10px;padding:14px;border-top:1px solid var(--border-dim);background:var(--bg-panel);}
+.chat-input{flex:1;background:var(--bg-deep);border:1px solid var(--border-dim);border-radius:8px;padding:10px 14px;font-family:var(--sans);font-size:13px;color:var(--text-1);outline:none;transition:border-color 0.2s;}
+.chat-input:focus{border-color:var(--accent);}
+.cat-filter-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;}
+.cat-filter{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--border-dim);color:var(--text-2);background:transparent;font-family:var(--mono);letter-spacing:0.1em;transition:all 0.2s;}
+.cat-filter:hover{border-color:var(--border);color:var(--text-1);}
+.cat-filter.active{background:var(--accent);border-color:var(--accent);color:#fff;}
 /* ══ MISC ══ */
 .empty-state{text-align:center;padding:60px 20px;color:var(--text-2);}
 .empty-state-icon{font-size:40px;margin-bottom:16px;opacity:0.5;}
@@ -231,94 +235,79 @@ tr:last-child td{border-bottom:none;}
 .divider{height:1px;background:var(--border-dim);margin:24px 0;}
 .notice{background:var(--accent-dim);border:1px solid var(--border);border-radius:10px;padding:14px 18px;display:flex;align-items:flex-start;gap:12px;font-size:13px;color:var(--text-2);margin-bottom:20px;}
 .notice-icon{font-size:16px;flex-shrink:0;margin-top:1px;}
-.text-accent{color:var(--accent);} .text-green{color:var(--green);} .text-yellow{color:var(--yellow);} .text-red{color:var(--red);} .text-muted{color:var(--text-2);font-size:12px;} .mono{font-family:var(--mono);}
+.text-accent{color:var(--accent);}.text-green{color:var(--green);}.text-yellow{color:var(--yellow);}.text-red{color:var(--red);}.text-muted{color:var(--text-2);font-size:12px;}.mono{font-family:var(--mono);}
 @keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
 .fade-in{animation:fadeIn 0.3s ease;}
 .loading-bar{width:100%;height:3px;background:var(--border-dim);border-radius:3px;overflow:hidden;margin-bottom:12px;}
 .loading-bar-fill{height:100%;background:var(--accent);border-radius:3px;animation:loadBar 1.5s ease-in-out infinite;}
-@keyframes loadBar{0%{width:0%;margin-left:0;}50%{width:60%;margin-left:20%;}100%{width:0%;margin-left:100%;}  }
+@keyframes loadBar{0%{width:0%;margin-left:0;}50%{width:60%;margin-left:20%;}100%{width:0%;margin-left:100%;}}
 ::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--text-3);border-radius:10px;}
 </style>
 </head>
 <body>
 
-<!-- ══════════════════════════════════════
-     SETUP SCREEN (first-time JSONBin config)
-══════════════════════════════════════ -->
-<div id="setup-screen">
+<!-- SETUP SCREEN -->
+<div id="setup-screen" style="display:none;">
   <div style="font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:0.4em;color:var(--accent);text-transform:uppercase;margin-bottom:10px;">NEXUS PORTAL</div>
   <div style="font-family:var(--mono);font-size:22px;font-weight:700;color:var(--text-1);margin-bottom:6px;text-shadow:0 0 40px rgba(59,110,255,0.4);">FIRST-TIME SETUP</div>
-  <div style="font-size:13px;color:var(--text-2);margin-bottom:28px;font-family:var(--mono);letter-spacing:0.1em;">Connect your JSONBin database</div>
-
   <div class="setup-box">
-    <div class="setup-step active" id="setup-step-1">
-      <div class="setup-title">Step 1 — Create your JSONBin</div>
-      <div class="setup-sub">You need a free JSONBin account to store all data permanently across devices.</div>
-      <div class="setup-hint">
-        1. Go to <a href="https://jsonbin.io" target="_blank">jsonbin.io</a> and create a free account<br>
-        2. Click <b>+ CREATE BIN</b> and paste this as the content:<br><br>
-        <span style="color:var(--accent);">{"forms":[],"applications":[],"users":[],"activity":[]}</span><br><br>
-        3. Click <b>CREATE BIN</b> — copy the <b>BIN ID</b> from the URL<br>
-        4. Go to <b>API Keys</b> in your account → create a key → copy it
-      </div>
-      <div class="form-group">
-        <label class="form-label">JSONBin API Key</label>
-        <input class="form-input" id="setup-apikey" placeholder="$2a$10$..." />
-      </div>
-      <div class="form-group">
-        <label class="form-label">JSONBin Bin ID</label>
-        <input class="form-input" id="setup-binid" placeholder="64abc123def456..." />
-      </div>
-      <div style="font-size:12px;color:var(--text-3);margin-bottom:16px;font-family:var(--mono);">These are saved in your browser and never sent anywhere except JSONBin.</div>
-      <button class="auth-btn" onclick="saveSetup()">CONNECT DATABASE</button>
+    <div class="setup-step active">
+      <div style="font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:0.2em;color:var(--accent);text-transform:uppercase;margin-bottom:16px;">Connect JSONBin</div>
+      <div class="setup-hint">Go to <a href="https://jsonbin.io" target="_blank">jsonbin.io</a>, create a bin with <span style="color:var(--accent);">{"forms":[],"applications":[],"users":[],"activity":[],"tickets":[]}</span>, then paste your API key and Bin ID below.</div>
+      <div class="form-group"><label class="form-label">API Key</label><input class="form-input" id="setup-apikey" placeholder="$2a$10$..."></div>
+      <div class="form-group"><label class="form-label">Bin ID</label><input class="form-input" id="setup-binid" placeholder="64abc..."></div>
+      <button class="auth-btn" onclick="saveSetup()">CONNECT</button>
       <div class="auth-error" id="setup-error"></div>
     </div>
   </div>
-  <div style="margin-top:20px;font-family:var(--mono);font-size:10px;color:var(--text-3);letter-spacing:0.2em;">NEXUS PORTAL v2.0 — PRIVATE SYSTEM</div>
 </div>
 
-<!-- ══════════════════════════════════════
-     AUTH SCREEN (Login / Register)
-══════════════════════════════════════ -->
+<!-- ACCOUNT CLOSED SCREEN -->
+<div id="closed-screen">
+  <div class="closed-box">
+    <div class="closed-icon">🔒</div>
+    <div class="closed-title">ACCOUNT SUSPENDED</div>
+    <p style="font-size:13px;color:var(--text-2);margin-bottom:16px;">Your account has been closed by an administrator.</p>
+    <div class="closed-reason" id="closed-reason-text">No reason provided.</div>
+    <p style="font-size:12px;color:var(--text-3);margin-bottom:20px;">If you believe this is a mistake, you can contact support below.</p>
+    <button class="btn btn-primary" style="width:100%;" onclick="openClosedTicket()">Contact Support</button>
+  </div>
+</div>
+
+<!-- AUTH SCREEN -->
 <div id="auth-screen">
   <div class="auth-bg"></div>
   <div class="auth-logo">NEXUS PORTAL</div>
-  <div class="auth-title" id="auth-title">PORTAL ACCESS</div>
+  <div class="auth-title">PORTAL ACCESS</div>
   <div class="auth-subtitle">// SECURE APPLICATION MANAGEMENT</div>
-
-  <div class="auth-tabs" id="auth-tabs">
+  <div class="auth-tabs">
     <div class="auth-tab active" onclick="switchAuthTab('login')">LOGIN</div>
     <div class="auth-tab" onclick="switchAuthTab('register')">REGISTER</div>
   </div>
-
   <div class="auth-box">
-    <!-- Login -->
     <div class="auth-form active" id="form-login">
       <label class="field-label">Username</label>
-      <input class="field-input" id="li-user" type="text" placeholder="Enter username" autocomplete="off" />
+      <input class="field-input" id="li-user" type="text" placeholder="Enter username" autocomplete="off">
       <label class="field-label">Password</label>
-      <input class="field-input" id="li-pass" type="password" placeholder="••••••••" autocomplete="off" />
+      <input class="field-input" id="li-pass" type="password" placeholder="••••••••" autocomplete="off">
       <button class="auth-btn" onclick="doLogin()">AUTHENTICATE</button>
       <div class="auth-error" id="li-error"></div>
     </div>
-    <!-- Register -->
     <div class="auth-form" id="form-register">
       <label class="field-label">Choose Username</label>
-      <input class="field-input" id="reg-user" type="text" placeholder="Username" autocomplete="off" />
+      <input class="field-input" id="reg-user" type="text" placeholder="Username" autocomplete="off">
       <label class="field-label">Choose Password</label>
-      <input class="field-input" id="reg-pass" type="password" placeholder="Min 4 characters" autocomplete="off" />
+      <input class="field-input" id="reg-pass" type="password" placeholder="Min 4 characters" autocomplete="off">
       <label class="field-label">Confirm Password</label>
-      <input class="field-input" id="reg-pass2" type="password" placeholder="Repeat password" autocomplete="off" />
+      <input class="field-input" id="reg-pass2" type="password" placeholder="Repeat password" autocomplete="off">
       <button class="auth-btn" onclick="doRegister()">CREATE ACCOUNT</button>
       <div class="auth-error" id="reg-error"></div>
     </div>
   </div>
-  <div class="auth-footer">NEXUS PORTAL v2.0 &nbsp;|&nbsp; PRIVATE SYSTEM — AUTHORISED ACCESS ONLY</div>
+  <div class="auth-footer">NEXUS PORTAL v3.0 &nbsp;|&nbsp; PRIVATE SYSTEM — AUTHORISED ACCESS ONLY</div>
 </div>
 
-<!-- ══════════════════════════════════════
-     ADMIN APP
-══════════════════════════════════════ -->
+<!-- ADMIN APP -->
 <div id="app">
   <div class="topbar">
     <div class="topbar-logo"><div class="topbar-logo-dot"></div>NEXUS PORTAL</div>
@@ -342,20 +331,16 @@ tr:last-child td{border-bottom:none;}
       <div class="nav-item" id="nav-forms" onclick="navigate('forms',this)"><span class="nav-icon">▣</span>Application Forms</div>
       <div class="nav-item" id="nav-create-form" onclick="navigate('create-form',this)"><span class="nav-icon">✦</span>Create New Form</div>
       <div class="nav-item" id="nav-users" onclick="navigate('users',this)"><span class="nav-icon">◎</span>User Accounts<span class="nav-badge" id="badge-users">0</span></div>
+      <div class="nav-item" id="nav-tickets" onclick="navigate('tickets',this)"><span class="nav-icon">💬</span>Support Tickets<span class="nav-badge red" id="badge-tickets">0</span></div>
       <div class="sidebar-divider"></div>
       <div class="nav-section-label">System</div>
       <div class="nav-item" id="nav-activity" onclick="navigate('activity',this)"><span class="nav-icon">◈</span>Activity Log</div>
     </div>
-
     <div class="content">
 
       <!-- DASHBOARD -->
       <div class="page-section active fade-in" id="page-dashboard">
-        <div class="page-header">
-          <div class="page-header-eyebrow">Overview</div>
-          <h1>Dashboard</h1>
-          <p>Welcome back, Administrator. Here's your current system overview.</p>
-        </div>
+        <div class="page-header"><div class="page-header-eyebrow">Overview</div><h1>Dashboard</h1><p>Welcome back, Administrator.</p></div>
         <div class="stat-grid" id="stat-grid"></div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
           <div class="card">
@@ -375,13 +360,9 @@ tr:last-child td{border-bottom:none;}
         <div class="card">
           <div class="card-header" style="flex-wrap:wrap;gap:10px;">
             <div style="display:flex;gap:10px;flex-wrap:wrap;">
-              <input class="form-input" style="width:220px;" placeholder="Search applicants…" oninput="filterApps(this.value,'all-apps')" id="search-all" />
+              <input class="form-input" style="width:220px;" placeholder="Search applicants…" oninput="filterApps(this.value)" id="search-all">
               <select class="form-select" style="width:160px;" onchange="filterStatus(this.value)">
-                <option value="">All Statuses</option>
-                <option value="pending">Pending</option>
-                <option value="review">In Review</option>
-                <option value="accepted">Accepted</option>
-                <option value="rejected">Rejected</option>
+                <option value="">All Statuses</option><option value="pending">Pending</option><option value="review">In Review</option><option value="accepted">Accepted</option><option value="rejected">Rejected</option>
               </select>
             </div>
           </div>
@@ -405,17 +386,17 @@ tr:last-child td{border-bottom:none;}
       <div class="page-section fade-in" id="page-forms">
         <div class="page-header"><div class="page-header-eyebrow">Management</div><h1>Application Forms</h1><p>Manage your public-facing application forms.</p></div>
         <div id="forms-grid"></div>
-        <div class="empty-state" id="forms-empty" style="display:none"><div class="empty-state-icon">▣</div><h3>No forms yet</h3><p>Create your first application form to get started.</p><button class="btn btn-primary" style="margin-top:16px;" onclick="navigate('create-form',document.getElementById('nav-create-form'))">Create Form</button></div>
+        <div class="empty-state" id="forms-empty" style="display:none"><div class="empty-state-icon">▣</div><h3>No forms yet</h3><p>Create your first application form.</p><button class="btn btn-primary" style="margin-top:16px;" onclick="navigate('create-form',document.getElementById('nav-create-form'))">Create Form</button></div>
       </div>
 
       <!-- CREATE FORM -->
       <div class="page-section fade-in" id="page-create-form">
-        <div class="page-header"><div class="page-header-eyebrow">Management</div><h1>Create Application Form</h1><p>Build a new public-facing form for applicants to fill out.</p></div>
-        <div class="notice"><div class="notice-icon">ℹ</div>Each form gets a unique shareable link. Submissions are immediately visible in your dashboard.</div>
+        <div class="page-header"><div class="page-header-eyebrow">Management</div><h1>Create Application Form</h1><p>Build a new public-facing form.</p></div>
+        <div class="notice"><div class="notice-icon">ℹ</div>Each form gets a unique shareable link. Submissions appear instantly in your dashboard.</div>
         <div class="card">
-          <div class="form-group"><label class="form-label">Form Title</label><input class="form-input" id="cf-title" placeholder="e.g. DayZ Staff Application" /></div>
-          <div class="form-group"><label class="form-label">Category / Server</label><input class="form-input" id="cf-category" placeholder="e.g. DayZ Chernarus Server" /></div>
-          <div class="form-group"><label class="form-label">Description (shown to applicants)</label><textarea class="form-textarea" id="cf-desc" placeholder="Describe the role, requirements, expectations…"></textarea></div>
+          <div class="form-group"><label class="form-label">Form Title</label><input class="form-input" id="cf-title" placeholder="e.g. DayZ Staff Application"></div>
+          <div class="form-group"><label class="form-label">Category / Server</label><input class="form-input" id="cf-category" placeholder="e.g. DayZ Chernarus Server"></div>
+          <div class="form-group"><label class="form-label">Description</label><textarea class="form-textarea" id="cf-desc" placeholder="Describe the role, requirements, expectations…"></textarea></div>
           <div class="divider"></div>
           <div class="card-header" style="margin-bottom:14px;"><div class="card-title">Questions</div><button class="btn btn-ghost btn-sm" onclick="addQuestion()">+ Add Question</button></div>
           <div id="questions-list"></div>
@@ -429,7 +410,7 @@ tr:last-child td{border-bottom:none;}
 
       <!-- USERS -->
       <div class="page-section fade-in" id="page-users">
-        <div class="page-header"><div class="page-header-eyebrow">Management</div><h1>User Accounts</h1><p>View and manage all registered applicant accounts. You can also create accounts manually.</p></div>
+        <div class="page-header"><div class="page-header-eyebrow">Management</div><h1>User Accounts</h1><p>Create, edit, and manage all accounts.</p></div>
         <div class="card">
           <div class="card-header">
             <div class="card-title">All Accounts</div>
@@ -437,45 +418,69 @@ tr:last-child td{border-bottom:none;}
           </div>
           <div class="table-wrap">
             <table>
-              <thead><tr><th>Username</th><th>Role</th><th>Registered</th><th>Applications</th><th>Actions</th></tr></thead>
+              <thead><tr><th>Username</th><th>Role</th><th>Status</th><th>Registered</th><th>Apps</th><th>Actions</th></tr></thead>
               <tbody id="users-tbody"></tbody>
             </table>
           </div>
         </div>
       </div>
 
+      <!-- TICKETS (ADMIN) -->
+      <div class="page-section fade-in" id="page-tickets">
+        <div class="page-header"><div class="page-header-eyebrow">Support</div><h1>Support Tickets</h1><p>Respond to user tickets anonymously. Your identity is hidden from users.</p></div>
+        <div class="cat-filter-row">
+          <button class="cat-filter active" onclick="filterTickets('',this)">All</button>
+          <button class="cat-filter" onclick="filterTickets('general',this)">General</button>
+          <button class="cat-filter" onclick="filterTickets('ban',this)">Ban Appeal</button>
+          <button class="cat-filter" onclick="filterTickets('account',this)">Account</button>
+          <button class="cat-filter" onclick="filterTickets('bug',this)">Bug Report</button>
+          <button class="cat-filter" onclick="filterTickets('other',this)">Other</button>
+        </div>
+        <div id="admin-tickets-list"></div>
+      </div>
+
       <!-- ACTIVITY -->
       <div class="page-section fade-in" id="page-activity">
-        <div class="page-header"><div class="page-header-eyebrow">System</div><h1>Activity Log</h1><p>A record of all admin actions, registrations, and submissions.</p></div>
+        <div class="page-header"><div class="page-header-eyebrow">System</div><h1>Activity Log</h1><p>All admin actions, registrations, and submissions.</p></div>
         <div class="card" id="activity-log"></div>
       </div>
 
-    </div><!-- /content -->
+    </div>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════
-     APPLICANT PORTAL
-══════════════════════════════════════ -->
+<!-- APPLICANT PORTAL -->
 <div id="applicant-portal">
   <div class="ap-header">
     <div class="topbar-logo"><div class="topbar-logo-dot"></div>NEXUS PORTAL</div>
-    <div class="topbar-status">MY APPLICATIONS</div>
+    <div class="ap-nav">
+      <div class="ap-nav-item active" onclick="apNavigate('applications',this)">My Applications</div>
+      <div class="ap-nav-item" onclick="apNavigate('support',this)">Support</div>
+    </div>
     <div style="margin-left:auto;display:flex;align-items:center;gap:16px;">
       <div class="topbar-user" id="ap-username"></div>
       <button class="topbar-logout" onclick="logout()">LOGOUT</button>
     </div>
   </div>
   <div class="ap-content">
-    <div class="ap-welcome" id="ap-welcome"></div>
-    <div class="ap-sub">Here is the current status of your application(s). The admin will update your status as they review.</div>
-    <div id="ap-apps-list"></div>
+    <!-- My Applications -->
+    <div class="ap-page active" id="ap-page-applications">
+      <div class="ap-welcome" id="ap-welcome"></div>
+      <div class="ap-sub">Here is the current status of your application(s).</div>
+      <div id="ap-apps-list"></div>
+    </div>
+    <!-- Support / Tickets -->
+    <div class="ap-page" id="ap-page-support">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+        <div><div style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--text-1);margin-bottom:4px;">Support</div><div style="font-size:13px;color:var(--text-2);">Submit a ticket and an admin will respond. Your ticket ID is kept private.</div></div>
+        <button class="btn btn-primary" onclick="openNewTicketModal()">+ New Ticket</button>
+      </div>
+      <div id="user-tickets-list"></div>
+    </div>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════
-     PUBLIC APPLICATION FORM
-══════════════════════════════════════ -->
+<!-- PUBLIC FORM -->
 <div id="public-app-page">
   <div class="pub-wrap">
     <button class="btn btn-ghost" onclick="closePubForm()" style="margin-bottom:24px;">← Back</button>
@@ -492,15 +497,13 @@ tr:last-child td{border-bottom:none;}
       <div class="pub-success" id="pub-success">
         <div class="pub-success-icon">✓</div>
         <h2>Application Submitted</h2>
-        <p>Thank you for applying. Log in to your account to track the status of your application.</p>
+        <p>Thank you. Log in to track your application status.</p>
       </div>
     </div>
   </div>
 </div>
 
 <!-- ══ MODALS ══ -->
-
-<!-- View Application -->
 <div class="modal-overlay" id="modal-view">
   <div class="modal">
     <div class="modal-header"><div class="modal-title">Application Details</div><button class="modal-close" onclick="closeModal('modal-view')">✕</button></div>
@@ -508,8 +511,6 @@ tr:last-child td{border-bottom:none;}
     <div class="modal-footer" id="modal-view-footer"></div>
   </div>
 </div>
-
-<!-- Edit Application -->
 <div class="modal-overlay" id="modal-edit">
   <div class="modal">
     <div class="modal-header"><div class="modal-title">Edit Application</div><button class="modal-close" onclick="closeModal('modal-edit')">✕</button></div>
@@ -520,750 +521,717 @@ tr:last-child td{border-bottom:none;}
     </div>
   </div>
 </div>
-
-<!-- Confirm Delete -->
 <div class="modal-overlay" id="modal-confirm">
   <div class="modal" style="width:440px;">
-    <div class="modal-header"><div class="modal-title text-red">Confirm Delete</div><button class="modal-close" onclick="closeModal('modal-confirm')">✕</button></div>
-    <div class="modal-body"><p style="color:var(--text-2);font-size:13px;">Are you sure you want to permanently delete this? This cannot be undone.</p></div>
+    <div class="modal-header"><div class="modal-title text-red">Confirm Action</div><button class="modal-close" onclick="closeModal('modal-confirm')">✕</button></div>
+    <div class="modal-body" id="modal-confirm-body"><p style="color:var(--text-2);font-size:13px;">Are you sure? This cannot be undone.</p></div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('modal-confirm')">Cancel</button>
-      <button class="btn btn-danger" id="confirm-delete-btn">Delete</button>
+      <button class="btn btn-danger" id="confirm-delete-btn">Confirm</button>
     </div>
   </div>
 </div>
-
-<!-- Form Link -->
 <div class="modal-overlay" id="modal-link">
   <div class="modal" style="width:500px;">
     <div class="modal-header"><div class="modal-title">Share Application Link</div><button class="modal-close" onclick="closeModal('modal-link')">✕</button></div>
     <div class="modal-body">
       <p style="font-size:13px;color:var(--text-2);margin-bottom:16px;">Share this link with potential applicants.</p>
-      <div style="display:flex;gap:10px;">
-        <input class="form-input" id="link-input" readonly style="font-family:var(--mono);font-size:12px;" />
-        <button class="btn btn-primary" onclick="copyLink()">Copy</button>
-      </div>
+      <div style="display:flex;gap:10px;"><input class="form-input" id="link-input" readonly style="font-family:var(--mono);font-size:12px;"><button class="btn btn-primary" onclick="copyLink()">Copy</button></div>
       <div style="margin-top:12px;font-family:var(--mono);font-size:11px;color:var(--green);" id="copy-confirm"></div>
     </div>
   </div>
 </div>
 
-<!-- Create User (Admin) -->
+<!-- Create/Edit User Modal -->
 <div class="modal-overlay" id="modal-create-user">
-  <div class="modal" style="width:440px;">
-    <div class="modal-header"><div class="modal-title">Create User Account</div><button class="modal-close" onclick="closeModal('modal-create-user')">✕</button></div>
+  <div class="modal" style="width:480px;">
+    <div class="modal-header"><div class="modal-title" id="cu-modal-title">Create User Account</div><button class="modal-close" onclick="closeModal('modal-create-user')">✕</button></div>
     <div class="modal-body">
-      <div class="form-group"><label class="form-label">Username</label><input class="form-input" id="cu-user" placeholder="Choose a username" /></div>
-      <div class="form-group"><label class="form-label">Password</label><input class="form-input" id="cu-pass" type="password" placeholder="Choose a password" /></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Username</label><input class="form-input" id="cu-user" placeholder="Username"></div>
+        <div class="form-group"><label class="form-label">Password</label><input class="form-input" id="cu-pass" type="password" placeholder="Password"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Role</label>
+        <select class="form-select" id="cu-role">
+          <option value="user">User (Applicant)</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
       <div class="auth-error" id="cu-error"></div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('modal-create-user')">Cancel</button>
-      <button class="btn btn-primary" onclick="adminCreateUser()">Create Account</button>
+      <button class="btn btn-primary" id="cu-submit-btn" onclick="submitUserModal()">Create Account</button>
     </div>
   </div>
 </div>
 
-<!-- Loading overlay -->
+<!-- Close Account Modal -->
+<div class="modal-overlay" id="modal-close-account">
+  <div class="modal" style="width:460px;">
+    <div class="modal-header"><div class="modal-title text-red">Close Account</div><button class="modal-close" onclick="closeModal('modal-close-account')">✕</button></div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--text-2);margin-bottom:16px;">The user will see this reason when they try to log in and will be given the option to contact support.</p>
+      <div class="form-group"><label class="form-label">Reason for closure</label><textarea class="form-textarea" id="close-reason" placeholder="e.g. Violation of server rules, toxic behaviour…"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-close-account')">Cancel</button>
+      <button class="btn btn-danger" onclick="submitCloseAccount()">Close Account</button>
+    </div>
+  </div>
+</div>
+
+<!-- Admin Ticket Chat Modal -->
+<div class="modal-overlay" id="modal-admin-ticket">
+  <div class="modal" style="width:680px;">
+    <div class="modal-header"><div class="modal-title" id="admin-ticket-title">Ticket</div><button class="modal-close" onclick="closeModal('modal-admin-ticket')">✕</button></div>
+    <div class="modal-body">
+      <div id="admin-ticket-info" style="margin-bottom:16px;"></div>
+      <div class="chat-window">
+        <div class="chat-messages" id="admin-chat-messages"></div>
+        <div class="chat-input-row">
+          <input class="chat-input" id="admin-chat-input" placeholder="Reply as Support Staff (anonymous)…" onkeydown="if(event.key==='Enter')sendAdminMsg()">
+          <button class="btn btn-primary btn-sm" onclick="sendAdminMsg()">Send</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-admin-ticket')">Close</button>
+      <button class="btn btn-warning btn-sm" id="admin-ticket-close-btn" onclick="closeTicketAsAdmin()">Close Ticket</button>
+    </div>
+  </div>
+</div>
+
+<!-- New Ticket Modal (User) -->
+<div class="modal-overlay" id="modal-new-ticket">
+  <div class="modal" style="width:500px;">
+    <div class="modal-header"><div class="modal-title">New Support Ticket</div><button class="modal-close" onclick="closeModal('modal-new-ticket')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Category</label>
+        <select class="form-select" id="nt-category">
+          <option value="general">General Question</option>
+          <option value="ban">Ban Appeal</option>
+          <option value="account">Account Issue</option>
+          <option value="bug">Bug Report</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">Subject</label><input class="form-input" id="nt-subject" placeholder="Brief description of your issue"></div>
+      <div class="form-group"><label class="form-label">Message</label><textarea class="form-textarea" id="nt-message" placeholder="Describe your issue in detail…"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-new-ticket')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitNewTicket()">Submit Ticket</button>
+    </div>
+  </div>
+</div>
+
+<!-- User Ticket Chat Modal -->
+<div class="modal-overlay" id="modal-user-ticket">
+  <div class="modal" style="width:680px;">
+    <div class="modal-header"><div class="modal-title" id="user-ticket-title">Support Ticket</div><button class="modal-close" onclick="closeModal('modal-user-ticket')">✕</button></div>
+    <div class="modal-body">
+      <div id="user-ticket-info" style="margin-bottom:16px;"></div>
+      <div class="chat-window">
+        <div class="chat-messages" id="user-chat-messages"></div>
+        <div class="chat-input-row" id="user-chat-input-row">
+          <input class="chat-input" id="user-chat-input" placeholder="Type a message…" onkeydown="if(event.key==='Enter')sendUserMsg()">
+          <button class="btn btn-primary btn-sm" onclick="sendUserMsg()">Send</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('modal-user-ticket')">Close</button></div>
+  </div>
+</div>
+
+<!-- Loading -->
 <div id="loading-overlay" style="position:fixed;inset:0;background:rgba(7,11,20,0.85);z-index:99999;display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px;">
   <div style="font-family:var(--mono);font-size:12px;color:var(--accent);letter-spacing:0.3em;">SYNCING DATABASE…</div>
   <div style="width:200px;"><div class="loading-bar"><div class="loading-bar-fill"></div></div></div>
 </div>
 
 <script>
-/* ════════════════════════════════════════
-   JSONBIN CONFIG
-════════════════════════════════════════ */
-let JSONBIN_KEY = '';
-let JSONBIN_ID  = '';
+/* ══ CONFIG ══ */
+let JSONBIN_KEY='', JSONBIN_ID='';
+const BIN_URL=()=>`https://api.jsonbin.io/v3/b/${JSONBIN_ID}`;
+const HEADERS=()=>({'Content-Type':'application/json','X-Master-Key':JSONBIN_KEY,'X-Bin-Versioning':'false'});
+let db={forms:[],applications:[],users:[],activity:[],tickets:[]};
+let currentUser=null;
 
-const BIN_URL = () => `https://api.jsonbin.io/v3/b/${JSONBIN_ID}`;
-const HEADERS = () => ({
-  'Content-Type': 'application/json',
-  'X-Master-Key': JSONBIN_KEY,
-  'X-Bin-Versioning': 'false'
-});
-
-/* ════════════════════════════════════════
-   DATA
-════════════════════════════════════════ */
-let db = { forms:[], applications:[], users:[], activity:[] };
-let currentUser = null; // { username, role:'admin'|'user' }
-
-/* ════════════════════════════════════════
-   JSONBIN CRUD
-════════════════════════════════════════ */
-function showLoading(v){ document.getElementById('loading-overlay').style.display = v?'flex':'none'; }
-
+/* ══ DB ══ */
+function showLoading(v){document.getElementById('loading-overlay').style.display=v?'flex':'none';}
 async function loadDB(){
   showLoading(true);
   try{
-    const r = await fetch(BIN_URL(), { headers: HEADERS() });
-    if(!r.ok) throw new Error('fetch failed');
-    const j = await r.json();
-    db = j.record || { forms:[], applications:[], users:[], activity:[] };
-    if(!db.users) db.users=[];
-    if(!db.activity) db.activity=[];
-    // Ensure admin account always exists
+    const r=await fetch(BIN_URL(),{headers:HEADERS()});
+    if(!r.ok)throw new Error();
+    const j=await r.json();
+    db=j.record||{forms:[],applications:[],users:[],activity:[],tickets:[]};
+    if(!db.users)db.users=[];
+    if(!db.activity)db.activity=[];
+    if(!db.tickets)db.tickets=[];
     if(!db.users.find(u=>u.username==='1877')){
-      db.users.unshift({ username:'1877', password:'1877', role:'admin', created: nowStr() });
+      db.users.unshift({username:'1877',password:'1877',role:'admin',status:'active',created:nowStr()});
       await saveDB();
     }
-  } catch(e){ showErr('Could not reach JSONBin. Check your API key and Bin ID.'); }
-  finally{ showLoading(false); }
+  }catch(e){console.error('loadDB failed',e);}
+  finally{showLoading(false);}
 }
-
 async function saveDB(){
   try{
-    // Safety: never save if users is empty (prevents wiping all accounts)
-    if(!db.users || db.users.length === 0){
-      console.warn('saveDB blocked: empty users, refusing to overwrite.');
-      return;
-    }
-    await fetch(BIN_URL(), {
-      method:'PUT',
-      headers: HEADERS(),
-      body: JSON.stringify(db)
-    });
-  } catch(e){ console.error('Save failed',e); }
+    if(!db.users||db.users.length===0){console.warn('saveDB blocked');return;}
+    await fetch(BIN_URL(),{method:'PUT',headers:HEADERS(),body:JSON.stringify(db)});
+  }catch(e){console.error('Save failed',e);}
 }
 
-/* ════════════════════════════════════════
-   SETUP
-════════════════════════════════════════ */
+/* ══ SETUP ══ */
 async function saveSetup(){
-  const key = document.getElementById('setup-apikey').value.trim();
-  const id  = document.getElementById('setup-binid').value.trim();
-  if(!key||!id){ showSetupErr('Both fields are required.'); return; }
+  const key=document.getElementById('setup-apikey').value.trim();
+  const id=document.getElementById('setup-binid').value.trim();
+  if(!key||!id){document.getElementById('setup-error').textContent='Both fields required.';return;}
   showLoading(true);
   try{
-    // Test connection
-    const r = await fetch(`https://api.jsonbin.io/v3/b/${id}`, { headers:{ 'X-Master-Key':key, 'X-Bin-Versioning':'false' } });
-    if(!r.ok) throw new Error('bad');
-    localStorage.setItem('nx_key', key);
-    localStorage.setItem('nx_id', id);
-    JSONBIN_KEY = key; JSONBIN_ID = id;
-    await loadDB();
-    showLoading(false);
+    const r=await fetch(`https://api.jsonbin.io/v3/b/${id}`,{headers:{'X-Master-Key':key,'X-Bin-Versioning':'false'}});
+    if(!r.ok)throw new Error();
+    localStorage.setItem('nx_key',key);localStorage.setItem('nx_id',id);
+    JSONBIN_KEY=key;JSONBIN_ID=id;
+    await loadDB();showLoading(false);
     document.getElementById('setup-screen').style.display='none';
     showAuth();
-  } catch(e){
-    showLoading(false);
-    showSetupErr('Connection failed. Double-check your API key and Bin ID.');
-  }
+  }catch(e){showLoading(false);document.getElementById('setup-error').textContent='Connection failed.';}
 }
 
-function showSetupErr(msg){ document.getElementById('setup-error').textContent=msg; }
-
-/* ════════════════════════════════════════
-   AUTH
-════════════════════════════════════════ */
-function showAuth(){
-  document.getElementById('auth-screen').classList.add('visible');
-}
-
+/* ══ AUTH ══ */
+function showAuth(){document.getElementById('auth-screen').classList.add('visible');}
 function switchAuthTab(tab){
   document.querySelectorAll('.auth-tab').forEach((t,i)=>t.classList.toggle('active',['login','register'][i]===tab));
-  document.getElementById('form-login').classList.toggle('active', tab==='login');
-  document.getElementById('form-register').classList.toggle('active', tab==='register');
+  document.getElementById('form-login').classList.toggle('active',tab==='login');
+  document.getElementById('form-register').classList.toggle('active',tab==='register');
   document.getElementById('li-error').textContent='';
   document.getElementById('reg-error').textContent='';
 }
-
 async function doLogin(){
-  const u = document.getElementById('li-user').value.trim();
-  const p = document.getElementById('li-pass').value.trim();
-  if(!u||!p){ setAuthErr('li','Username and password required.'); return; }
-  showLoading(true);
-  await loadDB(); // always re-fetch fresh data
-  showLoading(false);
-  const user = db.users.find(x=>x.username===u && x.password===p);
-  if(!user){ setAuthErr('li','Invalid username or password.'); return; }
-  currentUser = { username: user.username, role: user.role };
-  localStorage.setItem('nx_session', JSON.stringify(currentUser));
-  logActivity(`${user.username} logged in`, 'accent');
+  const u=document.getElementById('li-user').value.trim();
+  const p=document.getElementById('li-pass').value.trim();
+  if(!u||!p){setAuthErr('li','Username and password required.');return;}
+  showLoading(true);await loadDB();showLoading(false);
+  const user=db.users.find(x=>x.username===u&&x.password===p);
+  if(!user){setAuthErr('li','Invalid username or password.');return;}
+  // Check if account is closed
+  if(user.status==='closed'){
+    showClosedScreen(user.closeReason||'No reason provided.');
+    return;
+  }
+  currentUser={username:user.username,role:user.role};
+  localStorage.setItem('nx_session',JSON.stringify(currentUser));
+  logActivity(`${user.username} logged in`,'accent');
   await saveDB();
   document.getElementById('auth-screen').classList.remove('visible');
-  if(user.role==='admin') launchAdmin();
+  if(user.role==='admin')launchAdmin();
   else launchApplicantPortal();
-  // Handle pending form link
-  if(window._pendingForm){
-    setTimeout(()=>openPublicForm(window._pendingForm),300);
-    window._pendingForm=null;
-  }
+  if(window._pendingForm){setTimeout(()=>openPublicForm(window._pendingForm),300);window._pendingForm=null;}
 }
-
 async function doRegister(){
-  const u = document.getElementById('reg-user').value.trim();
-  const p = document.getElementById('reg-pass').value.trim();
-  const p2= document.getElementById('reg-pass2').value.trim();
-  if(!u||!p){ setAuthErr('reg','All fields are required.'); return; }
-  if(p.length < 4){ setAuthErr('reg','Password must be at least 4 characters.'); return; }
-  if(p!==p2){ setAuthErr('reg','Passwords do not match.'); return; }
-  showLoading(true);
-  await loadDB();
-  if(db.users.find(x=>x.username.toLowerCase()===u.toLowerCase())){
-    showLoading(false); setAuthErr('reg','That username is already taken.'); return;
-  }
-  const newUser = { username:u, password:p, role:'user', created: nowStr() };
-  db.users.push(newUser);
-  logActivity(`New account registered: ${u}`, 'green');
-  await saveDB();
-  showLoading(false);
-  currentUser = { username:u, role:'user' };
-  localStorage.setItem('nx_session', JSON.stringify(currentUser));
+  const u=document.getElementById('reg-user').value.trim();
+  const p=document.getElementById('reg-pass').value.trim();
+  const p2=document.getElementById('reg-pass2').value.trim();
+  if(!u||!p){setAuthErr('reg','All fields required.');return;}
+  if(p.length<4){setAuthErr('reg','Password must be at least 4 characters.');return;}
+  if(p!==p2){setAuthErr('reg','Passwords do not match.');return;}
+  showLoading(true);await loadDB();
+  if(db.users.find(x=>x.username.toLowerCase()===u.toLowerCase())){showLoading(false);setAuthErr('reg','Username already taken.');return;}
+  const nu={username:u,password:p,role:'user',status:'active',created:nowStr()};
+  db.users.push(nu);
+  logActivity(`New account registered: ${u}`,'green');
+  await saveDB();showLoading(false);
+  currentUser={username:u,role:'user'};
+  localStorage.setItem('nx_session',JSON.stringify(currentUser));
   document.getElementById('auth-screen').classList.remove('visible');
   launchApplicantPortal();
 }
-
-function setAuthErr(prefix, msg){ document.getElementById(prefix+'-error').textContent=msg; }
-
+function setAuthErr(prefix,msg){document.getElementById(prefix+'-error').textContent=msg;}
 function logout(){
-  currentUser=null;
-  localStorage.removeItem('nx_session');
+  currentUser=null;localStorage.removeItem('nx_session');
   document.getElementById('app').classList.remove('active');
   document.getElementById('applicant-portal').classList.remove('active');
   document.getElementById('public-app-page').classList.remove('open');
+  document.getElementById('closed-screen').classList.remove('visible');
   switchAuthTab('login');
-  document.getElementById('li-user').value='';
-  document.getElementById('li-pass').value='';
+  document.getElementById('li-user').value='';document.getElementById('li-pass').value='';
   document.getElementById('auth-screen').classList.add('visible');
 }
 
-/* ════════════════════════════════════════
-   ADMIN LAUNCH
-════════════════════════════════════════ */
+/* ══ CLOSED ACCOUNT ══ */
+function showClosedScreen(reason){
+  document.getElementById('auth-screen').classList.remove('visible');
+  document.getElementById('closed-reason-text').textContent=reason;
+  document.getElementById('closed-screen').classList.add('visible');
+}
+function openClosedTicket(){
+  // Let them log in as "suspended" to submit a ticket
+  const u=document.getElementById('li-user').value.trim();
+  const user=db.users.find(x=>x.username===u);
+  if(user){
+    currentUser={username:user.username,role:'user'};
+    document.getElementById('closed-screen').classList.remove('visible');
+    launchApplicantPortal();
+    setTimeout(()=>{apNavigate('support',document.querySelectorAll('.ap-nav-item')[1]);openNewTicketModal();},300);
+  }
+}
+
+/* ══ LAUNCH ══ */
 function launchAdmin(){
   document.getElementById('topbar-username').textContent='⬡ '+currentUser.username.toUpperCase();
   document.getElementById('app').classList.add('active');
-  startClock();
-  refreshAll();
+  startClock();refreshAll();
 }
-
-/* ════════════════════════════════════════
-   APPLICANT PORTAL
-════════════════════════════════════════ */
 function launchApplicantPortal(){
   document.getElementById('ap-username').textContent='⬡ '+currentUser.username.toUpperCase();
   document.getElementById('ap-welcome').textContent='Welcome, '+currentUser.username;
   document.getElementById('applicant-portal').classList.add('active');
   renderApplicantApps();
+  renderUserTickets();
 }
 
+/* ══ APPLICANT PORTAL NAV ══ */
+function apNavigate(page,el){
+  document.querySelectorAll('.ap-page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.ap-nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('ap-page-'+page).classList.add('active');
+  if(el)el.classList.add('active');
+  if(page==='support')renderUserTickets();
+}
+
+/* ══ APPLICANT APPS ══ */
 function renderApplicantApps(){
-  const myApps = db.applications.filter(a=>a.submittedBy===currentUser.username);
-  const el = document.getElementById('ap-apps-list');
-  if(!myApps.length){
-    el.innerHTML=`<div class="ap-no-apps"><div class="ap-no-apps-icon">◧</div><h3 style="font-size:16px;font-weight:600;color:var(--text-1);margin-bottom:8px;">No Applications Found</h3><p>You haven't submitted any applications yet. Use a form link to apply.</p></div>`;
-    return;
-  }
-  el.innerHTML = [...myApps].reverse().map(a=>`
+  const myApps=db.applications.filter(a=>a.submittedBy===currentUser.username);
+  const el=document.getElementById('ap-apps-list');
+  if(!myApps.length){el.innerHTML=`<div class="ap-no-apps"><div class="ap-no-apps-icon">◧</div><h3 style="font-size:16px;font-weight:600;color:var(--text-1);margin-bottom:8px;">No Applications Found</h3><p>You haven't submitted any applications yet.</p></div>`;return;}
+  el.innerHTML=[...myApps].reverse().map(a=>`
     <div class="ap-card">
       <div class="ap-app-title">${esc(a.formTitle)}</div>
-      <div class="ap-app-meta">APPLICATION #${a.id} &nbsp;·&nbsp; SUBMITTED ${a.date}</div>
-      <div class="status-big ${a.status}">
-        ${{pending:'⏳ Pending Review',review:'🔍 Under Review',accepted:'✓ Accepted',rejected:'✕ Rejected'}[a.status]||a.status}
-      </div>
+      <div class="ap-app-meta">APPLICATION #${a.id} · SUBMITTED ${a.date}</div>
+      <div class="status-big ${a.status}">${{pending:'⏳ Pending Review',review:'🔍 Under Review',accepted:'✓ Accepted',rejected:'✕ Rejected'}[a.status]||a.status}</div>
       ${a.adminNote?`<div class="ap-note-box"><div class="ap-note-label">Message from Admin</div><div class="ap-note-text">${esc(a.adminNote)}</div></div>`:''}
-    </div>
-  `).join('');
+    </div>`).join('');
 }
 
-/* ════════════════════════════════════════
-   CLOCK
-════════════════════════════════════════ */
-function startClock(){
-  const el=document.getElementById('clock');
-  const t=()=>el.textContent=new Date().toLocaleTimeString('en-GB',{hour12:false});
-  t(); setInterval(t,1000);
-}
+/* ══ CLOCK ══ */
+function startClock(){const el=document.getElementById('clock');const t=()=>el.textContent=new Date().toLocaleTimeString('en-GB',{hour12:false});t();setInterval(t,1000);}
 
-/* ════════════════════════════════════════
-   NAVIGATION
-════════════════════════════════════════ */
-function navigate(page, el){
+/* ══ NAVIGATION ══ */
+function navigate(page,el){
   document.querySelectorAll('.page-section').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   const sec=document.getElementById('page-'+page);
   if(sec){sec.classList.add('active');sec.classList.add('fade-in');}
-  if(el) el.classList.add('active');
+  if(el)el.classList.add('active');
   refreshPage(page);
 }
-
 function refreshPage(page){
-  if(page==='dashboard') renderDashboard();
-  if(page==='all-apps') renderAllApps();
-  if(page==='pending') renderFiltered(['pending','review'],'pending-tbody',true);
-  if(page==='accepted') renderFiltered(['accepted'],'accepted-tbody',false);
-  if(page==='forms') renderForms();
-  if(page==='create-form') initCreateForm();
-  if(page==='users') renderUsers();
-  if(page==='activity') renderActivity();
+  if(page==='dashboard')renderDashboard();
+  if(page==='all-apps')renderAllApps();
+  if(page==='pending')renderFiltered(['pending','review'],'pending-tbody',true);
+  if(page==='accepted')renderFiltered(['accepted'],'accepted-tbody',false);
+  if(page==='forms')renderForms();
+  if(page==='create-form')initCreateForm();
+  if(page==='users')renderUsers();
+  if(page==='tickets')renderAdminTickets();
+  if(page==='activity')renderActivity();
 }
+async function refreshAll(){showLoading(true);await loadDB();showLoading(false);updateBadges();renderDashboard();}
 
-async function refreshAll(){
-  showLoading(true);
-  await loadDB();
-  showLoading(false);
-  updateBadges();
-  renderDashboard();
-}
-
-/* ════════════════════════════════════════
-   DASHBOARD
-════════════════════════════════════════ */
+/* ══ DASHBOARD ══ */
 function renderDashboard(){
   updateBadges();
-  const total=db.applications.length;
-  const pending=db.applications.filter(a=>a.status==='pending'||a.status==='review').length;
-  const accepted=db.applications.filter(a=>a.status==='accepted').length;
-  const rejected=db.applications.filter(a=>a.status==='rejected').length;
-  const forms=db.forms.length;
-  const users=db.users.filter(u=>u.role!=='admin').length;
+  const total=db.applications.length,pending=db.applications.filter(a=>a.status==='pending'||a.status==='review').length,accepted=db.applications.filter(a=>a.status==='accepted').length,rejected=db.applications.filter(a=>a.status==='rejected').length,forms=db.forms.length,users=db.users.filter(u=>u.role!=='admin').length,openTickets=(db.tickets||[]).filter(t=>t.status==='open').length;
   document.getElementById('stat-grid').innerHTML=`
     <div class="stat-card"><div class="stat-label">Total Applications</div><div class="stat-value">${total}</div><div class="stat-sub">All time</div></div>
     <div class="stat-card yellow"><div class="stat-label">Pending Review</div><div class="stat-value">${pending}</div><div class="stat-sub">Awaiting decision</div></div>
     <div class="stat-card green"><div class="stat-label">Accepted</div><div class="stat-value">${accepted}</div><div class="stat-sub">Total approved</div></div>
     <div class="stat-card red"><div class="stat-label">Rejected</div><div class="stat-value">${rejected}</div><div class="stat-sub">Total declined</div></div>
     <div class="stat-card"><div class="stat-label">Active Forms</div><div class="stat-value">${forms}</div><div class="stat-sub">Published</div></div>
-    <div class="stat-card"><div class="stat-label">Registered Users</div><div class="stat-value">${users}</div><div class="stat-sub">Applicant accounts</div></div>
-  `;
+    <div class="stat-card"><div class="stat-label">Registered Users</div><div class="stat-value">${users}</div><div class="stat-sub">Accounts</div></div>
+    <div class="stat-card yellow"><div class="stat-label">Open Tickets</div><div class="stat-value">${openTickets}</div><div class="stat-sub">Awaiting reply</div></div>`;
   const recent=[...db.applications].reverse().slice(0,5);
   const recEl=document.getElementById('recent-apps-list');
-  if(!recent.length){recEl.innerHTML='<div class="empty-state" style="padding:30px 0;"><div class="empty-state-icon" style="font-size:24px;">◧</div><p>No applications yet</p></div>';}
-  else recEl.innerHTML=recent.map(a=>`
-    <div class="activity-item" style="cursor:pointer;" onclick="openViewModal(${a.id})">
-      <div class="activity-dot ${a.status==='accepted'?'green':a.status==='rejected'?'red':''}"></div>
-      <div>
-        <div class="activity-text">${esc(a.applicantName)} — <span class="text-muted">${esc(a.formTitle)}</span></div>
-        <div class="activity-time">${a.date} · <span class="badge badge-${a.status}">${a.status}</span></div>
-      </div>
-    </div>`).join('');
+  if(!recent.length)recEl.innerHTML='<div class="empty-state" style="padding:30px 0;"><div class="empty-state-icon" style="font-size:24px;">◧</div><p>No applications yet</p></div>';
+  else recEl.innerHTML=recent.map(a=>`<div class="activity-item" style="cursor:pointer;" onclick="openViewModal(${a.id})"><div class="activity-dot ${a.status==='accepted'?'green':a.status==='rejected'?'red':''}"></div><div><div class="activity-text">${esc(a.applicantName)} — <span class="text-muted">${esc(a.formTitle)}</span></div><div class="activity-time">${a.date} · <span class="badge badge-${a.status}">${a.status}</span></div></div></div>`).join('');
   const formsEl=document.getElementById('active-forms-list');
-  if(!db.forms.length){formsEl.innerHTML='<div class="empty-state" style="padding:30px 0;"><div class="empty-state-icon" style="font-size:24px;">▣</div><p>No forms yet</p></div>';}
-  else formsEl.innerHTML=db.forms.slice(-5).reverse().map(f=>{
-    const cnt=db.applications.filter(a=>a.formId===f.id).length;
-    return`<div class="activity-item"><div class="activity-dot"></div><div style="flex:1;"><div class="activity-text">${esc(f.title)}</div><div class="activity-time">${esc(f.category)} · ${cnt} submission${cnt!==1?'s':''}</div></div><button class="btn btn-ghost btn-sm" onclick="openPublicForm(${f.id})">Preview</button></div>`;
-  }).join('');
+  if(!db.forms.length)formsEl.innerHTML='<div class="empty-state" style="padding:30px 0;"><div class="empty-state-icon" style="font-size:24px;">▣</div><p>No forms yet</p></div>';
+  else formsEl.innerHTML=db.forms.slice(-5).reverse().map(f=>{const cnt=db.applications.filter(a=>a.formId===f.id).length;return`<div class="activity-item"><div class="activity-dot"></div><div style="flex:1;"><div class="activity-text">${esc(f.title)}</div><div class="activity-time">${esc(f.category)} · ${cnt} submission${cnt!==1?'s':''}</div></div><button class="btn btn-ghost btn-sm" onclick="openPublicForm(${f.id})">Preview</button></div>`;}).join('');
 }
-
 function updateBadges(){
   document.getElementById('badge-all').textContent=db.applications.length;
   document.getElementById('badge-pending').textContent=db.applications.filter(a=>a.status==='pending'||a.status==='review').length;
   document.getElementById('badge-accepted').textContent=db.applications.filter(a=>a.status==='accepted').length;
   document.getElementById('badge-users').textContent=db.users.filter(u=>u.role!=='admin').length;
+  document.getElementById('badge-tickets').textContent=(db.tickets||[]).filter(t=>t.status==='open').length;
 }
 
-/* ════════════════════════════════════════
-   APPLICATIONS TABLE
-════════════════════════════════════════ */
-function appRow(a, showStatus=true){
-  return`<tr>
-    <td class="mono text-muted" style="font-size:11px;">#${a.id}</td>
-    <td style="font-weight:500;">${esc(a.applicantName)}</td>
-    <td class="text-muted">${esc(a.formTitle)}</td>
-    <td class="mono text-muted" style="font-size:11px;">${a.date}</td>
-    ${showStatus?`<td><span class="badge badge-${a.status}">${a.status}</span></td>`:''}
-    <td><div style="display:flex;gap:6px;">
-      <button class="btn btn-ghost btn-sm" onclick="openViewModal(${a.id})">View</button>
-      <button class="btn btn-ghost btn-sm" onclick="openEditModal(${a.id})">Edit</button>
-      <button class="btn btn-danger btn-sm" onclick="confirmDelete(${a.id},'app')">Del</button>
-    </div></td>
-  </tr>`;
-}
-
+/* ══ APPS TABLE ══ */
+function appRow(a,showStatus=true){return`<tr><td class="mono text-muted" style="font-size:11px;">#${a.id}</td><td style="font-weight:500;">${esc(a.applicantName)}</td><td class="text-muted">${esc(a.formTitle)}</td><td class="mono text-muted" style="font-size:11px;">${a.date}</td>${showStatus?`<td><span class="badge badge-${a.status}">${a.status}</span></td>`:''}<td><div style="display:flex;gap:6px;"><button class="btn btn-ghost btn-sm" onclick="openViewModal(${a.id})">View</button><button class="btn btn-ghost btn-sm" onclick="openEditModal(${a.id})">Edit</button><button class="btn btn-danger btn-sm" onclick="confirmDelete(${a.id},'app')">Del</button></div></td></tr>`;}
 let _filter='',_statusFilter='';
-function renderAllApps(){
-  let apps=[...db.applications].reverse();
-  if(_filter) apps=apps.filter(a=>a.applicantName.toLowerCase().includes(_filter.toLowerCase()));
-  if(_statusFilter) apps=apps.filter(a=>a.status===_statusFilter);
-  const tb=document.getElementById('all-apps-tbody');
-  tb.innerHTML=apps.length?apps.map(a=>appRow(a,true)).join(''):'<tr><td colspan="6"><div class="empty-state" style="padding:40px 0"><div class="empty-state-icon">◧</div><p>No applications found</p></div></td></tr>';
-}
-function filterApps(v){ _filter=v; renderAllApps(); }
-function filterStatus(v){ _statusFilter=v; renderAllApps(); }
-function renderFiltered(statuses,tbodyId,showStatus){
-  const apps=[...db.applications].filter(a=>statuses.includes(a.status)).reverse();
-  const tb=document.getElementById(tbodyId);
-  const cols=showStatus?6:5;
-  tb.innerHTML=apps.length?apps.map(a=>appRow(a,showStatus)).join(''):`<tr><td colspan="${cols}"><div class="empty-state" style="padding:40px 0"><div class="empty-state-icon">◌</div><p>Nothing here yet</p></div></td></tr>`;
-}
+function renderAllApps(){let apps=[...db.applications].reverse();if(_filter)apps=apps.filter(a=>a.applicantName.toLowerCase().includes(_filter.toLowerCase()));if(_statusFilter)apps=apps.filter(a=>a.status===_statusFilter);const tb=document.getElementById('all-apps-tbody');tb.innerHTML=apps.length?apps.map(a=>appRow(a,true)).join(''):'<tr><td colspan="6"><div class="empty-state" style="padding:40px 0"><div class="empty-state-icon">◧</div><p>No applications found</p></div></td></tr>';}
+function filterApps(v){_filter=v;renderAllApps();}
+function filterStatus(v){_statusFilter=v;renderAllApps();}
+function renderFiltered(statuses,tbodyId,showStatus){const apps=[...db.applications].filter(a=>statuses.includes(a.status)).reverse();const tb=document.getElementById(tbodyId);const cols=showStatus?6:5;tb.innerHTML=apps.length?apps.map(a=>appRow(a,showStatus)).join(''):`<tr><td colspan="${cols}"><div class="empty-state" style="padding:40px 0"><div class="empty-state-icon">◌</div><p>Nothing here yet</p></div></td></tr>`;}
 
-/* ════════════════════════════════════════
-   VIEW MODAL
-════════════════════════════════════════ */
+/* ══ VIEW/EDIT MODALS ══ */
 function openViewModal(id){
-  const a=db.applications.find(x=>x.id===id);
-  if(!a) return;
-  document.getElementById('modal-view-body').innerHTML=`
-    <div class="detail-grid">
-      <div><div class="detail-key">Applicant</div><div class="detail-val">${esc(a.applicantName)}</div></div>
-      <div><div class="detail-key">Account</div><div class="detail-val mono">${esc(a.submittedBy||'—')}</div></div>
-      <div><div class="detail-key">Form</div><div class="detail-val">${esc(a.formTitle)}</div></div>
-      <div><div class="detail-key">ID</div><div class="detail-val mono">#${a.id}</div></div>
-      <div><div class="detail-key">Submitted</div><div class="detail-val mono">${a.date}</div></div>
-      <div><div class="detail-key">Status</div><div class="detail-val"><span class="badge badge-${a.status}">${a.status}</span></div></div>
-    </div>
-    <div class="divider"></div>
-    <div style="font-size:10px;font-weight:600;color:var(--text-2);margin-bottom:14px;font-family:var(--mono);letter-spacing:0.2em;">RESPONSES</div>
-    ${a.answers.map(q=>`<div class="answer-block"><div class="answer-question">${esc(q.question)}</div><div class="answer-text">${esc(q.answer)||'<span style="color:var(--text-3);font-style:italic;">No answer</span>'}</div></div>`).join('')}
-    ${a.adminNote?`<div class="divider"></div><div class="detail-key">Admin Note</div><div class="answer-text">${esc(a.adminNote)}</div>`:''}
-  `;
-  document.getElementById('modal-view-footer').innerHTML=`
-    <button class="btn btn-ghost" onclick="closeModal('modal-view')">Close</button>
-    ${a.status!=='accepted'?`<button class="btn btn-success" onclick="setStatus(${id},'accepted')">✓ Accept</button>`:''}
-    ${a.status!=='rejected'?`<button class="btn btn-danger" onclick="setStatus(${id},'rejected')">✕ Reject</button>`:''}
-    ${a.status==='pending'?`<button class="btn btn-ghost" onclick="setStatus(${id},'review')">Mark In Review</button>`:''}
-  `;
+  const a=db.applications.find(x=>x.id===id);if(!a)return;
+  document.getElementById('modal-view-body').innerHTML=`<div class="detail-grid"><div><div class="detail-key">Applicant</div><div class="detail-val">${esc(a.applicantName)}</div></div><div><div class="detail-key">Account</div><div class="detail-val mono">${esc(a.submittedBy||'—')}</div></div><div><div class="detail-key">Form</div><div class="detail-val">${esc(a.formTitle)}</div></div><div><div class="detail-key">ID</div><div class="detail-val mono">#${a.id}</div></div><div><div class="detail-key">Submitted</div><div class="detail-val mono">${a.date}</div></div><div><div class="detail-key">Status</div><div class="detail-val"><span class="badge badge-${a.status}">${a.status}</span></div></div></div><div class="divider"></div><div style="font-size:10px;font-weight:600;color:var(--text-2);margin-bottom:14px;font-family:var(--mono);letter-spacing:0.2em;">RESPONSES</div>${a.answers.map(q=>`<div class="answer-block"><div class="answer-question">${esc(q.question)}</div><div class="answer-text">${esc(q.answer)||'<span style="color:var(--text-3);font-style:italic;">No answer</span>'}</div></div>`).join('')}${a.adminNote?`<div class="divider"></div><div class="detail-key">Admin Note</div><div class="answer-text">${esc(a.adminNote)}</div>`:''}`;
+  document.getElementById('modal-view-footer').innerHTML=`<button class="btn btn-ghost" onclick="closeModal('modal-view')">Close</button>${a.status!=='accepted'?`<button class="btn btn-success" onclick="setStatus(${id},'accepted')">✓ Accept</button>`:''} ${a.status!=='rejected'?`<button class="btn btn-danger" onclick="setStatus(${id},'rejected')">✕ Reject</button>`:''} ${a.status==='pending'?`<button class="btn btn-ghost" onclick="setStatus(${id},'review')">Mark In Review</button>`:''}`;
   openModal('modal-view');
 }
-
-/* ════════════════════════════════════════
-   EDIT MODAL
-════════════════════════════════════════ */
 let editingId=null;
 function openEditModal(id){
-  editingId=id;
-  const a=db.applications.find(x=>x.id===id);
-  if(!a) return;
-  document.getElementById('modal-edit-body').innerHTML=`
-    <div class="form-group"><label class="form-label">Applicant Name</label><input class="form-input" id="edit-name" value="${esc(a.applicantName)}" /></div>
-    <div class="form-group"><label class="form-label">Status</label>
-      <select class="form-select" id="edit-status">
-        ${['pending','review','accepted','rejected'].map(s=>`<option value="${s}" ${a.status===s?'selected':''}>${s.charAt(0).toUpperCase()+s.slice(1)}</option>`).join('')}
-      </select></div>
-    <div class="form-group"><label class="form-label">Admin Note (visible to applicant)</label><textarea class="form-textarea" id="edit-note" placeholder="Leave a message for the applicant…">${esc(a.adminNote||'')}</textarea></div>
-    ${a.answers.map((q,i)=>`<div class="form-group"><label class="form-label">${esc(q.question)}</label><textarea class="form-textarea" id="edit-ans-${i}" style="min-height:70px;">${esc(q.answer)}</textarea></div>`).join('')}
-  `;
+  editingId=id;const a=db.applications.find(x=>x.id===id);if(!a)return;
+  document.getElementById('modal-edit-body').innerHTML=`<div class="form-group"><label class="form-label">Applicant Name</label><input class="form-input" id="edit-name" value="${esc(a.applicantName)}"></div><div class="form-group"><label class="form-label">Status</label><select class="form-select" id="edit-status">${['pending','review','accepted','rejected'].map(s=>`<option value="${s}" ${a.status===s?'selected':''}>${s.charAt(0).toUpperCase()+s.slice(1)}</option>`).join('')}</select></div><div class="form-group"><label class="form-label">Admin Note (visible to applicant)</label><textarea class="form-textarea" id="edit-note" placeholder="Leave a message…">${esc(a.adminNote||'')}</textarea></div>${a.answers.map((q,i)=>`<div class="form-group"><label class="form-label">${esc(q.question)}</label><textarea class="form-textarea" id="edit-ans-${i}" style="min-height:70px;">${esc(q.answer)}</textarea></div>`).join('')}`;
   openModal('modal-edit');
 }
-
 async function saveEditApp(){
-  const a=db.applications.find(x=>x.id===editingId);
-  if(!a) return;
+  const a=db.applications.find(x=>x.id===editingId);if(!a)return;
   const oldStatus=a.status;
   a.applicantName=document.getElementById('edit-name').value.trim()||a.applicantName;
   a.status=document.getElementById('edit-status').value;
   a.adminNote=document.getElementById('edit-note').value.trim();
   a.answers.forEach((q,i)=>{const el=document.getElementById('edit-ans-'+i);if(el)q.answer=el.value.trim();});
-  if(oldStatus!==a.status) logActivity(`Application #${a.id} status: ${oldStatus} → ${a.status}`, a.status==='accepted'?'green':a.status==='rejected'?'red':'yellow');
-  showLoading(true); await saveDB(); showLoading(false);
-  closeModal('modal-edit'); refreshAll();
+  if(oldStatus!==a.status)logActivity(`Application #${a.id} status: ${oldStatus} → ${a.status}`,a.status==='accepted'?'green':a.status==='rejected'?'red':'yellow');
+  showLoading(true);await saveDB();showLoading(false);closeModal('modal-edit');refreshAll();
 }
-
-/* ════════════════════════════════════════
-   STATUS
-════════════════════════════════════════ */
 async function setStatus(id,status){
-  const a=db.applications.find(x=>x.id===id);
-  if(!a) return;
-  logActivity(`Application #${id} (${a.applicantName}) → ${status}`, status==='accepted'?'green':status==='rejected'?'red':'yellow');
-  a.status=status;
-  showLoading(true); await saveDB(); showLoading(false);
-  closeModal('modal-view'); refreshAll();
+  const a=db.applications.find(x=>x.id===id);if(!a)return;
+  logActivity(`Application #${id} (${a.applicantName}) → ${status}`,status==='accepted'?'green':status==='rejected'?'red':'yellow');
+  a.status=status;showLoading(true);await saveDB();showLoading(false);closeModal('modal-view');refreshAll();
 }
 
-/* ════════════════════════════════════════
-   DELETE
-════════════════════════════════════════ */
-function confirmDelete(id, type='app'){
+/* ══ DELETE ══ */
+function confirmDelete(id,type='app',extra=''){
+  document.getElementById('modal-confirm-body').innerHTML=`<p style="color:var(--text-2);font-size:13px;">${type==='app'?'Delete this application?':type==='user'?`Delete account <b>${extra||id}</b>?`:'Are you sure?'} This cannot be undone.</p>`;
   document.getElementById('confirm-delete-btn').onclick=async()=>{
-    if(type==='app'){
-      db.applications=db.applications.filter(a=>a.id!==id);
-      logActivity(`Application #${id} deleted`,'red');
-    } else if(type==='user'){
-      db.users=db.users.filter(u=>u.username!==id);
-      logActivity(`User "${id}" deleted`,'red');
-    }
-    showLoading(true); await saveDB(); showLoading(false);
-    closeModal('modal-confirm'); refreshAll();
-    refreshPage(document.querySelector('.page-section.active').id.replace('page-',''));
+    if(type==='app'){db.applications=db.applications.filter(a=>a.id!==id);logActivity(`Application #${id} deleted`,'red');}
+    else if(type==='user'){db.users=db.users.filter(u=>u.username!==id);logActivity(`User "${id}" deleted`,'red');}
+    showLoading(true);await saveDB();showLoading(false);closeModal('modal-confirm');refreshAll();
+    refreshPage(document.querySelector('.page-section.active')?.id.replace('page-',''));
   };
   openModal('modal-confirm');
 }
 
-/* ════════════════════════════════════════
-   USERS
-════════════════════════════════════════ */
+/* ══ USERS ══ */
 function renderUsers(){
   const tb=document.getElementById('users-tbody');
   const users=db.users.filter(u=>u.username!=='1877');
-  if(!users.length){ tb.innerHTML='<tr><td colspan="5"><div class="empty-state" style="padding:40px 0"><div class="empty-state-icon">◎</div><p>No user accounts yet</p></div></td></tr>'; return; }
+  if(!users.length){tb.innerHTML='<tr><td colspan="6"><div class="empty-state" style="padding:40px 0"><div class="empty-state-icon">◎</div><p>No user accounts yet</p></div></td></tr>';return;}
   tb.innerHTML=users.map(u=>{
     const cnt=db.applications.filter(a=>a.submittedBy===u.username).length;
+    const statusBadge=u.status==='closed'?`<span class="badge badge-closed">Closed</span>`:`<span class="badge badge-accepted">Active</span>`;
     return`<tr>
       <td style="font-weight:500;">${esc(u.username)}</td>
       <td><span class="badge ${u.role==='admin'?'badge-review':'badge-pending'}">${u.role}</span></td>
+      <td>${statusBadge}</td>
       <td class="mono text-muted" style="font-size:11px;">${u.created}</td>
       <td class="mono">${cnt}</td>
-      <td><button class="btn btn-danger btn-sm" onclick="confirmDelete('${esc(u.username)}','user')">Delete</button></td>
+      <td><div style="display:flex;gap:6px;flex-wrap:wrap;">
+        <button class="btn btn-ghost btn-sm" onclick="openEditUserModal('${esc(u.username)}')">Edit</button>
+        ${u.status==='closed'
+          ?`<button class="btn btn-success btn-sm" onclick="reopenAccount('${esc(u.username)}')">Reopen</button>`
+          :`<button class="btn btn-warning btn-sm" onclick="openCloseAccountModal('${esc(u.username)}')">Close</button>`}
+        <button class="btn btn-danger btn-sm" onclick="confirmDelete('${esc(u.username)}','user','${esc(u.username)}')">Delete</button>
+      </div></td>
     </tr>`;
   }).join('');
 }
 
+/* Create user modal */
+let _editingUser=null;
 function openCreateUserModal(){
+  _editingUser=null;
+  document.getElementById('cu-modal-title').textContent='Create User Account';
   document.getElementById('cu-user').value='';
   document.getElementById('cu-pass').value='';
+  document.getElementById('cu-role').value='user';
   document.getElementById('cu-error').textContent='';
+  document.getElementById('cu-submit-btn').textContent='Create Account';
+  document.getElementById('cu-user').disabled=false;
   openModal('modal-create-user');
 }
-
-async function adminCreateUser(){
+function openEditUserModal(username){
+  const u=db.users.find(x=>x.username===username);if(!u)return;
+  _editingUser=username;
+  document.getElementById('cu-modal-title').textContent='Edit Account: '+username;
+  document.getElementById('cu-user').value=u.username;
+  document.getElementById('cu-pass').value=u.password;
+  document.getElementById('cu-role').value=u.role;
+  document.getElementById('cu-error').textContent='';
+  document.getElementById('cu-submit-btn').textContent='Save Changes';
+  document.getElementById('cu-user').disabled=false;
+  openModal('modal-create-user');
+}
+async function submitUserModal(){
   const u=document.getElementById('cu-user').value.trim();
   const p=document.getElementById('cu-pass').value.trim();
-  if(!u||!p){ document.getElementById('cu-error').textContent='Both fields required.'; return; }
-  if(db.users.find(x=>x.username.toLowerCase()===u.toLowerCase())){ document.getElementById('cu-error').textContent='Username already exists.'; return; }
-  db.users.push({ username:u, password:p, role:'user', created:nowStr() });
-  logActivity(`Admin created account: ${u}`, 'green');
-  showLoading(true); await saveDB(); showLoading(false);
-  closeModal('modal-create-user'); renderUsers(); updateBadges();
+  const role=document.getElementById('cu-role').value;
+  if(!u||!p){document.getElementById('cu-error').textContent='Both fields required.';return;}
+  if(_editingUser){
+    // Edit existing
+    const user=db.users.find(x=>x.username===_editingUser);
+    if(!user)return;
+    // Check username conflict (allow same username)
+    if(u!==_editingUser&&db.users.find(x=>x.username.toLowerCase()===u.toLowerCase())){document.getElementById('cu-error').textContent='Username already exists.';return;}
+    user.username=u;user.password=p;user.role=role;
+    logActivity(`Admin edited account: ${_editingUser}→${u}`,'yellow');
+    // Update session if editing current user
+    if(currentUser&&currentUser.username===_editingUser){
+      currentUser.username=u;currentUser.role=role;
+      localStorage.setItem('nx_session',JSON.stringify(currentUser));
+    }
+  } else {
+    if(db.users.find(x=>x.username.toLowerCase()===u.toLowerCase())){document.getElementById('cu-error').textContent='Username already exists.';return;}
+    db.users.push({username:u,password:p,role,status:'active',created:nowStr()});
+    logActivity(`Admin created account: ${u} (${role})`,'green');
+  }
+  showLoading(true);await saveDB();showLoading(false);
+  closeModal('modal-create-user');renderUsers();updateBadges();
 }
 
-/* ════════════════════════════════════════
-   FORMS
-════════════════════════════════════════ */
+/* Close / Reopen account */
+let _closingUser=null;
+function openCloseAccountModal(username){
+  _closingUser=username;
+  document.getElementById('close-reason').value='';
+  openModal('modal-close-account');
+}
+async function submitCloseAccount(){
+  const reason=document.getElementById('close-reason').value.trim();
+  if(!reason){alert('Please provide a reason.');return;}
+  const u=db.users.find(x=>x.username===_closingUser);
+  if(!u)return;
+  u.status='closed';u.closeReason=reason;
+  logActivity(`Account closed: ${_closingUser} — "${reason}"`,'red');
+  showLoading(true);await saveDB();showLoading(false);
+  closeModal('modal-close-account');renderUsers();
+}
+async function reopenAccount(username){
+  const u=db.users.find(x=>x.username===username);if(!u)return;
+  u.status='active';delete u.closeReason;
+  logActivity(`Account reopened: ${username}`,'green');
+  showLoading(true);await saveDB();showLoading(false);renderUsers();
+}
+
+/* ══ FORMS ══ */
 function renderForms(){
-  const el=document.getElementById('forms-grid');
-  const empty=document.getElementById('forms-empty');
+  const el=document.getElementById('forms-grid');const empty=document.getElementById('forms-empty');
   if(!db.forms.length){el.innerHTML='';empty.style.display='block';return;}
   empty.style.display='none';
-  el.innerHTML=db.forms.map(f=>{
-    const cnt=db.applications.filter(a=>a.formId===f.id).length;
-    return`<div class="card" style="margin-bottom:16px;">
-      <div class="card-header">
-        <div><div class="card-title">${esc(f.title)}</div><div class="text-muted" style="margin-top:4px;">${esc(f.category)} · ${f.questions.length} questions · ${cnt} submissions</div></div>
-        <div style="display:flex;gap:8px;">
-          <button class="btn btn-ghost btn-sm" onclick="getFormLink(${f.id})">🔗 Link</button>
-          <button class="btn btn-ghost btn-sm" onclick="openPublicForm(${f.id})">Preview</button>
-          <button class="btn btn-danger btn-sm" onclick="deleteForm(${f.id})">Delete</button>
-        </div>
-      </div>
-      <div style="font-size:13px;color:var(--text-2);line-height:1.6;">${esc((f.description||'').substring(0,160))}${(f.description||'').length>160?'…':''}</div>
-    </div>`;
-  }).join('');
+  el.innerHTML=db.forms.map(f=>{const cnt=db.applications.filter(a=>a.formId===f.id).length;return`<div class="card" style="margin-bottom:16px;"><div class="card-header"><div><div class="card-title">${esc(f.title)}</div><div class="text-muted" style="margin-top:4px;">${esc(f.category)} · ${f.questions.length} questions · ${cnt} submissions</div></div><div style="display:flex;gap:8px;"><button class="btn btn-ghost btn-sm" onclick="getFormLink(${f.id})">🔗 Link</button><button class="btn btn-ghost btn-sm" onclick="openPublicForm(${f.id})">Preview</button><button class="btn btn-danger btn-sm" onclick="deleteForm(${f.id})">Delete</button></div></div><div style="font-size:13px;color:var(--text-2);line-height:1.6;">${esc((f.description||'').substring(0,160))}${(f.description||'').length>160?'…':''}</div></div>`;}).join('');
 }
-
-async function deleteForm(id){
-  if(!confirm('Delete this form? Submissions will be kept.')) return;
-  db.forms=db.forms.filter(f=>f.id!==id);
-  logActivity(`Form deleted`,'red');
-  showLoading(true); await saveDB(); showLoading(false);
-  renderForms();
-}
-
-/* ════════════════════════════════════════
-   CREATE FORM
-════════════════════════════════════════ */
+async function deleteForm(id){if(!confirm('Delete this form?'))return;db.forms=db.forms.filter(f=>f.id!==id);logActivity('Form deleted','red');showLoading(true);await saveDB();showLoading(false);renderForms();}
 let questions=[],questionCount=0;
-
-function initCreateForm(){
-  questions=[];questionCount=0;
-  ['cf-title','cf-category','cf-desc'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('questions-list').innerHTML='';
-  addQuestion('What is your in-game name / username?','text');
-  addQuestion('How old are you?','text');
-  addQuestion('Tell us about yourself and your experience.','textarea');
-  addQuestion('Why do you want to join?','textarea');
-  addQuestion('How many hours per week can you commit?','text');
-}
-
-function addQuestion(label='',type='text'){
-  questionCount++;
-  const id=questionCount;
-  questions.push({id,label,type});
-  const el=document.createElement('div');
-  el.className='form-builder-field';
-  el.id='qfield-'+id;
-  el.innerHTML=`
-    <div style="color:var(--text-3);font-size:18px;padding-top:20px;cursor:grab;">⠿</div>
-    <div class="fb-field-body">
-      <div class="form-row" style="margin-bottom:0;">
-        <div><label class="form-label" style="font-size:9px;">Question Label</label><input class="form-input" style="font-size:12px;" value="${esc(label)}" placeholder="Enter question…" oninput="updateQ(${id},'label',this.value)" /></div>
-        <div><label class="form-label" style="font-size:9px;">Field Type</label>
-          <select class="form-select" style="font-size:12px;" onchange="updateQ(${id},'type',this.value)">
-            <option value="text" ${type==='text'?'selected':''}>Short Text</option>
-            <option value="textarea" ${type==='textarea'?'selected':''}>Long Text</option>
-            <option value="number" ${type==='number'?'selected':''}>Number</option>
-          </select></div>
-      </div>
-    </div>
-    <button class="btn btn-danger btn-sm" onclick="removeQ(${id})" style="margin-top:20px;">✕</button>
-  `;
-  document.getElementById('questions-list').appendChild(el);
-}
-
+function initCreateForm(){questions=[];questionCount=0;['cf-title','cf-category','cf-desc'].forEach(id=>document.getElementById(id).value='');document.getElementById('questions-list').innerHTML='';addQuestion('What is your in-game name / username?','text');addQuestion('How old are you?','text');addQuestion('Tell us about yourself and your experience.','textarea');addQuestion('Why do you want to join?','textarea');addQuestion('How many hours per week can you commit?','text');}
+function addQuestion(label='',type='text'){questionCount++;const id=questionCount;questions.push({id,label,type});const el=document.createElement('div');el.className='form-builder-field';el.id='qfield-'+id;el.innerHTML=`<div style="color:var(--text-3);font-size:18px;padding-top:20px;cursor:grab;">⠿</div><div class="fb-field-body"><div class="form-row" style="margin-bottom:0;"><div><label class="form-label" style="font-size:9px;">Question Label</label><input class="form-input" style="font-size:12px;" value="${esc(label)}" placeholder="Enter question…" oninput="updateQ(${id},'label',this.value)"></div><div><label class="form-label" style="font-size:9px;">Field Type</label><select class="form-select" style="font-size:12px;" onchange="updateQ(${id},'type',this.value)"><option value="text" ${type==='text'?'selected':''}>Short Text</option><option value="textarea" ${type==='textarea'?'selected':''}>Long Text</option><option value="number" ${type==='number'?'selected':''}>Number</option></select></div></div></div><button class="btn btn-danger btn-sm" onclick="removeQ(${id})" style="margin-top:20px;">✕</button>`;document.getElementById('questions-list').appendChild(el);}
 function updateQ(id,key,val){const q=questions.find(x=>x.id===id);if(q)q[key]=val;}
 function removeQ(id){questions=questions.filter(q=>q.id!==id);document.getElementById('qfield-'+id)?.remove();}
+async function saveForm(){const title=document.getElementById('cf-title').value.trim();const category=document.getElementById('cf-category').value.trim();const desc=document.getElementById('cf-desc').value.trim();if(!title){alert('Please enter a form title.');return;}if(!questions.length){alert('Please add at least one question.');return;}const form={id:Date.now(),title,category,description:desc,questions:questions.map(q=>({label:q.label,type:q.type})),created:nowStr()};db.forms.push(form);logActivity(`New form: "${title}"`,'accent');showLoading(true);await saveDB();showLoading(false);navigate('forms',document.getElementById('nav-forms'));}
 
-async function saveForm(){
-  const title=document.getElementById('cf-title').value.trim();
-  const category=document.getElementById('cf-category').value.trim();
-  const desc=document.getElementById('cf-desc').value.trim();
-  if(!title){alert('Please enter a form title.');return;}
-  if(!questions.length){alert('Please add at least one question.');return;}
-  const form={id:Date.now(),title,category,description:desc,questions:questions.map(q=>({label:q.label,type:q.type})),created:nowStr()};
-  db.forms.push(form);
-  logActivity(`New form created: "${title}"`,'accent');
-  showLoading(true); await saveDB(); showLoading(false);
-  navigate('forms',document.getElementById('nav-forms'));
-}
+/* ══ FORM LINK ══ */
+function getFormLink(id){document.getElementById('link-input').value=`${location.origin}${location.pathname}?form=${id}`;document.getElementById('copy-confirm').textContent='';openModal('modal-link');}
+function copyLink(){navigator.clipboard.writeText(document.getElementById('link-input').value).then(()=>{document.getElementById('copy-confirm').textContent='✓ Link copied to clipboard';});}
 
-/* ════════════════════════════════════════
-   FORM LINK
-════════════════════════════════════════ */
-function getFormLink(id){
-  document.getElementById('link-input').value=`${location.origin}${location.pathname}?form=${id}`;
-  document.getElementById('copy-confirm').textContent='';
-  openModal('modal-link');
-}
-function copyLink(){
-  navigator.clipboard.writeText(document.getElementById('link-input').value).then(()=>{
-    document.getElementById('copy-confirm').textContent='✓ Link copied to clipboard';
-  });
-}
-
-/* ════════════════════════════════════════
-   PUBLIC FORM
-════════════════════════════════════════ */
+/* ══ PUBLIC FORM ══ */
 let pubFormId=null;
-
 function openPublicForm(id){
-  const form=db.forms.find(f=>f.id===id);
-  if(!form) return;
+  const form=db.forms.find(f=>f.id===id);if(!form)return;
   pubFormId=id;
   document.getElementById('pub-badge').textContent=form.category||'NOW ACCEPTING APPLICATIONS';
   document.getElementById('pub-title').textContent=form.title;
   document.getElementById('pub-desc').textContent=form.description||'';
-  document.getElementById('pub-fields').innerHTML=`
-    <div class="pub-form-group">
-      <label class="pub-form-label">Full Name / Username <span class="req">*</span></label>
-      <input class="pub-form-input" id="pub-name" required placeholder="Your name or username" />
-    </div>
-    ${form.questions.map((q,i)=>`
-      <div class="pub-form-group">
-        <label class="pub-form-label">${esc(q.label)} <span class="req">*</span></label>
-        ${q.type==='textarea'
-          ?`<textarea class="pub-form-textarea" id="pubq-${i}" required placeholder="Your answer…"></textarea>`
-          :`<input class="pub-form-input" type="${q.type}" id="pubq-${i}" required placeholder="Your answer…" />`}
-      </div>`).join('')}
-  `;
+  document.getElementById('pub-fields').innerHTML=`<div class="pub-form-group"><label class="pub-form-label">Full Name / Username <span class="req">*</span></label><input class="pub-form-input" id="pub-name" required placeholder="Your name or username"></div>${form.questions.map((q,i)=>`<div class="pub-form-group"><label class="pub-form-label">${esc(q.label)} <span class="req">*</span></label>${q.type==='textarea'?`<textarea class="pub-form-textarea" id="pubq-${i}" required placeholder="Your answer…"></textarea>`:`<input class="pub-form-input" type="${q.type}" id="pubq-${i}" required placeholder="Your answer…">`}</div>`).join('')}`;
   document.getElementById('pub-success').style.display='none';
   document.getElementById('pub-form-area').style.display='block';
   document.getElementById('public-app-page').classList.add('open');
 }
-
-function closePubForm(){
-  document.getElementById('public-app-page').classList.remove('open');
-}
-
+function closePubForm(){document.getElementById('public-app-page').classList.remove('open');}
 async function submitApplication(){
-  const form=db.forms.find(f=>f.id===pubFormId);
-  if(!form) return;
+  const form=db.forms.find(f=>f.id===pubFormId);if(!form)return;
   const name=document.getElementById('pub-name').value.trim();
   if(!name){alert('Please enter your name.');return;}
   const answers=form.questions.map((q,i)=>({question:q.label,answer:document.getElementById('pubq-'+i)?.value?.trim()||''}));
-  const missingRequired=answers.some(a=>!a.answer);
-  if(missingRequired){alert('Please answer all questions.');return;}
-  const app={
-    id:db.applications.length+1,
-    formId:form.id,
-    formTitle:form.title,
-    applicantName:name,
-    submittedBy:currentUser?currentUser.username:'anonymous',
-    answers,
-    status:'pending',
-    adminNote:'',
-    date:nowStr()
-  };
+  if(answers.some(a=>!a.answer)){alert('Please answer all questions.');return;}
+  const app={id:db.applications.length+1,formId:form.id,formTitle:form.title,applicantName:name,submittedBy:currentUser?currentUser.username:'anonymous',answers,status:'pending',adminNote:'',date:nowStr()};
   db.applications.push(app);
   logActivity(`New application from "${name}" for "${form.title}"`,'green');
-  showLoading(true); await saveDB(); showLoading(false);
+  showLoading(true);await saveDB();showLoading(false);
   document.getElementById('pub-form-area').style.display='none';
   document.getElementById('pub-success').style.display='block';
   updateBadges();
 }
 
-/* ════════════════════════════════════════
-   ACTIVITY
-════════════════════════════════════════ */
-function logActivity(text,color='accent'){
-  if(!db.activity) db.activity=[];
-  db.activity.unshift({text,color,time:nowStr()});
-  if(db.activity.length>200) db.activity.pop();
+/* ══ TICKETS ══ */
+const CAT_LABELS={general:'General',ban:'Ban Appeal',account:'Account',bug:'Bug Report',other:'Other'};
+let _ticketFilter='';
+function filterTickets(cat,el){
+  _ticketFilter=cat;
+  document.querySelectorAll('.cat-filter').forEach(b=>b.classList.remove('active'));
+  if(el)el.classList.add('active');
+  renderAdminTickets();
 }
-
-function renderActivity(){
-  const el=document.getElementById('activity-log');
-  if(!db.activity||!db.activity.length){el.innerHTML='<div class="empty-state"><div class="empty-state-icon">◈</div><h3>No activity yet</h3><p>Actions will appear here.</p></div>';return;}
-  el.innerHTML=db.activity.map(a=>`
-    <div class="activity-item">
-      <div class="activity-dot ${a.color==='green'?'green':a.color==='red'?'red':a.color==='yellow'?'yellow':''}"></div>
-      <div><div class="activity-text">${esc(a.text)}</div><div class="activity-time">${a.time}</div></div>
+function renderAdminTickets(){
+  let tickets=[...(db.tickets||[])].reverse();
+  if(_ticketFilter)tickets=tickets.filter(t=>t.category===_ticketFilter);
+  const el=document.getElementById('admin-tickets-list');
+  if(!tickets.length){el.innerHTML='<div class="empty-state"><div class="empty-state-icon">💬</div><h3>No tickets</h3><p>No support tickets yet.</p></div>';return;}
+  el.innerHTML=tickets.map(t=>`
+    <div class="ticket-list-item ${t.messages&&t.messages.some(m=>m.from==='user'&&!m.readByAdmin)?'unread':''}" onclick="openAdminTicket('${t.id}')">
+      <span class="ticket-cat-badge ${t.category}">${CAT_LABELS[t.category]||t.category}</span>
+      <div class="ticket-info">
+        <div class="ticket-subject">${esc(t.subject)}</div>
+        <div class="ticket-meta">#${t.id} · ${t.date} · ${t.messages?t.messages.length:0} messages</div>
+      </div>
+      <span class="badge ${t.status==='open'?'badge-accepted':'badge-pending'}">${t.status}</span>
+      <div class="ticket-status-dot ${t.status}"></div>
     </div>`).join('');
 }
+let _openTicketId=null;
+function openAdminTicket(id){
+  const t=(db.tickets||[]).find(x=>x.id===id);if(!t)return;
+  _openTicketId=id;
+  // Mark admin-read
+  if(t.messages)t.messages.forEach(m=>{if(m.from==='user')m.readByAdmin=true;});
+  document.getElementById('admin-ticket-title').textContent=`Ticket #${t.id} — ${esc(t.subject)}`;
+  document.getElementById('admin-ticket-info').innerHTML=`<div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;"><span class="ticket-cat-badge ${t.category}">${CAT_LABELS[t.category]||t.category}</span><span class="text-muted mono">${t.date}</span><span class="badge ${t.status==='open'?'badge-accepted':'badge-pending'}">${t.status}</span><span class="text-muted" style="font-size:12px;">Note: Your identity is hidden. You appear as "Support Staff"</span></div>`;
+  document.getElementById('admin-ticket-close-btn').textContent=t.status==='open'?'Close Ticket':'Reopen Ticket';
+  renderChatMessages('admin-chat-messages',t.messages||[]);
+  document.getElementById('admin-chat-input').disabled=t.status==='closed';
+  openModal('modal-admin-ticket');
+}
+async function sendAdminMsg(){
+  const input=document.getElementById('admin-chat-input');
+  const text=input.value.trim();if(!text)return;
+  const t=(db.tickets||[]).find(x=>x.id===_openTicketId);if(!t)return;
+  if(!t.messages)t.messages=[];
+  t.messages.push({from:'admin',text,time:nowStr(),sender:'Support Staff'});
+  input.value='';
+  renderChatMessages('admin-chat-messages',t.messages);
+  showLoading(true);await saveDB();showLoading(false);
+}
+async function closeTicketAsAdmin(){
+  const t=(db.tickets||[]).find(x=>x.id===_openTicketId);if(!t)return;
+  t.status=t.status==='open'?'closed':'open';
+  document.getElementById('admin-ticket-close-btn').textContent=t.status==='open'?'Close Ticket':'Reopen Ticket';
+  document.getElementById('admin-chat-input').disabled=t.status==='closed';
+  logActivity(`Ticket #${t.id} ${t.status}`,'yellow');
+  showLoading(true);await saveDB();showLoading(false);updateBadges();renderAdminTickets();
+}
 
-/* ════════════════════════════════════════
-   MODALS
-════════════════════════════════════════ */
+/* User tickets */
+function renderUserTickets(){
+  const myTickets=(db.tickets||[]).filter(t=>t.username===currentUser.username).reverse();
+  const el=document.getElementById('user-tickets-list');
+  if(!myTickets.length){el.innerHTML='<div class="empty-state"><div class="empty-state-icon">💬</div><h3>No tickets yet</h3><p>Submit a ticket if you need help.</p></div>';return;}
+  el.innerHTML=myTickets.map(t=>`
+    <div class="ticket-list-item" onclick="openUserTicket('${t.id}')">
+      <span class="ticket-cat-badge ${t.category}">${CAT_LABELS[t.category]||t.category}</span>
+      <div class="ticket-info">
+        <div class="ticket-subject">${esc(t.subject)}</div>
+        <div class="ticket-meta">#${t.id} · ${t.date} · ${t.messages?t.messages.length:0} messages</div>
+      </div>
+      <span class="badge ${t.status==='open'?'badge-accepted':'badge-pending'}">${t.status}</span>
+    </div>`).join('');
+}
+function openNewTicketModal(){
+  document.getElementById('nt-category').value='general';
+  document.getElementById('nt-subject').value='';
+  document.getElementById('nt-message').value='';
+  openModal('modal-new-ticket');
+}
+async function submitNewTicket(){
+  const category=document.getElementById('nt-category').value;
+  const subject=document.getElementById('nt-subject').value.trim();
+  const message=document.getElementById('nt-message').value.trim();
+  if(!subject||!message){alert('Please fill in all fields.');return;}
+  if(!db.tickets)db.tickets=[];
+  const ticket={id:'T'+Date.now(),username:currentUser.username,category,subject,status:'open',date:nowStr(),messages:[{from:'user',text:message,time:nowStr(),sender:currentUser.username}]};
+  db.tickets.push(ticket);
+  logActivity(`New ticket from ${currentUser.username}: "${subject}"`,'accent');
+  showLoading(true);await saveDB();showLoading(false);
+  closeModal('modal-new-ticket');
+  renderUserTickets();updateBadges();
+}
+function openUserTicket(id){
+  const t=(db.tickets||[]).find(x=>x.id===id);if(!t)return;
+  _openTicketId=id;
+  document.getElementById('user-ticket-title').textContent=`Ticket #${t.id} — ${esc(t.subject)}`;
+  document.getElementById('user-ticket-info').innerHTML=`<div style="display:flex;gap:12px;align-items:center;"><span class="ticket-cat-badge ${t.category}">${CAT_LABELS[t.category]||t.category}</span><span class="text-muted mono">${t.date}</span><span class="badge ${t.status==='open'?'badge-accepted':'badge-pending'}">${t.status}</span></div>`;
+  renderChatMessages('user-chat-messages',t.messages||[],true);
+  document.getElementById('user-chat-input-row').style.display=t.status==='closed'?'none':'flex';
+  openModal('modal-user-ticket');
+}
+async function sendUserMsg(){
+  const input=document.getElementById('user-chat-input');
+  const text=input.value.trim();if(!text)return;
+  const t=(db.tickets||[]).find(x=>x.id===_openTicketId);if(!t||t.status==='closed')return;
+  if(!t.messages)t.messages=[];
+  t.messages.push({from:'user',text,time:nowStr(),sender:currentUser.username,readByAdmin:false});
+  input.value='';
+  renderChatMessages('user-chat-messages',t.messages,true);
+  showLoading(true);await saveDB();showLoading(false);updateBadges();
+}
+
+/* Render chat messages */
+function renderChatMessages(containerId,messages,isUserView=false){
+  const el=document.getElementById(containerId);
+  if(!messages.length){el.innerHTML='<div style="text-align:center;color:var(--text-3);font-size:13px;padding:20px;">No messages yet.</div>';return;}
+  el.innerHTML=messages.map(m=>{
+    const isOwn=isUserView?(m.from==='user'):(m.from==='admin');
+    // In user view: admin messages show as "Support Staff" (anonymous)
+    const senderLabel=isUserView?(m.from==='admin'?'Support Staff':m.sender):(m.from==='admin'?'Support Staff (You)':m.sender);
+    return`<div class="chat-msg ${isOwn?'user':'admin'}"><div class="chat-msg-meta">${esc(senderLabel)} · ${m.time}</div>${esc(m.text)}</div>`;
+  }).join('');
+  el.scrollTop=el.scrollHeight;
+}
+
+/* ══ ACTIVITY ══ */
+function logActivity(text,color='accent'){if(!db.activity)db.activity=[];db.activity.unshift({text,color,time:nowStr()});if(db.activity.length>200)db.activity.pop();}
+function renderActivity(){const el=document.getElementById('activity-log');if(!db.activity||!db.activity.length){el.innerHTML='<div class="empty-state"><div class="empty-state-icon">◈</div><h3>No activity yet</h3></div>';return;}el.innerHTML=db.activity.map(a=>`<div class="activity-item"><div class="activity-dot ${a.color==='green'?'green':a.color==='red'?'red':a.color==='yellow'?'yellow':''}"></div><div><div class="activity-text">${esc(a.text)}</div><div class="activity-time">${a.time}</div></div></div>`).join('');}
+
+/* ══ MODALS ══ */
 function openModal(id){document.getElementById(id).classList.add('open');}
 function closeModal(id){document.getElementById(id).classList.remove('open');}
-document.querySelectorAll('.modal-overlay').forEach(m=>{
-  m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');});
-});
+document.querySelectorAll('.modal-overlay').forEach(m=>{m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');});});
 
-/* ════════════════════════════════════════
-   UTILS
-════════════════════════════════════════ */
+/* ══ UTILS ══ */
 function esc(s){if(s==null)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function nowStr(){return new Date().toLocaleString('en-GB',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});}
 function showErr(msg){console.error(msg);}
 
-/* ════════════════════════════════════════
-   BOOT
-════════════════════════════════════════ */
+/* ══ BOOT ══ */
 (async function boot(){
-  // Hardcoded credentials (pre-configured)
-  const HARDCODED_KEY = '$2a$10$TO05PANXis1Ueo3ZNfC24OATctFcWl4fEFHc2.GYdvL2PN3sNbKEm';
-  const HARDCODED_ID  = '6a315432f5f4af5e29fb5a0b';
-  localStorage.setItem('nx_key', HARDCODED_KEY);
-  localStorage.setItem('nx_id',  HARDCODED_ID);
-  JSONBIN_KEY = HARDCODED_KEY;
-  JSONBIN_ID  = HARDCODED_ID;
-
+  const HARDCODED_KEY='$2a$10$TO05PANXis1Ueo3ZNfC24OATctFcWl4fEFHc2.GYdvL2PN3sNbKEm';
+  const HARDCODED_ID='6a315432f5f4af5e29fb5a0b';
+  localStorage.setItem('nx_key',HARDCODED_KEY);localStorage.setItem('nx_id',HARDCODED_ID);
+  JSONBIN_KEY=HARDCODED_KEY;JSONBIN_ID=HARDCODED_ID;
   const params=new URLSearchParams(location.search);
   const formParam=params.get('form');
-
   document.getElementById('setup-screen').style.display='none';
   await loadDB();
-
-  // Restore session from localStorage
-  const savedSession = localStorage.getItem('nx_session');
-  if(savedSession && !formParam){
+  const savedSession=localStorage.getItem('nx_session');
+  if(savedSession&&!formParam){
     try{
-      const sess = JSON.parse(savedSession);
-      // Verify the user still exists in DB
-      const stillExists = db.users.find(u=>u.username===sess.username && u.role===sess.role);
-      if(stillExists){
-        currentUser = { username: sess.username, role: sess.role };
-        if(sess.role==='admin') { launchAdmin(); return; }
-        else { launchApplicantPortal(); return; }
+      const sess=JSON.parse(savedSession);
+      const u=db.users.find(u=>u.username===sess.username&&u.role===sess.role);
+      if(u){
+        if(u.status==='closed'){showClosedScreen(u.closeReason||'No reason provided.');return;}
+        currentUser={username:u.username,role:u.role};
+        if(u.role==='admin'){launchAdmin();return;}
+        else{launchApplicantPortal();return;}
       }
-    } catch(e){ localStorage.removeItem('nx_session'); }
+    }catch(e){localStorage.removeItem('nx_session');}
   }
-
-  if(formParam){
-    // Direct form link — show auth first, then form after login
-    showAuth();
-    // After login, open form
-    window._pendingForm = parseInt(formParam);
-    return;
-  }
-
+  if(formParam){showAuth();window._pendingForm=parseInt(formParam);return;}
   showAuth();
-
-  // Override doLogin to handle pending form
-
 })();
 </script>
-</body>
-</html>
+</body></html>
