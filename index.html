@@ -2,7 +2,6 @@
 <html lang="en"><head>
 <meta charset="UTF-8">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 2 L28 7 L28 16 C28 22 22 27 16 30 C10 27 4 22 4 16 L4 7 Z' fill='%233B6EFF'/%3E%3Cpath d='M16 6 L24 10 L24 16 C24 20 20 24 16 26 C12 24 8 20 8 16 L8 10 Z' fill='%230D1220'/%3E%3Cpath d='M13 15 L15 17 L19 12' stroke='%233B6EFF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 2 L28 7 L28 16 C28 22 22 27 16 30 C10 27 4 22 4 16 L4 7 Z' fill='%233B6EFF'/%3E%3Cpath d='M16 6 L24 10 L24 16 C24 20 20 24 16 26 C12 24 8 20 8 16 L8 10 Z' fill='%230D1220'/%3E%3Cpath d='M13 15 L15 17 L19 12' stroke='%233B6EFF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NEXUS PORTAL</title>
 <style>
@@ -266,6 +265,13 @@ tr:last-child td{border-bottom:none;}
 .cl-title{font-size:15px;font-weight:700;color:var(--text-1);margin-bottom:6px;}
 .cl-body{font-size:13px;color:var(--text-2);line-height:1.7;white-space:pre-wrap;}
 .cl-meta{font-family:var(--mono);font-size:10px;color:var(--text-3);margin-top:10px;letter-spacing:0.1em;}
+/* ══ STAR RATING ══ */
+.star-rating{display:flex;gap:8px;justify-content:center;margin:16px 0;}
+.star-rating .star{font-size:32px;cursor:pointer;color:var(--text-3);transition:color 0.15s,transform 0.15s;}
+.star-rating .star:hover,.star-rating .star.active{color:var(--yellow);transform:scale(1.2);}
+.transcript-item{background:var(--bg-deep);border:1px solid var(--border-dim);border-radius:10px;padding:16px 20px;margin-bottom:10px;cursor:pointer;transition:border-color 0.2s;}
+.transcript-item:hover{border-color:var(--border);background:var(--bg-hover);}
+.transcript-stars{color:var(--yellow);font-size:14px;margin-top:4px;}
 /* ══ MISC ══ */
 .empty-state{text-align:center;padding:60px 20px;color:var(--text-2);}
 .empty-state-icon{font-size:40px;margin-bottom:16px;opacity:0.5;}
@@ -376,6 +382,7 @@ tr:last-child td{border-bottom:none;}
       <div class="nav-item" id="nav-activity" onclick="navigate('activity',this)"><span class="nav-icon">◈</span>Activity Log</div>
       <div class="nav-item" id="nav-maintenance" onclick="navigate('maintenance',this)"><span class="nav-icon">⚙</span>Maintenance</div>
       <div class="nav-item" id="nav-changelog" onclick="navigate('changelog',this)"><span class="nav-icon">📢</span>Changelog</div>
+      <div class="nav-item" id="nav-transcripts" onclick="navigate('transcripts',this)"><span class="nav-icon">📋</span>Transcripts<span class="nav-badge" id="badge-transcripts">0</span></div>
     </div>
     <div class="content">
 
@@ -539,6 +546,12 @@ tr:last-child td{border-bottom:none;}
           </div>
         </div>
         <div id="cl-admin-list"></div>
+      </div>
+
+      <!-- TRANSCRIPTS (OWNER ONLY) -->
+      <div class="page-section fade-in" id="page-transcripts">
+        <div class="page-header"><div class="page-header-eyebrow">Support</div><h1>Transcripts</h1><p>Closed ticket transcripts with user ratings.</p></div>
+        <div id="transcripts-list"></div>
       </div>
 
       <!-- ACTIVITY -->
@@ -821,6 +834,37 @@ tr:last-child td{border-bottom:none;}
   </div>
 </div>
 
+<!-- Rating Modal (User) -->
+<div class="modal-overlay" id="modal-rating">
+  <div class="modal" style="width:440px;">
+    <div class="modal-header"><div class="modal-title">Rate Your Experience</div></div>
+    <div class="modal-body" style="text-align:center;">
+      <p style="font-size:13px;color:var(--text-2);margin-bottom:8px;">How would you rate your support experience?</p>
+      <div class="star-rating" id="star-rating-row">
+        <span class="star" onclick="setRating(1)" data-val="1">★</span>
+        <span class="star" onclick="setRating(2)" data-val="2">★</span>
+        <span class="star" onclick="setRating(3)" data-val="3">★</span>
+        <span class="star" onclick="setRating(4)" data-val="4">★</span>
+        <span class="star" onclick="setRating(5)" data-val="5">★</span>
+      </div>
+      <div style="font-family:var(--mono);font-size:12px;color:var(--text-3);min-height:20px;" id="rating-label"></div>
+    </div>
+    <div class="modal-footer" style="justify-content:center;">
+      <button class="btn btn-ghost" onclick="submitRating(0)">Skip</button>
+      <button class="btn btn-primary" onclick="submitRating(_selectedRating)">Submit Rating</button>
+    </div>
+  </div>
+</div>
+
+<!-- Transcript View Modal (Owner) -->
+<div class="modal-overlay" id="modal-transcript">
+  <div class="modal" style="width:680px;">
+    <div class="modal-header"><div class="modal-title" id="transcript-modal-title">Transcript</div><button class="modal-close" onclick="closeModal('modal-transcript')">✕</button></div>
+    <div class="modal-body" id="transcript-modal-body"></div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('modal-transcript')">Close</button></div>
+  </div>
+</div>
+
 <div id="loading-overlay" style="position:fixed;inset:0;background:rgba(7,11,20,0.85);z-index:99999;display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px;">
   <div style="font-family:var(--mono);font-size:12px;color:var(--accent);letter-spacing:0.3em;">SYNCING DATABASE…</div>
   <div style="width:200px;"><div class="loading-bar"><div class="loading-bar-fill"></div></div></div>
@@ -851,6 +895,7 @@ async function loadDB(){
     if(!db.assignedForms)db.assignedForms=[];
     if(!db.maintenance)db.maintenance={};
     if(!db.changelog)db.changelog=[];
+    if(!db.transcripts)db.transcripts=[];
     const owner1877=db.users.find(u=>u.username==='1877');
     if(!owner1877){
       db.users.unshift({username:'1877',password:'1877',role:'owner',status:'active',created:nowStr()});
@@ -991,7 +1036,7 @@ function openClosedTicket(){
 function applyRoleRestrictions(){
   const owner=isOwner();
   // Items only owner can see
-  const ownerOnly=['nav-create-form','nav-activity','nav-maintenance','nav-changelog'];
+  const ownerOnly=['nav-create-form','nav-activity','nav-maintenance','nav-changelog','nav-transcripts'];
   ownerOnly.forEach(id=>{
     const el=document.getElementById(id);
     if(el)el.style.display=owner?'':'none';
@@ -1063,8 +1108,9 @@ function refreshPage(page){
   if(page==='activity')renderActivity();
   if(page==='maintenance')renderMaintenancePage();
   if(page==='changelog'){renderChangelogAdmin();}
+  if(page==='transcripts')renderTranscripts();
 }
-async function refreshAll(){showLoading(true);await loadDB();showLoading(false);updateBadges();renderDashboard();}
+async function refreshAll(){showLoading(true);await loadDB();showLoading(false);updateBadges();renderDashboard();updateTranscriptBadge();}
 
 /* ══ DASHBOARD ══ */
 function renderDashboard(){
@@ -1535,11 +1581,22 @@ async function sendAdminMsg(){
 }
 async function closeTicketAsAdmin(){
   const t=(db.tickets||[]).find(x=>x.id===_openTicketId);if(!t)return;
-  t.status=t.status==='open'?'closed':'open';
+  const wasOpen=t.status==='open';
+  t.status=wasOpen?'closed':'open';
   document.getElementById('admin-ticket-close-btn').textContent=t.status==='open'?'Close Ticket':'Reopen Ticket';
   document.getElementById('admin-chat-input').disabled=t.status==='closed';
-  logActivity(`Ticket #${t.id} ${t.status}`,'yellow');
-  showLoading(true);await saveDB();showLoading(false);updateBadges();renderAdminTickets();
+  // Save transcript when closing
+  if(wasOpen){
+    if(!db.transcripts)db.transcripts=[];
+    db.transcripts.unshift({
+      ticketId:t.id,subject:t.subject,category:t.category,
+      username:t.username,date:t.date,closedAt:nowStr(),
+      messages:t.messages||[],rating:null
+    });
+    t.awaitingRating=true;
+  }
+  logActivity('Ticket #'+t.id+' '+(wasOpen?'closed':'reopened'),'yellow');
+  showLoading(true);await saveDB();showLoading(false);updateBadges();renderAdminTickets();updateTranscriptBadge();
 }
 
 /* User tickets */
@@ -1579,8 +1636,17 @@ async function submitNewTicket(){
 function openUserTicket(id){
   const t=(db.tickets||[]).find(x=>x.id===id);if(!t)return;
   _openTicketId=id;
-  document.getElementById('user-ticket-title').textContent=`Ticket #${t.id} — ${esc(t.subject)}`;
-  document.getElementById('user-ticket-info').innerHTML=`<div style="display:flex;gap:12px;align-items:center;"><span class="ticket-cat-badge ${t.category}">${CAT_LABELS[t.category]||t.category}</span><span class="text-muted mono">${t.date}</span><span class="badge ${t.status==='open'?'badge-accepted':'badge-pending'}">${t.status}</span></div>`;
+  // Show rating prompt if ticket just closed and awaiting rating
+  if(t.status==='closed'&&t.awaitingRating){
+    _ratingTicketId=id;
+    _selectedRating=0;
+    document.querySelectorAll('.star').forEach(s=>s.classList.remove('active'));
+    document.getElementById('rating-label').textContent='';
+    openModal('modal-rating');
+    return;
+  }
+  document.getElementById('user-ticket-title').textContent='Ticket #'+t.id+' — '+esc(t.subject);
+  document.getElementById('user-ticket-info').innerHTML='<div style="display:flex;gap:12px;align-items:center;"><span class="ticket-cat-badge '+t.category+'">'+CAT_LABELS[t.category]+'</span><span class="text-muted mono">'+t.date+'</span><span class="badge '+(t.status==='open'?'badge-accepted':'badge-pending')+'">'+t.status+'</span></div>';
   renderChatMessages('user-chat-messages',t.messages||[],true);
   document.getElementById('user-chat-input-row').style.display=t.status==='closed'?'none':'flex';
   openModal('modal-user-ticket');
@@ -1721,6 +1787,73 @@ async function deleteChangelog(index){
   db.changelog.splice(index,1);
   showLoading(true);await saveDB();showLoading(false);
   renderChangelogAdmin();
+}
+
+/* ══ RATING + TRANSCRIPTS ══ */
+let _selectedRating=0,_ratingTicketId=null;
+const RATING_LABELS=['','Poor','Below Average','Average','Good','Excellent'];
+function setRating(val){
+  _selectedRating=val;
+  document.querySelectorAll('.star').forEach(s=>{
+    s.classList.toggle('active',parseInt(s.dataset.val)<=val);
+  });
+  document.getElementById('rating-label').textContent=RATING_LABELS[val]||'';
+}
+async function submitRating(rating){
+  if(_ratingTicketId){
+    const t=(db.tickets||[]).find(x=>x.id===_ratingTicketId);
+    if(t){t.awaitingRating=false;t.rating=rating||null;}
+    // Update transcript rating too
+    const tr=(db.transcripts||[]).find(x=>x.ticketId===_ratingTicketId);
+    if(tr)tr.rating=rating||null;
+    showLoading(true);await saveDB();showLoading(false);
+  }
+  closeModal('modal-rating');
+  _ratingTicketId=null;_selectedRating=0;
+  renderUserTickets();
+  updateTranscriptBadge();
+}
+function updateTranscriptBadge(){
+  const el=document.getElementById('badge-transcripts');
+  if(el)el.textContent=(db.transcripts||[]).length;
+}
+function renderTranscripts(){
+  updateTranscriptBadge();
+  const el=document.getElementById('transcripts-list');
+  if(!el)return;
+  const transcripts=(db.transcripts||[]);
+  if(!transcripts.length){el.innerHTML='<div class="empty-state"><div class="empty-state-icon">📋</div><h3>No transcripts yet</h3><p>Closed ticket transcripts will appear here.</p></div>';return;}
+  el.innerHTML=transcripts.map((tr,i)=>`
+    <div class="transcript-item" onclick="openTranscript(${i})">
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+        <span class="ticket-cat-badge ${tr.category}">${CAT_LABELS[tr.category]||tr.category}</span>
+        <span style="font-size:13px;font-weight:600;color:var(--text-1);">${esc(tr.subject)}</span>
+        <span class="text-muted mono">#${tr.ticketId}</span>
+        <span class="text-muted" style="margin-left:auto;">${tr.closedAt}</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:16px;margin-top:8px;">
+        <span style="font-size:12px;color:var(--text-2);">User: <b>${esc(tr.username)}</b></span>
+        <span style="font-size:12px;color:var(--text-2);">${tr.messages?tr.messages.length:0} messages</span>
+        <div class="transcript-stars">${tr.rating?'★'.repeat(tr.rating)+'<span style="color:var(--text-3);">★'.repeat(5-tr.rating)+'</span>':'<span style="color:var(--text-3);">Not rated</span>'}</div>
+      </div>
+    </div>`).join('');
+}
+function openTranscript(index){
+  const tr=(db.transcripts||[])[index];if(!tr)return;
+  document.getElementById('transcript-modal-title').textContent='Transcript — '+esc(tr.subject);
+  const starsHtml=tr.rating?'★'.repeat(tr.rating)+'☆'.repeat(5-tr.rating)+' ('+tr.rating+'/5)':'Not rated';
+  document.getElementById('transcript-modal-body').innerHTML=`
+    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px;">
+      <span class="ticket-cat-badge ${tr.category}">${CAT_LABELS[tr.category]||tr.category}</span>
+      <span class="text-muted mono">#${tr.ticketId}</span>
+      <span class="text-muted mono">${tr.date}</span>
+      <span style="margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--yellow);">${starsHtml}</span>
+    </div>
+    <div style="font-family:var(--mono);font-size:11px;color:var(--text-3);margin-bottom:12px;">User: ${esc(tr.username)} · Closed: ${tr.closedAt}</div>
+    <div style="background:var(--bg-deep);border:1px solid var(--border-dim);border-radius:10px;padding:16px;max-height:400px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;">
+      ${(tr.messages||[]).map(m=>`<div class="chat-msg ${m.from==='user'?'user':'admin'}" style="max-width:80%;"><div class="chat-msg-meta">${esc(m.from==='admin'?'Support Staff':m.sender)} · ${m.time}</div>${esc(m.text)}</div>`).join('')}
+    </div>`;
+  openModal('modal-transcript');
 }
 
 /* ══ ACTIVITY ══ */
