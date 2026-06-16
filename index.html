@@ -250,7 +250,6 @@ tr:last-child td{border-bottom:none;}
 .template-icon{font-size:24px;flex-shrink:0;}
 .template-name{font-size:13px;font-weight:600;color:var(--text-1);margin-bottom:2px;}
 .template-desc{font-size:11px;color:var(--text-3);}
-.ai-gen-area{background:var(--bg-deep);border:1px solid var(--border-dim);border-radius:10px;padding:16px;}
 /* ══ MISC ══ */
 .empty-state{text-align:center;padding:60px 20px;color:var(--text-2);}
 .empty-state-icon{font-size:40px;margin-bottom:16px;opacity:0.5;}
@@ -417,7 +416,7 @@ tr:last-child td{border-bottom:none;}
 
       <!-- CREATE FORM -->
       <div class="page-section fade-in" id="page-create-form">
-        <div class="page-header"><div class="page-header-eyebrow">Management</div><h1>Create Application Form</h1><p>Build a new form from scratch, a template, or with AI.</p></div>
+        <div class="page-header"><div class="page-header-eyebrow">Management</div><h1>Create Application Form</h1><p>Build a new form from scratch or start from a template.</p></div>
 
         <!-- QUICK START -->
         <div class="card" id="cf-quickstart-card">
@@ -428,15 +427,7 @@ tr:last-child td{border-bottom:none;}
             <div class="template-card" onclick="loadTemplate('admin')"><div class="template-icon">👑</div><div><div class="template-name">Admin Application</div><div class="template-desc">Senior admin position</div></div></div>
             <div class="template-card" onclick="loadTemplate('event')"><div class="template-icon">🎯</div><div><div class="template-name">Event Team</div><div class="template-desc">Event organiser role</div></div></div>
           </div>
-          <div class="divider"></div>
-          <div style="font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.2em;color:var(--text-2);text-transform:uppercase;margin-bottom:10px;">✨ AI Generate</div>
-          <div class="ai-gen-area">
-            <div style="display:flex;gap:10px;">
-              <input class="form-input" id="ai-prompt" placeholder="e.g. DayZ staff application for a PvP survival server…" style="margin-bottom:0;">
-              <button class="btn btn-primary" onclick="aiGenerateForm()" id="ai-gen-btn" style="white-space:nowrap;">Generate ✨</button>
-            </div>
-            <div style="font-family:var(--mono);font-size:11px;color:var(--text-3);margin-top:8px;" id="ai-gen-status"></div>
-          </div>
+
         </div>
 
         <!-- FORM BUILDER -->
@@ -1369,44 +1360,6 @@ function loadTemplate(key){
   setTimeout(()=>document.getElementById('cf-title').scrollIntoView({behavior:'smooth'}),400);
 }
 
-async function aiGenerateForm(){
-  const prompt=document.getElementById('ai-prompt').value.trim();
-  if(!prompt){alert('Please describe the form you want to generate.');return;}
-  const btn=document.getElementById('ai-gen-btn');
-  const status=document.getElementById('ai-gen-status');
-  btn.disabled=true;btn.textContent='Generating…';
-  status.textContent='⏳ AI is building your form…';
-  try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        model:'claude-sonnet-4-6',
-        max_tokens:1000,
-        messages:[{role:'user',content:`Create a staff/application form for: "${prompt}". Respond ONLY with a JSON object in this exact format, no markdown, no extra text:
-{"title":"...", "category":"...", "description":"...", "questions":[{"label":"...","type":"text|textarea|number"},...]}`}]
-      })
-    });
-    const data=await res.json();
-    let text=data.content.map(c=>c.text||'').join('');
-    text=text.replace(/\`\`\`json|\`\`\`/g,'').trim();
-    const form=JSON.parse(text);
-    document.getElementById('cf-title').value=form.title||'';
-    document.getElementById('cf-category').value=form.category||'';
-    document.getElementById('cf-desc').value=form.description||'';
-    questions=[];questionCount=0;
-    document.getElementById('questions-list').innerHTML='';
-    (form.questions||[]).forEach(q=>addQuestion(q.label,q.type||'text'));
-    status.textContent='✓ Form generated! Review and publish below.';
-    status.style.color='var(--green)';
-    setTimeout(()=>document.getElementById('cf-title').scrollIntoView({behavior:'smooth'}),300);
-  }catch(e){
-    status.textContent='✗ Generation failed. Try again or build manually.';
-    status.style.color='var(--red)';
-    console.error(e);
-  }
-  btn.disabled=false;btn.textContent='Generate ✨';
-}
 
 async function duplicateForm(id){
   const f=db.forms.find(x=>x.id===id);if(!f)return;
