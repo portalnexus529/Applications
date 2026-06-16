@@ -352,6 +352,7 @@ tr:last-child td{border-bottom:none;}
       <div class="sidebar-divider"></div>
       <div class="nav-section-label">System</div>
       <div class="nav-item" id="nav-activity" onclick="navigate('activity',this)"><span class="nav-icon">◈</span>Activity Log</div>
+      <div class="nav-item" id="nav-maintenance" onclick="navigate('maintenance',this)"><span class="nav-icon">⚙</span>Maintenance</div>
     </div>
     <div class="content">
 
@@ -455,6 +456,28 @@ tr:last-child td{border-bottom:none;}
           <button class="cat-filter" onclick="filterTickets('other',this)">Other</button>
         </div>
         <div id="admin-tickets-list"></div>
+      </div>
+
+      <!-- MAINTENANCE -->
+      <div class="page-section fade-in" id="page-maintenance">
+        <div class="page-header"><div class="page-header-eyebrow">System</div><h1>Maintenance Mode</h1><p>Take the portal offline for non-admins while you perform maintenance.</p></div>
+        <div class="card" id="maintenance-card">
+          <div class="card-header">
+            <div class="card-title" id="maint-status-title">🟢 Portal is Online</div>
+            <button class="btn btn-danger btn-sm" id="maint-toggle-btn" onclick="toggleMaintenance()">Enable Maintenance</button>
+          </div>
+          <div id="maint-active-notice" style="display:none;" class="notice" style="margin-bottom:20px;">
+            <div class="notice-icon">⚠️</div>
+            <span>Maintenance mode is <b>active</b>. All non-admin users see the maintenance screen.</span>
+          </div>
+          <div class="divider"></div>
+          <div class="form-group"><label class="form-label">Reason for Maintenance</label><textarea class="form-textarea" id="maint-reason" placeholder="e.g. We are performing scheduled server upgrades and improvements." style="min-height:90px;"></textarea></div>
+          <div class="form-group"><label class="form-label">Estimated Duration</label><input class="form-input" id="maint-duration" placeholder="e.g. Approximately 30 minutes · Back by 22:00 GMT"></div>
+          <div style="display:flex;gap:10px;justify-content:flex-end;">
+            <button class="btn btn-primary" onclick="saveMaintenance()">Save Settings</button>
+          </div>
+          <div style="font-family:var(--mono);font-size:11px;color:var(--green);margin-top:10px;min-height:16px;" id="maint-saved"></div>
+        </div>
       </div>
 
       <!-- ACTIVITY -->
@@ -713,6 +736,18 @@ tr:last-child td{border-bottom:none;}
   </div>
 </div>
 
+<!-- MAINTENANCE SCREEN -->
+<div id="maintenance-screen" style="display:none;position:fixed;inset:0;z-index:9997;background:var(--bg-deep);align-items:center;justify-content:center;flex-direction:column;">
+  <div style="background:var(--bg-panel);border:1px solid rgba(245,158,11,0.3);border-radius:16px;padding:52px 48px;width:560px;text-align:center;position:relative;max-width:95vw;">
+    <div style="position:absolute;top:0;left:50%;transform:translateX(-50%);width:60%;height:1px;background:linear-gradient(90deg,transparent,var(--yellow),transparent);"></div>
+    <div style="font-size:52px;margin-bottom:20px;">⚙️</div>
+    <div style="font-family:var(--mono);font-size:20px;font-weight:700;color:var(--yellow);margin-bottom:10px;letter-spacing:0.05em;">UNDER MAINTENANCE</div>
+    <div style="font-family:var(--mono);font-size:11px;color:var(--text-3);letter-spacing:0.2em;margin-bottom:24px;">NEXUS PORTAL</div>
+    <div id="maint-screen-reason" style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:10px;padding:16px 20px;font-size:13px;color:var(--text-2);line-height:1.7;margin-bottom:16px;text-align:left;">We are currently performing maintenance. Please check back shortly.</div>
+    <div id="maint-screen-duration" style="font-family:var(--mono);font-size:12px;color:var(--text-3);letter-spacing:0.1em;"></div>
+  </div>
+</div>
+
 <div id="loading-overlay" style="position:fixed;inset:0;background:rgba(7,11,20,0.85);z-index:99999;display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px;">
   <div style="font-family:var(--mono);font-size:12px;color:var(--accent);letter-spacing:0.3em;">SYNCING DATABASE…</div>
   <div style="width:200px;"><div class="loading-bar"><div class="loading-bar-fill"></div></div></div>
@@ -739,6 +774,7 @@ async function loadDB(){
     if(!db.activity)db.activity=[];
     if(!db.tickets)db.tickets=[];
     if(!db.assignedForms)db.assignedForms=[];
+    if(!db.maintenance)db.maintenance={};
     if(!db.users.find(u=>u.username==='1877')){
       db.users.unshift({username:'1877',password:'1877',role:'admin',status:'active',created:nowStr()});
       await saveDB();
@@ -878,6 +914,7 @@ function launchAdmin(){
   startClock();refreshAll();
 }
 function launchApplicantPortal(){
+  if(checkMaintenance())return;
   document.getElementById('ap-username').textContent='⬡ '+currentUser.username.toUpperCase();
   document.getElementById('ap-welcome').textContent='Welcome, '+currentUser.username;
   document.getElementById('applicant-portal').classList.add('active');
@@ -932,6 +969,7 @@ function refreshPage(page){
   if(page==='users')renderUsers();
   if(page==='tickets')renderAdminTickets();
   if(page==='activity')renderActivity();
+  if(page==='maintenance')renderMaintenancePage();
 }
 async function refreshAll(){showLoading(true);await loadDB();showLoading(false);updateBadges();renderDashboard();}
 
@@ -1385,6 +1423,50 @@ function renderChatMessages(containerId,messages,isUserView=false){
   el.scrollTop=el.scrollHeight;
 }
 
+/* ══ MAINTENANCE ══ */
+function renderMaintenancePage(){
+  const m=db.maintenance||{};
+  const active=!!m.active;
+  document.getElementById('maint-status-title').textContent=active?'🔴 Maintenance Mode ACTIVE':'🟢 Portal is Online';
+  document.getElementById('maint-toggle-btn').textContent=active?'Disable Maintenance':'Enable Maintenance';
+  document.getElementById('maint-toggle-btn').className=active?'btn btn-success btn-sm':'btn btn-danger btn-sm';
+  document.getElementById('maint-active-notice').style.display=active?'flex':'none';
+  document.getElementById('maint-reason').value=m.reason||'';
+  document.getElementById('maint-duration').value=m.duration||'';
+  document.getElementById('maint-card').style.borderColor=active?'rgba(245,158,11,0.4)':'';
+}
+async function saveMaintenance(){
+  if(!db.maintenance)db.maintenance={};
+  db.maintenance.reason=document.getElementById('maint-reason').value.trim();
+  db.maintenance.duration=document.getElementById('maint-duration').value.trim();
+  showLoading(true);await saveDB();showLoading(false);
+  document.getElementById('maint-saved').textContent='✓ Settings saved';
+  setTimeout(()=>{document.getElementById('maint-saved').textContent='';},2000);
+}
+async function toggleMaintenance(){
+  if(!db.maintenance)db.maintenance={};
+  db.maintenance.active=!db.maintenance.active;
+  db.maintenance.reason=document.getElementById('maint-reason').value.trim()||db.maintenance.reason||'';
+  db.maintenance.duration=document.getElementById('maint-duration').value.trim()||db.maintenance.duration||'';
+  logActivity('Maintenance mode '+(db.maintenance.active?'ENABLED':'DISABLED'),db.maintenance.active?'yellow':'green');
+  showLoading(true);await saveDB();showLoading(false);
+  renderMaintenancePage();
+}
+function checkMaintenance(){
+  const m=db.maintenance||{};
+  if(m.active&&currentUser&&currentUser.role!=='admin'){
+    // Show maintenance screen for non-admins
+    document.getElementById('app').classList.remove('active');
+    document.getElementById('applicant-portal').classList.remove('active');
+    document.getElementById('maintenance-screen').style.display='flex';
+    document.getElementById('maint-screen-reason').textContent=m.reason||'We are currently performing maintenance. Please check back shortly.';
+    document.getElementById('maint-screen-duration').textContent=m.duration?'⏱ '+m.duration:'';
+    return true;
+  }
+  document.getElementById('maintenance-screen').style.display='none';
+  return false;
+}
+
 /* ══ ACTIVITY ══ */
 function logActivity(text,color='accent'){if(!db.activity)db.activity=[];db.activity.unshift({text,color,time:nowStr()});if(db.activity.length>200)db.activity.pop();}
 function renderActivity(){const el=document.getElementById('activity-log');if(!db.activity||!db.activity.length){el.innerHTML='<div class="empty-state"><div class="empty-state-icon">◈</div><h3>No activity yet</h3></div>';return;}el.innerHTML=db.activity.map(a=>`<div class="activity-item"><div class="activity-dot ${a.color==='green'?'green':a.color==='red'?'red':a.color==='yellow'?'yellow':''}"></div><div><div class="activity-text">${esc(a.text)}</div><div class="activity-time">${a.time}</div></div></div>`).join('');}
@@ -1418,7 +1500,7 @@ function showErr(msg){console.error(msg);}
         if(u.status==='closed'){showClosedScreen(u.closeReason||'No reason provided.');return;}
         currentUser={username:u.username,role:u.role};
         if(u.role==='admin'){launchAdmin();return;}
-        else{launchApplicantPortal();return;}
+        else{if(!checkMaintenance())launchApplicantPortal();return;}
       }
     }catch(e){localStorage.removeItem('nx_session');}
   }
