@@ -818,6 +818,10 @@ function logout(){
   document.getElementById('applicant-portal').classList.remove('active');
   document.getElementById('public-app-page').classList.remove('open');
   document.getElementById('closed-screen').classList.remove('visible');
+  // Reset any locked nav tabs from suspended session
+  document.querySelectorAll('.ap-nav-item').forEach(n=>{
+    n.style.opacity='';n.style.pointerEvents='';n.style.cursor='';
+  });
   switchAuthTab('login');
   document.getElementById('li-user').value='';document.getElementById('li-pass').value='';
   document.getElementById('auth-screen').classList.add('visible');
@@ -830,15 +834,34 @@ function showClosedScreen(reason){
   document.getElementById('closed-screen').classList.add('visible');
 }
 function openClosedTicket(){
-  // Let them log in as "suspended" to submit a ticket
+  // Suspended users can only access Support tab — no full portal access
   const u=document.getElementById('li-user').value.trim();
   const user=db.users.find(x=>x.username===u);
-  if(user){
-    currentUser={username:user.username,role:'user'};
-    document.getElementById('closed-screen').classList.remove('visible');
-    launchApplicantPortal();
-    setTimeout(()=>{apNavigate('support',document.querySelectorAll('.ap-nav-item')[1]);openNewTicketModal();},300);
-  }
+  if(!user)return;
+  // Set a suspended session flag — NOT a real login
+  currentUser={username:user.username,role:'user',suspended:true};
+  document.getElementById('closed-screen').classList.remove('visible');
+  // Show applicant portal but lock to support tab only
+  document.getElementById('ap-username').textContent='⬡ '+user.username.toUpperCase();
+  document.getElementById('ap-welcome').textContent='Account Suspended';
+  document.getElementById('applicant-portal').classList.add('active');
+  // Hide My Applications and My Forms tabs for suspended users
+  const navItems=document.querySelectorAll('.ap-nav-item');
+  navItems.forEach(n=>{
+    if(n.textContent.trim()!=='Support'){
+      n.style.opacity='0.3';
+      n.style.pointerEvents='none';
+      n.style.cursor='not-allowed';
+    }
+  });
+  // Go straight to support tab
+  document.querySelectorAll('.ap-page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.ap-nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('ap-page-support').classList.add('active');
+  navItems.forEach(n=>{if(n.textContent.trim()==='Support')n.classList.add('active');});
+  renderUserTickets();
+  // Open new ticket modal immediately
+  setTimeout(()=>openNewTicketModal(),300);
 }
 
 /* ══ LAUNCH ══ */
