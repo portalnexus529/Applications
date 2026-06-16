@@ -234,6 +234,23 @@ tr:last-child td{border-bottom:none;}
 .assign-form-meta{font-family:var(--mono);font-size:11px;color:var(--text-3);}
 .assign-form-badge{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;padding:3px 10px;border-radius:4px;background:var(--accent-dim);color:var(--accent);flex-shrink:0;}
 .assign-form-badge.completed{background:rgba(34,197,94,0.12);color:var(--green);}
+/* ══ ADMIN ASSIGNED REVIEW ══ */
+.aaf-row{display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--border-dim);flex-wrap:wrap;}
+.aaf-row:last-child{border-bottom:none;}
+.aaf-check{width:20px;height:20px;accent-color:var(--accent);cursor:pointer;flex-shrink:0;}
+.aaf-info{flex:1;min-width:0;}
+.aaf-name{font-size:13px;font-weight:600;color:var(--text-1);}
+.aaf-meta{font-family:var(--mono);font-size:10px;color:var(--text-3);margin-top:2px;}
+.aaf-status-select{background:var(--bg-deep);border:1px solid var(--border-dim);border-radius:6px;padding:5px 10px;font-family:var(--mono);font-size:11px;color:var(--text-1);outline:none;cursor:pointer;}
+.aaf-save{background:var(--accent);color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:600;cursor:pointer;font-family:var(--mono);}
+.aaf-save:hover{background:#2A5CE8;}
+/* Status on user My Forms */
+.af-status{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:8px;font-family:var(--mono);font-weight:700;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;margin-top:8px;}
+.af-status.pending{background:rgba(245,158,11,0.1);color:var(--yellow);border:1px solid rgba(245,158,11,0.25);}
+.af-status.review{background:rgba(59,110,255,0.1);color:var(--accent);border:1px solid rgba(59,110,255,0.25);}
+.af-status.accepted{background:rgba(34,197,94,0.1);color:var(--green);border:1px solid rgba(34,197,94,0.25);}
+.af-status.rejected{background:rgba(239,68,68,0.1);color:var(--red);border:1px solid rgba(239,68,68,0.25);}
+.af-status.marked{background:rgba(34,197,94,0.1);color:var(--green);border:1px solid rgba(34,197,94,0.25);}
 /* ══ MISC ══ */
 .empty-state{text-align:center;padding:60px 20px;color:var(--text-2);}
 .empty-state-icon{font-size:40px;margin-bottom:16px;opacity:0.5;}
@@ -394,6 +411,15 @@ tr:last-child td{border-bottom:none;}
         <div class="page-header"><div class="page-header-eyebrow">Management</div><h1>Application Forms</h1><p>Manage your public-facing application forms.</p></div>
         <div id="forms-grid"></div>
         <div class="empty-state" id="forms-empty" style="display:none"><div class="empty-state-icon">▣</div><h3>No forms yet</h3><p>Create your first application form.</p><button class="btn btn-primary" style="margin-top:16px;" onclick="navigate('create-form',document.getElementById('nav-create-form'))">Create Form</button></div>
+
+      <!-- Assigned Forms Panel -->
+      <div class="card" id="assigned-forms-panel" style="margin-top:8px;">
+        <div class="card-header">
+          <div class="card-title">📋 Assigned Forms — Review Status</div>
+          <button class="btn btn-ghost btn-sm" onclick="renderAssignedFormsAdmin()">↻ Refresh</button>
+        </div>
+        <div id="admin-assigned-list"></div>
+      </div>
       </div>
 
       <!-- CREATE FORM -->
@@ -871,7 +897,7 @@ function refreshPage(page){
   if(page==='all-apps')renderAllApps();
   if(page==='pending')renderFiltered(['pending','review'],'pending-tbody',true);
   if(page==='accepted')renderFiltered(['accepted'],'accepted-tbody',false);
-  if(page==='forms')renderForms();
+  if(page==='forms'){renderForms();renderAssignedFormsAdmin();}
   if(page==='create-form')initCreateForm();
   if(page==='users')renderUsers();
   if(page==='tickets')renderAdminTickets();
@@ -1064,6 +1090,49 @@ function renderForms(){
   empty.style.display='none';
   el.innerHTML=db.forms.map(f=>{const cnt=db.applications.filter(a=>a.formId===f.id).length;return`<div class="card" style="margin-bottom:16px;"><div class="card-header"><div><div class="card-title">${esc(f.title)}</div><div class="text-muted" style="margin-top:4px;">${esc(f.category)} · ${f.questions.length} questions · ${cnt} submissions</div></div><div style="display:flex;gap:8px;"><button class="btn btn-ghost btn-sm" onclick="getFormLink(${f.id})">🔗 Link</button><button class="btn btn-success btn-sm" onclick="openSendFormModal(${f.id})">📤 Send</button><button class="btn btn-ghost btn-sm" onclick="openPublicForm(${f.id})">Preview</button><button class="btn btn-danger btn-sm" onclick="deleteForm(${f.id})">Delete</button></div></div><div style="font-size:13px;color:var(--text-2);line-height:1.6;">${esc((f.description||'').substring(0,160))}${(f.description||'').length>160?'…':''}</div></div>`;}).join('');
 }
+/* ══ ADMIN ASSIGNED FORMS REVIEW ══ */
+function renderAssignedFormsAdmin(){
+  const el=document.getElementById('admin-assigned-list');
+  if(!el)return;
+  const assigned=db.assignedForms||[];
+  if(!assigned.length){
+    el.innerHTML='<div style="text-align:center;padding:30px;color:var(--text-3);font-size:13px;">No forms have been assigned to users yet.</div>';
+    return;
+  }
+  el.innerHTML=assigned.map((a,idx)=>{
+    const form=db.forms.find(f=>f.id===a.formId);
+    const sub=db.applications.find(ap=>ap.formId===a.formId&&ap.submittedBy===a.username);
+    const st=a.adminStatus||'pending';
+    const marked=a.marked?'checked':'';
+    return '<div class="aaf-row">'
+      +'<input type="checkbox" class="aaf-check" '+marked+' onchange="toggleMarkForm('+idx+',this.checked)" title="Mark as reviewed">'
+      +'<div class="aaf-info">'
+        +'<div class="aaf-name">'+esc(a.username)+' — '+esc(a.formTitle)+'</div>'
+        +'<div class="aaf-meta">Assigned '+a.assignedAt+(sub?' · ✓ Submitted':'· ⏳ Not submitted yet')+'</div>'
+      +'</div>'
+      +'<select class="aaf-status-select" id="aaf-status-'+idx+'">'
+        +['pending','review','accepted','rejected'].map(s=>'<option value="'+s+'"'+(st===s?' selected':'')+'>'+s.charAt(0).toUpperCase()+s.slice(1)+'</option>').join('')
+      +'</select>'
+      +'<button class="aaf-save" onclick="saveAssignedFormStatus('+idx+')">Save</button>'
+    +'</div>';
+  }).join('');
+}
+
+async function toggleMarkForm(idx,checked){
+  if(!db.assignedForms[idx])return;
+  db.assignedForms[idx].marked=checked;
+  showLoading(true);await saveDB();showLoading(false);
+}
+
+async function saveAssignedFormStatus(idx){
+  if(!db.assignedForms[idx])return;
+  const status=document.getElementById('aaf-status-'+idx).value;
+  db.assignedForms[idx].adminStatus=status;
+  logActivity('Form status updated for '+db.assignedForms[idx].username+': '+status,'yellow');
+  showLoading(true);await saveDB();showLoading(false);
+  renderAssignedFormsAdmin();
+}
+
 async function deleteForm(id){if(!confirm('Delete this form?'))return;db.forms=db.forms.filter(f=>f.id!==id);logActivity('Form deleted','red');showLoading(true);await saveDB();showLoading(false);renderForms();}
 
 /* SEND FORM TO USER */
@@ -1107,6 +1176,9 @@ function renderUserAssignedForms(){
       +'<div style="flex:1;">'
         +'<div class="assign-form-title">'+a.formTitle+'</div>'
         +'<div class="assign-form-meta">Assigned '+a.assignedAt+(form?' · '+form.questions.length+' questions':'')+'</div>'
+        +(a.adminStatus&&a.adminStatus!=='pending'?'<div class="af-status '+a.adminStatus+'">'
+          +{review:'🔍 Under Review',accepted:'✓ Accepted',rejected:'✕ Rejected'}[a.adminStatus]
+          +'</div>':'')
       +'</div>'
       +(submitted
         ?'<span class="assign-form-badge completed">✓ Submitted</span><button class="btn btn-ghost btn-sm" style="margin-left:8px;" disabled>Already Submitted</button>'
