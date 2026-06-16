@@ -1246,9 +1246,11 @@ function renderUserAssignedForms(){
       +'</div>'
       +(submitted
         ?'<span class="assign-form-badge completed">✓ Submitted</span><button class="btn btn-ghost btn-sm" style="margin-left:8px;" disabled>Already Submitted</button>'
-        :form
-          ?'<span class="assign-form-badge">'+(form.category||'Form')+'</span><button class="btn btn-primary btn-sm" style="margin-left:8px;" onclick="openPublicForm('+a.formId+')">Fill Out →</button>'
-          :'<span class="text-muted" style="font-size:12px;">Form removed</span>')
+        :(a.adminStatus&&a.adminStatus!=='pending')
+          ?''
+          :form
+            ?'<span class="assign-form-badge">'+(form.category||'Form')+'</span><button class="btn btn-primary btn-sm" style="margin-left:8px;" onclick="openPublicForm('+a.formId+')">Fill Out →</button>'
+            :'<span class="text-muted" style="font-size:12px;">Form removed</span>')
     +'</div>';
   }).join('');
 }
