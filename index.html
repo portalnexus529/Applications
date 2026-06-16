@@ -527,6 +527,11 @@ tr:last-child td{border-bottom:none;}
         <h2>Application Submitted</h2>
         <p>Thank you. Log in to track your application status.</p>
       </div>
+      <div id="pub-locked" style="display:none;text-align:center;padding:40px 0;">
+        <div style="font-size:52px;margin-bottom:20px;">🔒</div>
+        <h2 style="font-size:22px;font-weight:700;color:var(--red);margin-bottom:10px;">Applications Closed</h2>
+        <p style="font-size:14px;color:var(--text-2);">This form is not currently accepting applications. Please check back later.</p>
+      </div>
     </div>
   </div>
 </div>
@@ -1142,7 +1147,15 @@ function renderForms(){
   const el=document.getElementById('forms-grid');const empty=document.getElementById('forms-empty');
   if(!db.forms.length){el.innerHTML='';empty.style.display='block';return;}
   empty.style.display='none';
-  el.innerHTML=db.forms.map(f=>{const cnt=db.applications.filter(a=>a.formId===f.id).length;return`<div class="card" style="margin-bottom:16px;"><div class="card-header"><div><div class="card-title">${esc(f.title)}</div><div class="text-muted" style="margin-top:4px;">${esc(f.category)} · ${f.questions.length} questions · ${cnt} submissions</div></div><div style="display:flex;gap:8px;"><button class="btn btn-ghost btn-sm" onclick="getFormLink(${f.id})">🔗 Link</button><button class="btn btn-success btn-sm" onclick="openSendFormModal(${f.id})">📤 Send</button><button class="btn btn-ghost btn-sm" onclick="openPublicForm(${f.id})">Preview</button><button class="btn btn-danger btn-sm" onclick="deleteForm(${f.id})">Delete</button></div></div><div style="font-size:13px;color:var(--text-2);line-height:1.6;">${esc((f.description||'').substring(0,160))}${(f.description||'').length>160?'…':''}</div></div>`;}).join('');
+  el.innerHTML=db.forms.map(f=>{const cnt=db.applications.filter(a=>a.formId===f.id).length;const locked=f.locked;return`<div class="card" style="margin-bottom:16px;border-color:${locked?'rgba(239,68,68,0.3)':''}"><div class="card-header"><div><div class="card-title">${esc(f.title)}${locked?'<span style="font-size:11px;color:var(--red);font-family:var(--mono);margin-left:10px;font-weight:600;">🔒 LOCKED</span>':''}</div><div class="text-muted" style="margin-top:4px;">${esc(f.category)} · ${f.questions.length} questions · ${cnt} submissions</div></div><div style="display:flex;gap:8px;flex-wrap:wrap;"><button class="btn btn-ghost btn-sm" onclick="getFormLink(${f.id})">🔗 Link</button><button class="btn btn-success btn-sm" onclick="openSendFormModal(${f.id})">📤 Send</button><button class="btn btn-ghost btn-sm" onclick="openPublicForm(${f.id})">Preview</button><button class="${locked?'btn btn-success':'btn btn-warning'} btn-sm" onclick="toggleFormLock(${f.id})">${locked?'🔓 Unlock':'🔒 Lock'}</button><button class="btn btn-danger btn-sm" onclick="deleteForm(${f.id})">Delete</button></div></div><div style="font-size:13px;color:var(--text-2);line-height:1.6;">${esc((f.description||'').substring(0,160))}${(f.description||'').length>160?'…':''}</div></div>`;}).join('');
+}
+
+async function toggleFormLock(id){
+  const f=db.forms.find(x=>x.id===id);if(!f)return;
+  f.locked=!f.locked;
+  logActivity(`Form "${f.title}" ${f.locked?'locked':'unlocked'}`,f.locked?'red':'green');
+  showLoading(true);await saveDB();showLoading(false);
+  renderForms();
 }
 
 async function deleteForm(id){if(!confirm('Delete this form?'))return;db.forms=db.forms.filter(f=>f.id!==id);logActivity('Form deleted','red');showLoading(true);await saveDB();showLoading(false);renderForms();}
@@ -1219,8 +1232,16 @@ function openPublicForm(id){
   document.getElementById('pub-badge').textContent=form.category||'NOW ACCEPTING APPLICATIONS';
   document.getElementById('pub-title').textContent=form.title;
   document.getElementById('pub-desc').textContent=form.description||'';
-  document.getElementById('pub-fields').innerHTML=`<div class="pub-form-group"><label class="pub-form-label">Full Name / Username <span class="req">*</span></label><input class="pub-form-input" id="pub-name" required placeholder="Your name or username"></div>${form.questions.map((q,i)=>`<div class="pub-form-group"><label class="pub-form-label">${esc(q.label)} <span class="req">*</span></label>${q.type==='textarea'?`<textarea class="pub-form-textarea" id="pubq-${i}" required placeholder="Your answer…"></textarea>`:`<input class="pub-form-input" type="${q.type}" id="pubq-${i}" required placeholder="Your answer…">`}</div>`).join('')}`;
   document.getElementById('pub-success').style.display='none';
+  // If form is locked and user is not admin, show locked screen
+  if(form.locked&&(!currentUser||currentUser.role!=='admin')){
+    document.getElementById('pub-form-area').style.display='none';
+    document.getElementById('pub-locked').style.display='block';
+    document.getElementById('public-app-page').classList.add('open');
+    return;
+  }
+  document.getElementById('pub-locked').style.display='none';
+  document.getElementById('pub-fields').innerHTML=`<div class="pub-form-group"><label class="pub-form-label">Full Name / Username <span class="req">*</span></label><input class="pub-form-input" id="pub-name" required placeholder="Your name or username"></div>${form.questions.map((q,i)=>`<div class="pub-form-group"><label class="pub-form-label">${esc(q.label)} <span class="req">*</span></label>${q.type==='textarea'?`<textarea class="pub-form-textarea" id="pubq-${i}" required placeholder="Your answer…"></textarea>`:`<input class="pub-form-input" type="${q.type}" id="pubq-${i}" required placeholder="Your answer…">`}</div>`).join('')}`;
   document.getElementById('pub-form-area').style.display='block';
   document.getElementById('public-app-page').classList.add('open');
 }
