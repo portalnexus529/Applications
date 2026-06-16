@@ -615,6 +615,11 @@ async function loadDB(){
 
 async function saveDB(){
   try{
+    // Safety: never save if users is empty (prevents wiping all accounts)
+    if(!db.users || db.users.length === 0){
+      console.warn('saveDB blocked: empty users, refusing to overwrite.');
+      return;
+    }
     await fetch(BIN_URL(), {
       method:'PUT',
       headers: HEADERS(),
@@ -675,6 +680,7 @@ async function doLogin(){
   const user = db.users.find(x=>x.username===u && x.password===p);
   if(!user){ setAuthErr('li','Invalid username or password.'); return; }
   currentUser = { username: user.username, role: user.role };
+  localStorage.setItem('nx_session', JSON.stringify(currentUser));
   logActivity(`${user.username} logged in`, 'accent');
   await saveDB();
   document.getElementById('auth-screen').classList.remove('visible');
@@ -700,6 +706,7 @@ async function doRegister(){
   await saveDB();
   showLoading(false);
   currentUser = { username:u, role:'user' };
+  localStorage.setItem('nx_session', JSON.stringify(currentUser));
   document.getElementById('auth-screen').classList.remove('visible');
   launchApplicantPortal();
 }
@@ -708,6 +715,7 @@ function setAuthErr(prefix, msg){ document.getElementById(prefix+'-error').textC
 
 function logout(){
   currentUser=null;
+  localStorage.removeItem('nx_session');
   document.getElementById('app').classList.remove('active');
   document.getElementById('applicant-portal').classList.remove('active');
   document.getElementById('public-app-page').classList.remove('open');
@@ -1222,6 +1230,21 @@ function showErr(msg){console.error(msg);}
 
   document.getElementById('setup-screen').style.display='none';
   await loadDB();
+
+  // Restore session from localStorage
+  const savedSession = localStorage.getItem('nx_session');
+  if(savedSession && !formParam){
+    try{
+      const sess = JSON.parse(savedSession);
+      // Verify the user still exists in DB
+      const stillExists = db.users.find(u=>u.username===sess.username && u.role===sess.role);
+      if(stillExists){
+        currentUser = { username: sess.username, role: sess.role };
+        if(sess.role==='admin') { launchAdmin(); return; }
+        else { launchApplicantPortal(); return; }
+      }
+    } catch(e){ localStorage.removeItem('nx_session'); }
+  }
 
   if(formParam){
     // Direct form link — show auth first, then form after login
