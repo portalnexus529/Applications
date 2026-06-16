@@ -1592,7 +1592,8 @@ async function syncSheets(){
       username:u.username,role:u.role,status:u.status||'active',
       created:u.created||'',closeReason:u.closeReason||''
     }));
-    await fetch(SHEETS_URL,{method:'POST',body:JSON.stringify({users}),headers:{'Content-Type':'application/json'}});
+    const payload=encodeURIComponent(JSON.stringify({users}));
+    await fetch(SHEETS_URL+'?data='+payload,{method:'GET',mode:'no-cors'});
   }catch(e){console.warn('Sheets sync failed (non-critical):',e);}
 }
 
