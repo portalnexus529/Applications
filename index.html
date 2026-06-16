@@ -744,7 +744,8 @@ tr:last-child td{border-bottom:none;}
     <div style="font-family:var(--mono);font-size:20px;font-weight:700;color:var(--yellow);margin-bottom:10px;letter-spacing:0.05em;">UNDER MAINTENANCE</div>
     <div style="font-family:var(--mono);font-size:11px;color:var(--text-3);letter-spacing:0.2em;margin-bottom:24px;">NEXUS PORTAL</div>
     <div id="maint-screen-reason" style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:10px;padding:16px 20px;font-size:13px;color:var(--text-2);line-height:1.7;margin-bottom:16px;text-align:left;">We are currently performing maintenance. Please check back shortly.</div>
-    <div id="maint-screen-duration" style="font-family:var(--mono);font-size:12px;color:var(--text-3);letter-spacing:0.1em;"></div>
+    <div id="maint-screen-duration" style="font-family:var(--mono);font-size:12px;color:var(--text-3);letter-spacing:0.1em;margin-bottom:28px;"></div>
+    <button onclick="showAdminLogin()" style="background:none;border:none;color:var(--text-3);font-family:var(--mono);font-size:10px;letter-spacing:0.2em;cursor:pointer;padding:8px 16px;border-radius:6px;transition:color 0.2s;" onmouseover="this.style.color='var(--text-2)'" onmouseout="this.style.color='var(--text-3)'">ADMIN LOGIN →</button>
   </div>
 </div>
 
@@ -832,7 +833,7 @@ async function doLogin(){
   logActivity(`${user.username} logged in`,'accent');
   await saveDB();
   document.getElementById('auth-screen').classList.remove('visible');
-  if(user.role==='admin')launchAdmin();
+  if(user.role==='admin'){document.getElementById('maintenance-screen').style.display='none';launchAdmin();}
   else launchApplicantPortal();
   if(window._pendingForm){setTimeout(()=>openPublicForm(window._pendingForm),300);window._pendingForm=null;}
 }
@@ -1465,6 +1466,11 @@ function checkMaintenance(){
   }
   document.getElementById('maintenance-screen').style.display='none';
   return false;
+}
+
+function showAdminLogin(){
+  document.getElementById('maintenance-screen').style.display='none';
+  showAuth();
 }
 
 /* ══ ACTIVITY ══ */
