@@ -1555,6 +1555,7 @@ function renderAdminTickets(){
       </div>
       <span class="badge ${t.status==='open'?'badge-accepted':'badge-pending'}">${t.status}</span>
       <div class="ticket-status-dot ${t.status}"></div>
+      ${isOwner()?`<button class="btn btn-danger btn-sm" style="margin-left:8px;flex-shrink:0;" onclick="event.stopPropagation();deleteTicket('${t.id}')">Delete</button>`:''}
     </div>`).join('');
 }
 let _openTicketId=null;
@@ -1855,6 +1856,16 @@ function openTranscript(index){
       ${(tr.messages||[]).map(m=>`<div class="chat-msg ${m.from==='user'?'user':'admin'}" style="max-width:80%;"><div class="chat-msg-meta">${esc(m.from==='admin'?'Support Staff':m.sender)} · ${m.time}</div>${esc(m.text)}</div>`).join('')}
     </div>`;
   openModal('modal-transcript');
+}
+
+async function deleteTicket(id){
+  if(!confirm('Delete this ticket permanently? This cannot be undone.'))return;
+  db.tickets=db.tickets.filter(t=>t.id!==id);
+  // Also remove transcript if exists
+  db.transcripts=(db.transcripts||[]).filter(tr=>tr.ticketId!==id);
+  logActivity('Ticket #'+id+' deleted by owner','red');
+  showLoading(true);await saveDB();showLoading(false);
+  updateBadges();updateTranscriptBadge();renderAdminTickets();
 }
 
 /* ══ ACTIVITY ══ */
