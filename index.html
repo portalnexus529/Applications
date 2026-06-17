@@ -1352,7 +1352,7 @@ function renderUsers(){
       <td class="mono">${cnt}</td>
       <td><div style="display:flex;gap:6px;flex-wrap:wrap;">
         <button class="btn btn-ghost btn-sm" onclick="openEditUserModal('${esc(u.username)}')">Edit</button>
-        ${u.role==='awaiting'?`<button class="btn btn-success btn-sm" onclick="openSvDecisionModal('${esc(u.username)}')">Decide</button>`:''}
+        ${u.role==='awaiting'?'<button class="btn btn-success btn-sm" onclick="openSvDecisionModal(\''+esc(u.username)+'\')">Decide</button>':''}
         ${u.status==='closed'
           ?`<button class="btn btn-success btn-sm" onclick="reopenAccount('${esc(u.username)}')">Reopen</button>`
           :u.role!=='awaiting'?`<button class="btn btn-warning btn-sm" onclick="openCloseAccountModal('${esc(u.username)}')">Close</button>`:''}
