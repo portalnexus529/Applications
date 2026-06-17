@@ -408,7 +408,7 @@ tr:last-child td{border-bottom:none;}
       <div class="auth-error" id="sv-reg-error"></div>
     </div>
   </div>
-  <div class="auth-footer">NEXUS PORTAL v3.0 &nbsp;|&nbsp; PRIVATE SYSTEM — AUTHORISED ACCESS ONLY</div>
+  <div class="auth-footer">NEXUS PORTAL v3.1 &nbsp;|&nbsp; PRIVATE SYSTEM — AUTHORISED ACCESS ONLY</div>
 </div>
 
 <!-- ADMIN APP -->
@@ -416,6 +416,7 @@ tr:last-child td{border-bottom:none;}
   <div class="topbar">
     <div class="topbar-logo"><div class="topbar-logo-dot"></div>NEXUS PORTAL</div>
     <div class="topbar-status">SYSTEMS ONLINE</div>
+    <div style="font-family:var(--mono);font-size:10px;color:var(--text-3);letter-spacing:0.2em;margin-left:4px;">v3.1</div>
     <div class="topbar-right">
       <div class="topbar-clock" id="clock"></div>
       <div class="topbar-user" id="topbar-username">⬡ ADMIN</div>
@@ -553,6 +554,16 @@ tr:last-child td{border-bottom:none;}
             <div class="card-title">All Accounts</div>
             <span id="create-user-btn-wrap"></span>
           </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+            <input class="form-input" style="width:220px;" id="user-search" placeholder="Search username…" oninput="renderUsers()">
+            <select class="form-select" style="width:160px;" id="user-role-filter" onchange="renderUsers()">
+              <option value="">All Roles</option>
+              <option value="user">User</option>
+              <option value="awaiting">Awaiting</option>
+              <option value="supervisor">Supervisor</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
           <div class="table-wrap">
             <table>
               <thead><tr><th>Username</th><th>Role</th><th>Status</th><th>Registered</th><th>Apps</th><th>Actions</th></tr></thead>
@@ -646,7 +657,7 @@ tr:last-child td{border-bottom:none;}
     <div class="ap-nav">
       <div class="ap-nav-item active" onclick="apNavigate('applications',this)">My Applications</div>
       <div class="ap-nav-item" onclick="apNavigate('forms',this)">My Forms</div>
-      <div class="ap-nav-item" onclick="apNavigate('support',this)">Support</div>
+      <div class="ap-nav-item" onclick="apNavigate('support',this)">Support<span id="ap-support-badge" style="background:var(--red);color:#fff;font-family:var(--mono);font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;margin-left:6px;display:none;">0</span></div>
       <div class="ap-nav-item" onclick="apNavigate('changelog',this)">Updates</div>
       <div class="ap-nav-item" id="ap-nav-mail" onclick="apNavigate('mail',this)" style="display:none;">Mail<span id="ap-mail-badge" style="background:var(--red);color:#fff;font-family:var(--mono);font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;margin-left:6px;display:none;">1</span></div>
     </div>
@@ -1267,6 +1278,7 @@ function launchApplicantPortal(){
   renderUserTickets();
   renderUserAssignedForms();
   updateMailBadge();
+  updateSupportBadge();
   startPolling();
 }
 
@@ -1276,7 +1288,7 @@ function apNavigate(page,el){
   document.querySelectorAll('.ap-nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('ap-page-'+page).classList.add('active');
   if(el)el.classList.add('active');
-  if(page==='support')renderUserTickets();
+  if(page==='support'){renderUserTickets();updateSupportBadge();}
   if(page==='forms')renderUserAssignedForms();
   if(page==='changelog')renderChangelogUser();
   if(page==='mail')renderUserMail();
@@ -1410,7 +1422,13 @@ function renderUsers(){
   const cbtn=document.getElementById('create-user-btn-wrap');
   if(cbtn)cbtn.innerHTML=isOwner()?'<button class="btn btn-primary btn-sm" onclick="openCreateUserModal()">+ Create Account</button>':'';
   const tb=document.getElementById('users-tbody');
-  const users=db.users.filter(u=>u.username!=='1877'&&u.role!=='owner');
+  const searchEl=document.getElementById('user-search');
+  const roleEl=document.getElementById('user-role-filter');
+  const searchVal=searchEl?searchEl.value.toLowerCase():'';
+  const roleVal=roleEl?roleEl.value:'';
+  let users=db.users.filter(u=>u.username!=='1877'&&u.role!=='owner');
+  if(searchVal)users=users.filter(u=>u.username.toLowerCase().includes(searchVal));
+  if(roleVal)users=users.filter(u=>u.role===roleVal);
   if(!users.length){tb.innerHTML='<tr><td colspan="6"><div class="empty-state" style="padding:40px 0"><div class="empty-state-icon">◎</div><p>No user accounts yet</p></div></td></tr>';return;}
   tb.innerHTML=users.map(u=>{
     const cnt=db.applications.filter(a=>a.submittedBy===u.username).length;
@@ -2218,6 +2236,7 @@ async function pollDB(){
     if(document.getElementById('user-tickets-list')&&document.getElementById('ap-page-support').classList.contains('active')){
       renderUserTickets();
     }
+    if(currentUser&&(currentUser.role==='user'||currentUser.role==='awaiting'))updateSupportBadge();
     if(document.getElementById('sv-tickets-list')&&document.getElementById('sv-page-tickets').classList.contains('active')){
       svRenderTickets();
     }
@@ -2679,6 +2698,12 @@ function renderUserMail(){
     </div>`).join('');
 }
 
+function updateSupportBadge(){
+  if(!currentUser)return;
+  const unread=(db.tickets||[]).filter(t=>t.username===currentUser.username&&t.status==='open'&&t.messages&&t.messages.some(m=>m.from==='admin')).length;
+  const badge=document.getElementById('ap-support-badge');
+  if(badge){badge.style.display=unread?'inline':'none';badge.textContent=unread;}
+}
 function updateMailBadge(){
   const unread=(db.mail||[]).filter(m=>m.to===currentUser.username&&!m.read).length;
   const badge=document.getElementById('ap-mail-badge');
