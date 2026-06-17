@@ -992,6 +992,32 @@ tr:last-child td{border-bottom:none;}
   </div>
 </div>
 
+<!-- Supervisor Decision Modal -->
+<div class="modal-overlay" id="modal-sv-decision">
+  <div class="modal" style="width:520px;">
+    <div class="modal-header"><div class="modal-title" id="sv-decision-title">Supervisor Request Decision</div><button class="modal-close" onclick="closeModal('modal-sv-decision')">&#x2715;</button></div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Decision</label>
+        <div style="display:flex;gap:10px;">
+          <button class="btn btn-success" id="sv-approve-btn" onclick="setSvDecision('approved')" style="flex:1;">&#x2713; Approve</button>
+          <button class="btn btn-danger" id="sv-deny-btn" onclick="setSvDecision('denied')" style="flex:1;">&#x2715; Deny</button>
+        </div>
+        <div id="sv-decision-chosen" style="font-family:var(--mono);font-size:11px;margin-top:8px;min-height:16px;"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Professional Message to Supervisor</label>
+        <textarea class="form-textarea" id="sv-decision-msg" placeholder="Write a professional message explaining your decision..." style="min-height:140px;"></textarea>
+      </div>
+      <div class="auth-error" id="sv-decision-error"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-sv-decision')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitSvDecision()">Send Decision</button>
+    </div>
+  </div>
+</div>
+
 <div id="loading-overlay" style="position:fixed;inset:0;background:rgba(7,11,20,0.85);z-index:99999;display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px;">
   <div style="font-family:var(--mono);font-size:12px;color:var(--accent);letter-spacing:0.3em;">SYNCING DATABASE…</div>
   <div style="width:200px;"><div class="loading-bar"><div class="loading-bar-fill"></div></div></div>
@@ -1352,7 +1378,7 @@ function renderUsers(){
       <td class="mono">${cnt}</td>
       <td><div style="display:flex;gap:6px;flex-wrap:wrap;">
         <button class="btn btn-ghost btn-sm" onclick="openEditUserModal('${esc(u.username)}')">Edit</button>
-        ${u.role==='awaiting'?'<button class="btn btn-success btn-sm" onclick="openSvDecisionModal(\''+esc(u.username)+'\')">Decide</button>':''}
+        ${u.role==='awaiting'?'<button class="btn btn-success btn-sm" onclick="openSvDecisionModal(this.dataset.u)" data-u="'+esc(u.username)+'">Decide</button>':''}
         ${u.status==='closed'
           ?`<button class="btn btn-success btn-sm" onclick="reopenAccount('${esc(u.username)}')">Reopen</button>`
           :u.role!=='awaiting'?`<button class="btn btn-warning btn-sm" onclick="openCloseAccountModal('${esc(u.username)}')">Close</button>`:''}
