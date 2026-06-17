@@ -361,7 +361,7 @@ tr:last-child td{border-bottom:none;}
       <label class="field-label">Community / Server Name</label>
       <input class="field-input" id="sv-reg-community" type="text" placeholder="e.g. My DayZ Server" autocomplete="off">
       <label class="field-label">Why do you want a Supervisor account?</label>
-      <textarea class="field-input" id="sv-reg-reason" placeholder="Tell us about your community and what you need…" style="min-height:80px;resize:vertical;line-height:1.5;font-family:var(--mono);font-size:13px;"></textarea>
+      <textarea class="field-input" id="sv-reg-reason" placeholder="Tell us about your community and what you need..." style="min-height:80px;resize:vertical;line-height:1.5;font-family:var(--mono);font-size:13px;"></textarea>
       <button class="auth-btn" style="background:var(--yellow);margin-top:8px;" onclick="doSupervisorSignup()">SUBMIT REQUEST</button>
       <div class="auth-error" id="sv-reg-error"></div>
     </div>
@@ -2227,22 +2227,12 @@ async function doSupervisorSignup(){
   db.users.push(nu);
   // Auto-create a supervisor request ticket with all their info
   if(!db.tickets)db.tickets=[];
-  const ticketMsg=
-    '🏘️ Community: '+community+'
-
-'+
-    '📝 Reason:
-'+reason+'
-
-'+
-    '👤 Username: '+u+'
-'+
-    '📅 Registered: '+nowStr();
+  const ticketMsg='Community: '+community+'\n\nReason:\n'+reason+'\n\nUsername: '+u+'\nRegistered: '+nowStr();
   const ticket={
     id:'T'+Date.now(),
     username:u,
     category:'supervisor',
-    subject:'Supervisor Request — '+community,
+    subject:'Supervisor Request - '+community,
     status:'open',
     date:nowStr(),
     messages:[{from:'user',text:ticketMsg,time:nowStr(),sender:u,readByAdmin:false}]
