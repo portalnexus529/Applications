@@ -1419,7 +1419,7 @@ function renderUsers(){
       <td class="mono">${cnt}</td>
       <td><div style="display:flex;gap:6px;flex-wrap:wrap;">
         <button class="btn btn-ghost btn-sm" onclick="openEditUserModal('${esc(u.username)}')">Edit</button>
-        ${u.role==='awaiting'?'<button class="btn btn-success btn-sm" onclick="openSvDecisionModal(this.dataset.u)" data-u="'+esc(u.username)+'">Decide</button>':''}
+        ${u.role==='awaiting'?`<button class="btn btn-success btn-sm" onclick="openSvDecisionModal(this.getAttribute('data-u'))" data-u="${esc(u.username)}">Decide</button>`:''}
         ${u.deleteAt?`<button class="btn btn-success btn-sm" onclick="cancelDeletion('${esc(u.username)}')">Cancel Deletion</button>`:''}
         ${u.status==='closed'
           ?`<button class="btn btn-success btn-sm" onclick="reopenAccount('${esc(u.username)}')">Reopen</button>`
@@ -2262,7 +2262,6 @@ function svRenderForms(){
           <div class="card-title">${esc(f.title)}${locked?'<span style="font-size:11px;color:var(--red);font-family:var(--mono);margin-left:10px;">&#128274; LOCKED</span>':''}${f.flagStatus==='investigation'?'<span style="font-size:11px;color:var(--yellow);font-family:var(--mono);margin-left:6px;">&#128270; UNDER INVESTIGATION</span>':''}</div>
           <div class="text-muted" style="margin-top:4px;">${esc(f.category)} &#183; ${f.questions.length} questions &#183; ${cnt} submissions</div>
           ${f.lockReason?'<div style="font-family:var(--mono);font-size:10px;color:var(--red);margin-top:4px;">Locked by portal: '+esc(f.lockReason)+'</div>':''}
-          <div style="font-family:var(--mono);font-size:10px;color:var(--text-3);margin-top:4px;">FORM ID: <span style="color:var(--accent);cursor:pointer;" onclick="navigator.clipboard.writeText('${f.id}').then(()=>alert('Form ID copied!'))">&#x24;{f.id} &#8212; click to copy</span></div>
           <div style="font-family:var(--mono);font-size:10px;color:var(--text-3);margin-top:4px;">FORM ID: <span style="color:var(--accent);cursor:pointer;" onclick="navigator.clipboard.writeText('${f.id}').then(()=>alert('Form ID copied!'))">${f.id} — click to copy</span></div>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
