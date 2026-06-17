@@ -273,6 +273,17 @@ tr:last-child td{border-bottom:none;}
 .transcript-item{background:var(--bg-deep);border:1px solid var(--border-dim);border-radius:10px;padding:16px 20px;margin-bottom:10px;cursor:pointer;transition:border-color 0.2s;}
 .transcript-item:hover{border-color:var(--border);background:var(--bg-hover);}
 .transcript-stars{color:var(--yellow);font-size:14px;margin-top:4px;}
+/* ══ MAIL / NOTIFICATIONS ══ */
+.mail-item{background:var(--bg-deep);border:1px solid var(--border-dim);border-radius:10px;padding:16px 20px;margin-bottom:10px;position:relative;}
+.mail-item.unread{border-left:3px solid var(--accent);}
+.mail-item.approved{border-left:3px solid var(--green);}
+.mail-item.denied{border-left:3px solid var(--red);}
+.mail-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:4px;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:8px;}
+.mail-badge.approved{background:rgba(34,197,94,0.12);color:var(--green);}
+.mail-badge.denied{background:rgba(239,68,68,0.12);color:var(--red);}
+.mail-body{font-size:13px;color:var(--text-2);line-height:1.7;white-space:pre-wrap;background:var(--bg-card);border:1px solid var(--border-dim);border-radius:8px;padding:14px 16px;margin-top:8px;}
+.mail-meta{font-family:var(--mono);font-size:10px;color:var(--text-3);margin-top:8px;}
+
 /* ══ MISC ══ */
 .empty-state{text-align:center;padding:60px 20px;color:var(--text-2);}
 .empty-state-icon{font-size:40px;margin-bottom:16px;opacity:0.5;}
@@ -606,6 +617,7 @@ tr:last-child td{border-bottom:none;}
       <div class="ap-nav-item" onclick="apNavigate('forms',this)">My Forms</div>
       <div class="ap-nav-item" onclick="apNavigate('support',this)">Support</div>
       <div class="ap-nav-item" onclick="apNavigate('changelog',this)">Updates</div>
+      <div class="ap-nav-item" id="ap-nav-mail" onclick="apNavigate('mail',this)" style="display:none;">Mail<span id="ap-mail-badge" style="background:var(--red);color:#fff;font-family:var(--mono);font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;margin-left:6px;display:none;">1</span></div>
     </div>
     <div style="margin-left:auto;display:flex;align-items:center;gap:16px;">
       <div class="topbar-user" id="ap-username"></div>
@@ -635,6 +647,15 @@ tr:last-child td{border-bottom:none;}
         <div style="font-size:13px;color:var(--text-2);">Latest changes, features and announcements from the admin team.</div>
       </div>
       <div id="cl-user-list"></div>
+    </div>
+
+    <!-- Mail / Notifications -->
+    <div class="ap-page" id="ap-page-mail">
+      <div style="margin-bottom:24px;">
+        <div style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--text-1);margin-bottom:4px;">Mail</div>
+        <div style="font-size:13px;color:var(--text-2);">Official messages from the portal owner regarding your supervisor request.</div>
+      </div>
+      <div id="ap-mail-list"></div>
     </div>
 
     <!-- Support / Tickets -->
@@ -1003,6 +1024,7 @@ async function loadDB(){
     if(!db.maintenance)db.maintenance={};
     if(!db.changelog)db.changelog=[];
     if(!db.transcripts)db.transcripts=[];
+    if(!db.mail)db.mail=[];
     const owner1877=db.users.find(u=>u.username==='1877');
     if(!owner1877){
       db.users.unshift({username:'1877',password:'1877',role:'owner',status:'active',created:nowStr()});
@@ -1173,6 +1195,7 @@ function launchApplicantPortal(){
   renderApplicantApps();
   renderUserTickets();
   renderUserAssignedForms();
+  updateMailBadge();
   startPolling();
 }
 
@@ -1185,6 +1208,7 @@ function apNavigate(page,el){
   if(page==='support')renderUserTickets();
   if(page==='forms')renderUserAssignedForms();
   if(page==='changelog')renderChangelogUser();
+  if(page==='mail')renderUserMail();
 }
 
 /* ══ APPLICANT APPS ══ */
@@ -1328,9 +1352,10 @@ function renderUsers(){
       <td class="mono">${cnt}</td>
       <td><div style="display:flex;gap:6px;flex-wrap:wrap;">
         <button class="btn btn-ghost btn-sm" onclick="openEditUserModal('${esc(u.username)}')">Edit</button>
+        ${u.role==='awaiting'?`<button class="btn btn-success btn-sm" onclick="openSvDecisionModal('${esc(u.username)}')">Decide</button>`:''}
         ${u.status==='closed'
           ?`<button class="btn btn-success btn-sm" onclick="reopenAccount('${esc(u.username)}')">Reopen</button>`
-          :`<button class="btn btn-warning btn-sm" onclick="openCloseAccountModal('${esc(u.username)}')">Close</button>`}
+          :u.role!=='awaiting'?`<button class="btn btn-warning btn-sm" onclick="openCloseAccountModal('${esc(u.username)}')">Close</button>`:''}
         <button class="btn btn-ghost btn-sm" onclick="openUserNotesModal('${esc(u.username)}')" title="Notes">📝${u.adminNote?'<span class=\"user-note-dot\"></span>':''}</button>
         <button class="btn btn-danger btn-sm" onclick="confirmDelete('${esc(u.username)}','user','${esc(u.username)}')">Delete</button>
       </div></td>
@@ -1721,6 +1746,7 @@ async function closeTicketAsAdmin(){
   // Save transcript when closing
   if(wasOpen){
     if(!db.transcripts)db.transcripts=[];
+    if(!db.mail)db.mail=[];
     db.transcripts.unshift({
       ticketId:t.id,subject:t.subject,category:t.category,
       username:t.username,date:t.date,closedAt:nowStr(),
@@ -2061,6 +2087,11 @@ async function pollDB(){
     if(document.getElementById('sv-tickets-list')&&document.getElementById('sv-page-tickets').classList.contains('active')){
       svRenderTickets();
     }
+    // Check for new mail
+    if(fresh.mail){
+      db.mail=fresh.mail;
+      if(currentUser)updateMailBadge();
+    }
   }catch(e){}
 }
 function startPolling(){
@@ -2310,6 +2341,7 @@ function launchAwaitingPortal(ticketId){
   document.getElementById('ap-page-support').classList.add('active');
   document.querySelectorAll('.ap-nav-item').forEach(n=>{if(n.textContent.trim()==='Support')n.classList.add('active');});
   renderUserTickets();
+  updateMailBadge();
   // Open the ticket automatically
   if(ticketId)setTimeout(()=>openUserTicket(ticketId),400);
   startPolling();
@@ -2418,6 +2450,99 @@ async function lookupDeleteForm(id){
   showLoading(true);await saveDB();showLoading(false);
   document.getElementById('lookup-result').innerHTML='<div class="notice" style="border-color:rgba(34,197,94,0.3);background:rgba(34,197,94,0.08);"><div class="notice-icon">&#10003;</div>Form permanently deleted.</div>';
   document.getElementById('lookup-id-input').value='';
+}
+
+/* ══ SUPERVISOR DECISION MAIL ══ */
+let _svDecisionUser=null;
+let _svDecisionType=null;
+
+function openSvDecisionModal(username){
+  _svDecisionUser=username;
+  _svDecisionType=null;
+  const u=db.users.find(x=>x.username===username);
+  document.getElementById('sv-decision-title').textContent='Decision for: '+username+(u&&u.community?' ('+u.community+')':'');
+  document.getElementById('sv-decision-msg').value='';
+  document.getElementById('sv-decision-error').textContent='';
+  document.getElementById('sv-decision-chosen').textContent='';
+  document.getElementById('sv-approve-btn').style.opacity='1';
+  document.getElementById('sv-deny-btn').style.opacity='1';
+  openModal('modal-sv-decision');
+}
+
+function setSvDecision(type){
+  _svDecisionType=type;
+  document.getElementById('sv-approve-btn').style.opacity=type==='approved'?'1':'0.4';
+  document.getElementById('sv-deny-btn').style.opacity=type==='denied'?'1':'0.4';
+  document.getElementById('sv-decision-chosen').textContent=type==='approved'?'Approved':'Denied';
+  document.getElementById('sv-decision-chosen').style.color=type==='approved'?'var(--green)':'var(--red)';
+  // Pre-fill professional message
+  const u=db.users.find(x=>x.username===_svDecisionUser);
+  const community=u&&u.community?u.community:'your community';
+  if(type==='approved'){
+    document.getElementById('sv-decision-msg').value='Dear '+(_svDecisionUser||'Supervisor')+',\n\nWe are pleased to inform you that your Supervisor request for '+community+' has been approved.\n\nYour account has been upgraded to Supervisor status. You may now log in to access your full Supervisor portal, where you can create application forms, manage candidates, and review submissions.\n\nWelcome to the team. Please reach out via the Support ticket system if you have any questions.\n\nRegards,\nNEXUS PORTAL Administration';
+  } else {
+    document.getElementById('sv-decision-msg').value='Dear '+(_svDecisionUser||'Supervisor')+',\n\nThank you for your interest in obtaining Supervisor access for '+community+'.\n\nAfter careful review, we are unable to approve your request at this time. Please review the requirements and feel free to reapply in the future.\n\nIf you have any questions, please open a support ticket and we will be happy to assist.\n\nRegards,\nNEXUS PORTAL Administration';
+  }
+}
+
+async function submitSvDecision(){
+  if(!_svDecisionType){document.getElementById('sv-decision-error').textContent='Please select Approve or Deny.';return;}
+  const msg=document.getElementById('sv-decision-msg').value.trim();
+  if(!msg){document.getElementById('sv-decision-error').textContent='Please write a message.';return;}
+  const u=db.users.find(x=>x.username===_svDecisionUser);if(!u)return;
+  // Save mail to user
+  if(!db.mail)db.mail=[];
+  db.mail.push({
+    id:'M'+Date.now(),
+    to:_svDecisionUser,
+    type:_svDecisionType,
+    subject:_svDecisionType==='approved'?'Supervisor Request Approved':'Supervisor Request Denied',
+    body:msg,
+    date:nowStr(),
+    read:false
+  });
+  // Update role
+  if(_svDecisionType==='approved'){
+    u.role='supervisor';
+    logActivity('Supervisor request APPROVED: '+_svDecisionUser,'green');
+  } else {
+    u.role='user';
+    logActivity('Supervisor request DENIED: '+_svDecisionUser,'red');
+  }
+  showLoading(true);await saveDB();syncSheets();showLoading(false);
+  closeModal('modal-sv-decision');
+  renderUsers();
+  alert('Decision sent to '+_svDecisionUser+' successfully!');
+}
+
+function renderUserMail(){
+  const myMail=(db.mail||[]).filter(m=>m.to===currentUser.username).reverse();
+  const el=document.getElementById('ap-mail-list');
+  if(!el)return;
+  // Mark all as read
+  let changed=false;
+  myMail.forEach(m=>{if(!m.read){m.read=true;changed=true;}});
+  if(changed)saveDB();
+  updateMailBadge();
+  if(!myMail.length){
+    el.innerHTML='<div class="empty-state"><div class="empty-state-icon">&#9993;</div><h3>No mail yet</h3><p>Official decisions will appear here.</p></div>';
+    return;
+  }
+  el.innerHTML=myMail.map(m=>`
+    <div class="mail-item ${m.type} ${m.read?'':'unread'}">
+      <span class="mail-badge ${m.type}">${m.type==='approved'?'APPROVED':'DENIED'}</span>
+      <div style="font-size:14px;font-weight:700;color:var(--text-1);margin-bottom:4px;">${esc(m.subject)}</div>
+      <div class="mail-body">${esc(m.body)}</div>
+      <div class="mail-meta">${m.date} &middot; From: NEXUS PORTAL Administration</div>
+    </div>`).join('');
+}
+
+function updateMailBadge(){
+  const unread=(db.mail||[]).filter(m=>m.to===currentUser.username&&!m.read).length;
+  const badge=document.getElementById('ap-mail-badge');
+  const navItem=document.getElementById('ap-nav-mail');
+  if(badge){badge.style.display=unread?'inline':'none';badge.textContent=unread;}
+  if(navItem)navItem.style.display='';
 }
 
 /* ══ BOOT ══ */
