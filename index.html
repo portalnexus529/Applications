@@ -650,6 +650,7 @@ tr:last-child td{border-bottom:none;}
       <div class="nav-item active" id="sv-nav-forms" onclick="svNavigate('forms',this)"><span class="nav-icon">▣</span>My Forms</div>
       <div class="nav-item" id="sv-nav-create" onclick="svNavigate('create',this)"><span class="nav-icon">✦</span>Create Form</div>
       <div class="nav-item" id="sv-nav-results" onclick="svNavigate('results',this)"><span class="nav-icon">◧</span>Results<span class="nav-badge yellow" id="sv-badge-results">0</span></div>
+      <div class="nav-item" id="sv-nav-updates" onclick="svNavigate('updates',this)"><span class="nav-icon">📢</span>Updates</div>
       <div class="sidebar-divider"></div>
       <div class="nav-section-label">Support</div>
       <div class="nav-item" id="sv-nav-tickets" onclick="svNavigate('tickets',this)"><span class="nav-icon">💬</span>My Tickets</div>
@@ -684,6 +685,11 @@ tr:last-child td{border-bottom:none;}
         <div class="card">
           <div class="table-wrap"><table><thead><tr><th>#</th><th>Applicant</th><th>Form</th><th>Submitted</th><th>Status</th><th>Actions</th></tr></thead><tbody id="sv-results-tbody"></tbody></table></div>
         </div>
+      </div>
+      <!-- SV UPDATES -->
+      <div class="page-section fade-in" id="sv-page-updates">
+        <div class="page-header"><div class="page-header-eyebrow">Supervisor</div><h1>Updates</h1><p>Latest announcements from the portal owner.</p></div>
+        <div id="sv-cl-list"></div>
       </div>
       <!-- SV TICKETS -->
       <div class="page-section fade-in" id="sv-page-tickets">
@@ -2068,6 +2074,7 @@ function svNavigate(page,el){
   if(page==='create')svInitCreateForm();
   if(page==='results')svRenderResults();
   if(page==='tickets')svRenderTickets();
+  if(page==='updates')svRenderUpdates();
 }
 
 function svMyForms(){
@@ -2206,6 +2213,20 @@ function svRenderTickets(){
         <div class="ticket-meta">#${t.id} · ${t.date} · ${t.messages?t.messages.length:0} messages</div>
       </div>
       <span class="badge ${t.status==='open'?'badge-accepted':'badge-pending'}">${t.status}</span>
+    </div>`).join('');
+}
+
+function svRenderUpdates(){
+  const posts=(db.changelog||[]);
+  const el=document.getElementById('sv-cl-list');
+  if(!el)return;
+  if(!posts.length){el.innerHTML='<div class="empty-state"><div class="empty-state-icon">📢</div><h3>No updates yet</h3><p>Check back soon for news and updates.</p></div>';return;}
+  el.innerHTML=posts.map(p=>`
+    <div class="cl-post ${CL_TAG_COLORS[p.tag]||''}">
+      <span class="cl-tag ${p.tag}">${CL_TAG_LABELS[p.tag]||p.tag}</span>
+      <div class="cl-title">${esc(p.title)}</div>
+      <div class="cl-body">${esc(p.body)}</div>
+      <div class="cl-meta">${p.date}</div>
     </div>`).join('');
 }
 
