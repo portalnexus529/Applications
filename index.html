@@ -1584,7 +1584,11 @@ function openPublicForm(id){
   document.getElementById('pub-form-area').style.display='block';
   document.getElementById('public-app-page').classList.add('open');
 }
-function closePubForm(){document.getElementById('public-app-page').classList.remove('open');}
+function closePubForm(){
+  document.getElementById('public-app-page').classList.remove('open');
+  // If no user logged in and we came from a form link, show auth
+  if(!currentUser){showAuth();}
+}
 async function submitApplication(){
   const form=db.forms.find(f=>f.id===pubFormId);if(!form)return;
   const name=document.getElementById('pub-name').value.trim();
@@ -1597,7 +1601,11 @@ async function submitApplication(){
   showLoading(true);await saveDB();showLoading(false);
   document.getElementById('pub-form-area').style.display='none';
   document.getElementById('pub-success').style.display='block';
-  updateBadges();
+  // Update success message for guests
+  if(!currentUser||currentUser.username==='anonymous'){
+    document.querySelector('#pub-success p').textContent='Thank you for applying! The team will review your application.';
+  }
+  if(currentUser)updateBadges();
 }
 
 /* ══ TICKETS ══ */
@@ -2199,7 +2207,11 @@ function svRenderTickets(){
       }
     }catch(e){localStorage.removeItem('nx_session');}
   }
-  if(formParam){showAuth();window._pendingForm=parseInt(formParam);return;}
+  if(formParam){
+    // Load form directly — no login required
+    openPublicForm(parseInt(formParam));
+    return;
+  }
   showAuth();
 })();
 </script>
