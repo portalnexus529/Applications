@@ -329,6 +329,7 @@ tr:last-child td{border-bottom:none;}
   <div class="auth-tabs">
     <div class="auth-tab active" onclick="switchAuthTab('login')">LOGIN</div>
     <div class="auth-tab" onclick="switchAuthTab('register')">REGISTER</div>
+    <div class="auth-tab" onclick="switchAuthTab('supervisor')">BECOME A SUPERVISOR</div>
   </div>
   <div class="auth-box">
     <div class="auth-form active" id="form-login">
@@ -348,6 +349,21 @@ tr:last-child td{border-bottom:none;}
       <input class="field-input" id="reg-pass2" type="password" placeholder="Repeat password" autocomplete="off">
       <button class="auth-btn" onclick="doRegister()">CREATE ACCOUNT</button>
       <div class="auth-error" id="reg-error"></div>
+    </div>
+    <div class="auth-form" id="form-supervisor">
+      <div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:8px;padding:10px 14px;font-family:var(--mono);font-size:10px;color:var(--yellow);margin-bottom:16px;letter-spacing:0.1em;">⬡ REQUEST SUPERVISOR ACCESS — AWAITING APPROVAL</div>
+      <label class="field-label">Username</label>
+      <input class="field-input" id="sv-reg-user" type="text" placeholder="Choose a username" autocomplete="off">
+      <label class="field-label">Password</label>
+      <input class="field-input" id="sv-reg-pass" type="password" placeholder="Min 4 characters" autocomplete="off">
+      <label class="field-label">Confirm Password</label>
+      <input class="field-input" id="sv-reg-pass2" type="password" placeholder="Repeat password" autocomplete="off">
+      <label class="field-label">Community / Server Name</label>
+      <input class="field-input" id="sv-reg-community" type="text" placeholder="e.g. My DayZ Server" autocomplete="off">
+      <label class="field-label">Why do you want a Supervisor account?</label>
+      <textarea class="field-input" id="sv-reg-reason" placeholder="Tell us about your community and what you need…" style="min-height:80px;resize:vertical;line-height:1.5;font-family:var(--mono);font-size:13px;"></textarea>
+      <button class="auth-btn" style="background:var(--yellow);margin-top:8px;" onclick="doSupervisorSignup()">SUBMIT REQUEST</button>
+      <div class="auth-error" id="sv-reg-error"></div>
     </div>
   </div>
   <div class="auth-footer">NEXUS PORTAL v3.0 &nbsp;|&nbsp; PRIVATE SYSTEM — AUTHORISED ACCESS ONLY</div>
@@ -761,6 +777,7 @@ tr:last-child td{border-bottom:none;}
         <label class="form-label">Role</label>
         <select class="form-select" id="cu-role">
           <option value="user">User (Applicant)</option>
+          <option value="awaiting">Awaiting (Supervisor Request)</option>
           <option value="supervisor">Supervisor</option>
           <option value="admin">Admin</option>
           <option value="owner">Owner</option>
@@ -1003,11 +1020,13 @@ async function saveSetup(){
 /* ══ AUTH ══ */
 function showAuth(){document.getElementById('auth-screen').classList.add('visible');}
 function switchAuthTab(tab){
-  document.querySelectorAll('.auth-tab').forEach((t,i)=>t.classList.toggle('active',['login','register'][i]===tab));
+  document.querySelectorAll('.auth-tab').forEach((t,i)=>t.classList.toggle('active',['login','register','supervisor'][i]===tab));
   document.getElementById('form-login').classList.toggle('active',tab==='login');
   document.getElementById('form-register').classList.toggle('active',tab==='register');
+  document.getElementById('form-supervisor').classList.toggle('active',tab==='supervisor');
   document.getElementById('li-error').textContent='';
   document.getElementById('reg-error').textContent='';
+  if(document.getElementById('sv-reg-error'))document.getElementById('sv-reg-error').textContent='';
 }
 async function doLogin(){
   const u=document.getElementById('li-user').value.trim();
@@ -1028,6 +1047,11 @@ async function doLogin(){
   document.getElementById('auth-screen').classList.remove('visible');
   if(user.role==='owner'||user.role==='admin'){document.getElementById('maintenance-screen').style.display='none';launchAdmin();}
   else if(user.role==='supervisor'){launchSupervisorPortal();}
+  else if(user.role==='awaiting'){
+    // Find their open supervisor request ticket
+    const svTicket=(db.tickets||[]).find(t=>t.username===user.username&&t.category==='supervisor'&&t.status==='open');
+    launchAwaitingPortal(svTicket?svTicket.id:null);
+  }
   else launchApplicantPortal();
   if(window._pendingForm){setTimeout(()=>openPublicForm(window._pendingForm),300);window._pendingForm=null;}
 }
@@ -1273,7 +1297,7 @@ function renderUsers(){
     const statusBadge=u.status==='closed'?`<span class="badge badge-closed">Closed</span>`:`<span class="badge badge-accepted">Active</span>`;
     return`<tr>
       <td style="font-weight:500;">${esc(u.username)}</td>
-      <td><span class="badge ${u.role==='owner'?'badge-accepted':u.role==='admin'?'badge-review':u.role==='supervisor'?'badge-closed':'badge-pending'}">${u.role}</span></td>
+      <td><span class="badge ${u.role==='owner'?'badge-accepted':u.role==='admin'?'badge-review':u.role==='supervisor'?'badge-closed':u.role==='awaiting'?'badge-review':'badge-pending'}">${u.role}</span></td>
       <td>${statusBadge}</td>
       <td class="mono text-muted" style="font-size:11px;">${u.created}</td>
       <td class="mono">${cnt}</td>
@@ -2185,6 +2209,76 @@ function svRenderTickets(){
     </div>`).join('');
 }
 
+/* ══ SUPERVISOR SIGNUP ══ */
+async function doSupervisorSignup(){
+  const u=document.getElementById('sv-reg-user').value.trim();
+  const p=document.getElementById('sv-reg-pass').value.trim();
+  const p2=document.getElementById('sv-reg-pass2').value.trim();
+  const community=document.getElementById('sv-reg-community').value.trim();
+  const reason=document.getElementById('sv-reg-reason').value.trim();
+  const errEl=document.getElementById('sv-reg-error');
+  if(!u||!p||!community||!reason){errEl.textContent='All fields are required.';return;}
+  if(p.length<4){errEl.textContent='Password must be at least 4 characters.';return;}
+  if(p!==p2){errEl.textContent='Passwords do not match.';return;}
+  showLoading(true);await loadDB();
+  if(db.users.find(x=>x.username.toLowerCase()===u.toLowerCase())){showLoading(false);errEl.textContent='Username already taken.';return;}
+  // Create account with 'awaiting' role
+  const nu={username:u,password:p,role:'awaiting',status:'active',created:nowStr(),community,svReason:reason};
+  db.users.push(nu);
+  // Auto-create a supervisor request ticket with all their info
+  if(!db.tickets)db.tickets=[];
+  const ticketMsg=
+    '🏘️ Community: '+community+'
+
+'+
+    '📝 Reason:
+'+reason+'
+
+'+
+    '👤 Username: '+u+'
+'+
+    '📅 Registered: '+nowStr();
+  const ticket={
+    id:'T'+Date.now(),
+    username:u,
+    category:'supervisor',
+    subject:'Supervisor Request — '+community,
+    status:'open',
+    date:nowStr(),
+    messages:[{from:'user',text:ticketMsg,time:nowStr(),sender:u,readByAdmin:false}]
+  };
+  db.tickets.push(ticket);
+  logActivity('New supervisor request from: '+u+' ('+community+')','yellow');
+  await saveDB();syncSheets();showLoading(false);
+  // Log them in as awaiting user
+  currentUser={username:u,role:'awaiting'};
+  localStorage.setItem('nx_session',JSON.stringify(currentUser));
+  document.getElementById('auth-screen').classList.remove('visible');
+  launchAwaitingPortal(ticket.id);
+}
+
+function launchAwaitingPortal(ticketId){
+  // Show a simple waiting screen with the live ticket
+  document.getElementById('applicant-portal').classList.add('active');
+  document.getElementById('ap-username').textContent='⬡ '+currentUser.username.toUpperCase();
+  document.getElementById('ap-welcome').textContent='Request Submitted!';
+  document.getElementById('ap-sub').textContent='Your supervisor request is under review. Chat below while you wait.';
+  // Lock all nav tabs except support
+  document.querySelectorAll('.ap-nav-item').forEach(n=>{
+    if(n.textContent.trim()!=='Support'){
+      n.style.opacity='0.3';n.style.pointerEvents='none';n.style.cursor='not-allowed';
+    }
+  });
+  document.querySelectorAll('.ap-page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.ap-nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('ap-page-support').classList.add('active');
+  document.querySelectorAll('.ap-nav-item').forEach(n=>{if(n.textContent.trim()==='Support')n.classList.add('active');});
+  renderUserTickets();
+  // Open the ticket automatically
+  if(ticketId)setTimeout(()=>openUserTicket(ticketId),400);
+  startPolling();
+}
+
 /* ══ BOOT ══ */
 (async function boot(){
   const HARDCODED_KEY='$2a$10$TO05PANXis1Ueo3ZNfC24OATctFcWl4fEFHc2.GYdvL2PN3sNbKEm';
@@ -2205,6 +2299,10 @@ function svRenderTickets(){
         currentUser={username:u.username,role:u.role};
         if(u.role==='owner'||u.role==='admin'){launchAdmin();return;}
         else if(u.role==='supervisor'){launchSupervisorPortal();return;}
+        else if(u.role==='awaiting'){
+          const svTicket=(db.tickets||[]).find(t=>t.username===u.username&&t.category==='supervisor'&&t.status==='open');
+          launchAwaitingPortal(svTicket?svTicket.id:null);return;
+        }
         else{if(!checkMaintenance())launchApplicantPortal();return;}
       }
     }catch(e){localStorage.removeItem('nx_session');}
