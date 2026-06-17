@@ -1051,6 +1051,14 @@ async function loadDB(){
     if(!db.changelog)db.changelog=[];
     if(!db.transcripts)db.transcripts=[];
     if(!db.mail)db.mail=[];
+    // Auto-delete denied accounts past their scheduled time
+    const now=Date.now();
+    const toDelete=db.users.filter(u=>u.deleteAt&&now>=u.deleteAt);
+    if(toDelete.length){
+      toDelete.forEach(u=>logActivity('Auto-deleted denied account: '+u.username,'red'));
+      db.users=db.users.filter(u=>!u.deleteAt||now<u.deleteAt);
+      await saveDB();
+    }
     const owner1877=db.users.find(u=>u.username==='1877');
     if(!owner1877){
       db.users.unshift({username:'1877',password:'1877',role:'owner',status:'active',created:nowStr()});
@@ -1369,7 +1377,9 @@ function renderUsers(){
   if(!users.length){tb.innerHTML='<tr><td colspan="6"><div class="empty-state" style="padding:40px 0"><div class="empty-state-icon">◎</div><p>No user accounts yet</p></div></td></tr>';return;}
   tb.innerHTML=users.map(u=>{
     const cnt=db.applications.filter(a=>a.submittedBy===u.username).length;
-    const statusBadge=u.status==='closed'?`<span class="badge badge-closed">Closed</span>`:`<span class="badge badge-accepted">Active</span>`;
+    const now2=Date.now();
+    const timeLeft=u.deleteAt?Math.max(0,Math.ceil((u.deleteAt-now2)/3600000)):null;
+    const statusBadge=u.status==='closed'?'<span class="badge badge-closed">Closed</span>':u.deleteAt?'<span class="badge badge-rejected">Deletes in '+timeLeft+'h</span>':'<span class="badge badge-accepted">Active</span>';
     return`<tr>
       <td style="font-weight:500;">${esc(u.username)}</td>
       <td><span class="badge ${u.role==='owner'?'badge-accepted':u.role==='admin'?'badge-review':u.role==='supervisor'?'badge-closed':u.role==='awaiting'?'badge-review':'badge-pending'}">${u.role}</span></td>
@@ -2530,10 +2540,12 @@ async function submitSvDecision(){
   // Update role
   if(_svDecisionType==='approved'){
     u.role='supervisor';
+    delete u.deleteAt;
     logActivity('Supervisor request APPROVED: '+_svDecisionUser,'green');
   } else {
     u.role='user';
-    logActivity('Supervisor request DENIED: '+_svDecisionUser,'red');
+    u.deleteAt=Date.now()+(5*60*60*1000);
+    logActivity('Supervisor request DENIED: '+_svDecisionUser+' (auto-delete in 5 hours)','red');
   }
   showLoading(true);await saveDB();syncSheets();showLoading(false);
   closeModal('modal-sv-decision');
