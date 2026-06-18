@@ -847,7 +847,7 @@ tr:last-child td{border-bottom:none;}
 
 
 /* ══ TERMS & PRIVACY ══ */
-#terms-page{display:none;position:fixed;inset:0;z-index:9500;background:var(--bg-deep);overflow-y:auto;}
+#terms-page{display:none;position:fixed;inset:0;z-index:10500;background:var(--bg-deep);overflow-y:auto;}
 #terms-page.open{display:block;}
 .terms-wrap{max-width:760px;margin:0 auto;padding:60px 24px 100px;}
 .terms-header{margin-bottom:40px;}
@@ -1973,6 +1973,36 @@ tr:last-child td{border-bottom:none;}
     <div class="terms-section">
       <h2>Contact</h2>
       <p>If you have questions or concerns about your data, please open a support ticket from within the portal.</p>
+    </div>
+  </div>
+</div>
+
+
+<!-- Delete Own Account Modal -->
+<div class="modal-overlay" id="modal-delete-own-account">
+  <div class="modal" style="width:480px;border-color:rgba(248,113,113,0.3);">
+    <div class="modal-header">
+      <div class="modal-title text-red">&#9888; Delete My Account</div>
+      <button class="modal-close" onclick="closeModal('modal-delete-own-account')">&#10005;</button>
+    </div>
+    <div class="modal-body">
+      <div class="notice" style="border-color:rgba(248,113,113,0.3);background:rgba(248,113,113,0.06);margin-bottom:20px;">
+        <div class="notice-icon">&#9888;&#65039;</div>
+        <span style="font-size:13px;">This will <b>permanently delete</b> your account and all associated data &mdash; applications, forms (if any), tickets, mail and feedback posts. This cannot be undone.</span>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Type your password to confirm</label>
+        <input class="form-input" id="delete-own-pass" type="password" placeholder="Enter your password" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Type DELETE to confirm</label>
+        <input class="form-input" id="delete-own-confirm" placeholder="Type DELETE" autocomplete="off" style="font-family:var(--mono);">
+      </div>
+      <div style="font-family:var(--mono);font-size:11px;color:var(--red);min-height:16px;" id="delete-own-error"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-delete-own-account')">Cancel</button>
+      <button class="btn btn-danger" onclick="submitDeleteOwnAccount()">Permanently Delete Account</button>
     </div>
   </div>
 </div>
@@ -4775,9 +4805,17 @@ function closeTermsPage(){
 /* ══ DELETE OWN ACCOUNT ══ */
 function openDeleteOwnAccountModal(){
   if(!currentUser){showToast('No active session','error');return;}
-  document.getElementById('delete-own-pass').value='';
-  document.getElementById('delete-own-confirm').value='';
-  document.getElementById('delete-own-error').textContent='';
+  const passEl=document.getElementById('delete-own-pass');
+  const confirmEl=document.getElementById('delete-own-confirm');
+  const errEl=document.getElementById('delete-own-error');
+  if(!passEl||!confirmEl||!errEl||!document.getElementById('modal-delete-own-account')){
+    console.error('Delete account modal elements missing from DOM. Found:',{passEl,confirmEl,errEl});
+    showToast('Delete account feature unavailable — please refresh the page','error');
+    return;
+  }
+  passEl.value='';
+  confirmEl.value='';
+  errEl.textContent='';
   openModal('modal-delete-own-account');
 }
 
