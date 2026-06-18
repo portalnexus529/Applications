@@ -1153,6 +1153,7 @@ tr:last-child td{border-bottom:none;}
             <div class="form-group" style="margin-bottom:0;"><label class="form-label">Contact / Support URL</label><input class="form-input" id="maint-contact" placeholder="e.g. discord.gg/yourserver"></div>
             <div class="form-group" style="margin-bottom:0;"><label class="form-label">Expected Back Online</label><input class="form-input" id="maint-back-at" placeholder="e.g. 23:30 GMT"></div>
           </div>
+          <div class="form-group"><label class="form-label">Discord Webhook URL <span style="font-weight:400;color:var(--text-3);font-size:11px;">(optional — auto-posts announcement when you enable/disable)</span></label><input class="form-input" id="maint-webhook" placeholder="https://discord.com/api/webhooks/..." style="font-family:var(--mono);font-size:12px;"></div>
           <div style="font-family:var(--mono);font-size:11px;color:var(--green);margin-top:14px;min-height:16px;" id="maint-saved"></div>
         </div>
         <div class="maint-danger-zone">
@@ -2883,6 +2884,7 @@ function renderMaintenancePage(){
   const notesEl=document.getElementById('maint-internal-notes');if(notesEl)notesEl.value=m.internalNotes||'';
   const contactEl=document.getElementById('maint-contact');if(contactEl)contactEl.value=m.contact||'';
   const backEl=document.getElementById('maint-back-at');if(backEl)backEl.value=m.backAt||'';
+  const webhookEl=document.getElementById('maint-webhook');if(webhookEl)webhookEl.value=m.webhookUrl||'';
   const card=document.getElementById('maintenance-card');if(card)card.style.borderColor=active?'rgba(245,158,11,0.3)':'';
 }
 async function saveMaintenance(){
@@ -2893,6 +2895,7 @@ async function saveMaintenance(){
   const notesEl=document.getElementById('maint-internal-notes');if(notesEl)db.maintenance.internalNotes=notesEl.value.trim();
   const contactEl=document.getElementById('maint-contact');if(contactEl)db.maintenance.contact=contactEl.value.trim();
   const backEl=document.getElementById('maint-back-at');if(backEl)db.maintenance.backAt=backEl.value.trim();
+  const webhookEl=document.getElementById('maint-webhook');if(webhookEl)db.maintenance.webhookUrl=webhookEl.value.trim();
   showLoading(true);await saveDB();showLoading(false);
   showToast('Maintenance settings saved','success');
   document.getElementById('maint-saved').textContent='✓ Settings saved';
@@ -2918,6 +2921,8 @@ async function submitMaintenanceAuth(){
   if(!owner||owner.password!==pass){errEl.textContent='Incorrect password. Access denied.';return;}
   // Auth passed — toggle maintenance
   if(!db.maintenance)db.maintenance={};
+  const wasActive=!!db.maintenance.active;
+  const enabledAt=db.maintenance.enabledAt||null;
   db.maintenance.active=!db.maintenance.active;
   // Save current field values
   const reasonEl=document.getElementById('maint-reason');if(reasonEl)db.maintenance.reason=reasonEl.value.trim()||db.maintenance.reason||'';
@@ -2926,11 +2931,18 @@ async function submitMaintenanceAuth(){
   const notesEl=document.getElementById('maint-internal-notes');if(notesEl)db.maintenance.internalNotes=notesEl.value.trim();
   const contactEl=document.getElementById('maint-contact');if(contactEl)db.maintenance.contact=contactEl.value.trim();
   const backEl=document.getElementById('maint-back-at');if(backEl)db.maintenance.backAt=backEl.value.trim();
+  const webhookEl=document.getElementById('maint-webhook');if(webhookEl)db.maintenance.webhookUrl=webhookEl.value.trim();
+  // Track when maintenance was enabled, for duration calc on disable
+  if(db.maintenance.active){
+    db.maintenance.enabledAt=Date.now();
+  }
   logActivity('Maintenance mode '+(db.maintenance.active?'ENABLED':'DISABLED')+' by owner',db.maintenance.active?'yellow':'green');
   showLoading(true);await saveDB();showLoading(false);
   closeModal('modal-maintenance-auth');
   renderMaintenancePage();
   showToast('Maintenance mode '+(db.maintenance.active?'enabled':'disabled'),db.maintenance.active?'info':'success');
+  // Fire Discord webhook announcement (non-blocking)
+  sendMaintenanceWebhook(db.maintenance.active, enabledAt);
 }
 async function disableMaintenance(){
   openMaintenanceAuth();
@@ -2964,6 +2976,73 @@ function checkMaintenance(){
 function showAdminLogin(){
   document.getElementById('maintenance-screen').style.display='none';
   showAuth();
+}
+
+/* ══ DISCORD WEBHOOK — MAINTENANCE ANNOUNCEMENTS ══ */
+function formatDuration(ms){
+  if(ms<0)ms=0;
+  const totalMin=Math.round(ms/60000);
+  const h=Math.floor(totalMin/60);
+  const m=totalMin%60;
+  if(h>0&&m>0)return h+'h '+m+'m';
+  if(h>0)return h+'h';
+  return m+'m';
+}
+
+async function sendMaintenanceWebhook(isEnabling, enabledAt){
+  const m=db.maintenance||{};
+  const webhookUrl=(m.webhookUrl||'').trim();
+  if(!webhookUrl)return; // no webhook configured, skip silently
+
+  const typeLabels={scheduled:'Scheduled Maintenance',emergency:'Emergency Downtime',update:'System Update',security:'Security Patch',upgrade:'Infrastructure Upgrade',other:'Maintenance'};
+  const typeLabel=typeLabels[m.type]||'Maintenance';
+
+  let embed;
+
+  if(isEnabling){
+    const fields=[
+      {name:'Type',value:typeLabel,inline:true},
+      {name:'Enabled By',value:currentUser?currentUser.username:'Owner',inline:true}
+    ];
+    if(m.duration)fields.push({name:'Estimated Duration',value:m.duration,inline:false});
+    if(m.backAt)fields.push({name:'Expected Back Online',value:m.backAt,inline:true});
+    if(m.contact)fields.push({name:'Support / Contact',value:m.contact,inline:true});
+    if(m.reason)fields.push({name:'Message to Users',value:m.reason.substring(0,1000),inline:false});
+
+    embed={
+      title:'🔧 Maintenance Mode ENABLED',
+      description:'NEXUS PORTAL has been taken offline for maintenance.',
+      color:15844367, // yellow/amber
+      fields:fields,
+      footer:{text:'NEXUS PORTAL — Maintenance System'},
+      timestamp:new Date().toISOString()
+    };
+  } else {
+    const durationMs=enabledAt?(Date.now()-enabledAt):null;
+    const fields=[
+      {name:'Disabled By',value:currentUser?currentUser.username:'Owner',inline:true}
+    ];
+    if(durationMs!==null)fields.push({name:'Total Downtime',value:formatDuration(durationMs),inline:true});
+
+    embed={
+      title:'✅ Maintenance Mode DISABLED',
+      description:'NEXUS PORTAL is back online! All systems operational.',
+      color:3066993, // green
+      fields:fields,
+      footer:{text:'NEXUS PORTAL — Maintenance System'},
+      timestamp:new Date().toISOString()
+    };
+  }
+
+  try{
+    await fetch(webhookUrl,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({embeds:[embed]})
+    });
+  }catch(e){
+    console.warn('Discord webhook failed (non-critical):',e);
+  }
 }
 
 /* ══ GOOGLE SHEETS SYNC ══ */
