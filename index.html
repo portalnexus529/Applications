@@ -745,6 +745,45 @@ tr:last-child td{border-bottom:none;}
 .fb-filter-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;}
 @media(max-width:600px){.fb-post{padding:14px 16px;}.fb-post-body{font-size:12px;}}
 
+
+/* ══ SECURITY CENTER ══ */
+.sec-stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:24px;}
+.sec-stat{background:var(--bg-card);border:1px solid var(--border-dim);border-radius:10px;padding:16px;position:relative;overflow:hidden;}
+.sec-stat::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:var(--accent);}
+.sec-stat.red::before{background:var(--red);}
+.sec-stat.yellow::before{background:var(--yellow);}
+.sec-stat.green::before{background:var(--green);}
+.sec-stat-label{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:0.1em;color:var(--text-3);text-transform:uppercase;margin-bottom:8px;}
+.sec-stat-val{font-family:var(--mono);font-size:28px;font-weight:800;color:var(--text-1);}
+.sec-stat-sub{font-size:11px;color:var(--text-2);margin-top:4px;}
+
+.sec-alert{background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.3);border-radius:10px;padding:14px 18px;margin-bottom:10px;display:flex;align-items:center;gap:14px;}
+.sec-alert-icon{font-size:18px;flex-shrink:0;}
+.sec-alert-text{font-size:13px;color:var(--text-1);font-weight:600;}
+.sec-alert-sub{font-size:11px;color:var(--text-2);margin-top:2px;font-family:var(--mono);}
+.sec-alert-actions{margin-left:auto;display:flex;gap:8px;flex-shrink:0;}
+
+.sec-event{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border-dim);align-items:flex-start;}
+.sec-event:last-child{border-bottom:none;}
+.sec-event-dot{width:8px;height:8px;border-radius:50%;margin-top:5px;flex-shrink:0;}
+.sec-event-dot.fail{background:var(--red);box-shadow:0 0 6px var(--red);}
+.sec-event-dot.ok{background:var(--green);box-shadow:0 0 6px var(--green);}
+.sec-event-dot.warn{background:var(--yellow);box-shadow:0 0 6px var(--yellow);}
+.sec-event-dot.info{background:var(--accent);box-shadow:0 0 6px var(--accent);}
+.sec-event-text{font-size:13px;color:var(--text-1);line-height:1.4;}
+.sec-event-meta{font-family:var(--mono);font-size:10px;color:var(--text-3);margin-top:3px;}
+.sec-event-badge{display:inline-flex;padding:2px 8px;border-radius:4px;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;margin-left:6px;}
+.sec-event-badge.fail{background:rgba(248,113,113,0.15);color:var(--red);}
+.sec-event-badge.ok{background:rgba(52,211,153,0.12);color:var(--green);}
+.sec-event-badge.warn{background:rgba(251,191,36,0.12);color:var(--yellow);}
+.sec-event-badge.brute{background:rgba(248,113,113,0.2);color:var(--red);border:1px solid rgba(248,113,113,0.4);}
+
+.sec-locked-badge{background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.3);border-radius:6px;padding:3px 10px;font-family:var(--mono);font-size:10px;font-weight:700;color:var(--red);letter-spacing:0.1em;}
+.sec-lockout-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border-dim);}
+.sec-lockout-item:last-child{border-bottom:none;}
+
+@media(max-width:600px){.sec-stat-grid{grid-template-columns:1fr 1fr;}}
+
 </style>
 </head>
 <body>
@@ -1107,6 +1146,50 @@ tr:last-child td{border-bottom:none;}
           <button class="fb-filter-btn" onclick="filterFeedback('other',this)">Other</button>
         </div>
         <div id="admin-feedback-list"></div>
+      </div>
+
+
+      <!-- SECURITY CENTER -->
+      <div class="page-section fade-in" id="page-security">
+        <div class="page-header">
+          <div class="page-header-eyebrow">System</div>
+          <h1>Security Center</h1>
+          <p>Monitor login attempts, detect brute force attacks and manage account lockouts.</p>
+        </div>
+        <!-- Stats -->
+        <div class="sec-stat-grid" id="sec-stat-grid">
+          <div class="sec-stat green"><div class="sec-stat-label">Successful Logins</div><div class="sec-stat-val" id="sec-ok">0</div><div class="sec-stat-sub">All time</div></div>
+          <div class="sec-stat red"><div class="sec-stat-label">Failed Attempts</div><div class="sec-stat-val" id="sec-fail">0</div><div class="sec-stat-sub">All time</div></div>
+          <div class="sec-stat yellow"><div class="sec-stat-label">Suspicious Events</div><div class="sec-stat-val" id="sec-sus">0</div><div class="sec-stat-sub">Flagged</div></div>
+          <div class="sec-stat red"><div class="sec-stat-label">Locked Accounts</div><div class="sec-stat-val" id="sec-locked">0</div><div class="sec-stat-sub">Temp lockout</div></div>
+        </div>
+        <!-- Alerts -->
+        <div class="card" style="margin-bottom:20px;">
+          <div class="card-header"><div class="card-title">⚠ Active Alerts</div><button class="btn btn-ghost btn-sm" onclick="renderSecurityPage()">Refresh</button></div>
+          <div id="sec-alerts">
+            <div class="empty-state" style="padding:24px 0;"><div class="empty-state-icon" style="font-size:28px;">🛡</div><p>No active alerts</p></div>
+          </div>
+        </div>
+        <!-- Temp Lockouts -->
+        <div class="card" style="margin-bottom:20px;">
+          <div class="card-header"><div class="card-title">🔒 Temp Lockouts</div><button class="btn btn-danger btn-sm" onclick="clearAllLockouts()">Clear All</button></div>
+          <div id="sec-lockouts">
+            <div style="font-size:13px;color:var(--text-3);padding:12px 0;">No accounts currently locked out.</div>
+          </div>
+        </div>
+        <!-- Login Event Log -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Login Event Log</div>
+            <div style="display:flex;gap:8px;">
+              <button class="btn btn-ghost btn-sm" onclick="secFilter('all',this)" id="sec-f-all" style="opacity:1;">All</button>
+              <button class="btn btn-ghost btn-sm" onclick="secFilter('fail',this)" id="sec-f-fail">Failed</button>
+              <button class="btn btn-ghost btn-sm" onclick="secFilter('brute',this)" id="sec-f-brute">Brute Force</button>
+              <button class="btn btn-danger btn-sm" onclick="clearSecurityLog()">Clear Log</button>
+            </div>
+          </div>
+          <div id="sec-event-log" style="max-height:480px;overflow-y:auto;"></div>
+        </div>
       </div>
 
       <!-- ACTIVITY -->
@@ -1745,6 +1828,8 @@ async function loadDB(){
     if(!db.transcripts)db.transcripts=[];
     if(!db.mail)db.mail=[];
     if(!db.feedback)db.feedback=[];
+    if(!db.securityLog)db.securityLog=[];
+    if(!db.lockouts)db.lockouts={};
     // Auto-delete denied accounts past their scheduled time
     const now=Date.now();
     const toDelete=db.users.filter(u=>u.deleteAt&&now>=u.deleteAt);
@@ -1805,7 +1890,26 @@ async function doLogin(){
   if(!u||!p){setAuthErr('li','Username and password required.');return;}
   showLoading(true);await loadDB();showLoading(false);
   const user=db.users.find(x=>x.username===u&&x.password===p);
-  if(!user){setAuthErr('li','Invalid username or password.');return;}
+  if(!user){
+    setAuthErr('li','Invalid username or password.');
+    // Log failed attempt
+    logSecurityEvent('fail', u, 'Failed login attempt — username: '+u);
+    await saveDB();
+    return;
+  }
+  // Check temp lockout
+  if(db.lockouts&&db.lockouts[u]){
+    const lo=db.lockouts[u];
+    if(Date.now()<lo.until){
+      const mins=Math.ceil((lo.until-Date.now())/60000);
+      setAuthErr('li','Account temporarily locked. Try again in '+mins+' minute'+(mins!==1?'s':'')+'.');
+      logSecurityEvent('warn',u,'Login blocked — account in temp lockout');
+      await saveDB();
+      return;
+    } else {
+      delete db.lockouts[u];
+    }
+  }
   // Check if account is closed
   if(user.status==='closed'){
     showClosedScreen(user.closeReason||'No reason provided.');
@@ -1814,6 +1918,7 @@ async function doLogin(){
   currentUser={username:user.username,role:user.role};
   localStorage.setItem('nx_session',JSON.stringify(currentUser));
   logActivity(`${user.username} logged in`,'accent');
+  logSecurityEvent('ok', user.username, 'Successful login');
   await saveDB();
   document.getElementById('auth-screen').classList.remove('visible');
   if(user.role==='owner'||user.role==='admin'){document.getElementById('maintenance-screen').style.display='none';launchAdmin();}
@@ -1903,7 +2008,7 @@ function openClosedTicket(){
 function applyRoleRestrictions(){
   const owner=isOwner();
   // Items only owner can see
-  const ownerOnly=['nav-create-form','nav-activity','nav-maintenance','nav-changelog','nav-transcripts','nav-feedback'];
+  const ownerOnly=['nav-create-form','nav-activity','nav-maintenance','nav-changelog','nav-transcripts','nav-feedback','nav-security'];
   ownerOnly.forEach(id=>{
     const el=document.getElementById(id);
     if(el)el.style.display=owner?'':'none';
@@ -1986,6 +2091,7 @@ function refreshPage(page){
   if(page==='transcripts')renderTranscripts();
   if(page==='form-lookup'){document.getElementById('lookup-id-input').value='';document.getElementById('lookup-result').innerHTML='';}
   if(page==='feedback')renderAdminFeedback();
+  if(page==='security')renderSecurityPage();
 }
 async function refreshAll(){showLoading(true);await loadDB();showLoading(false);updateBadges();renderDashboard();updateTranscriptBadge();}
 
@@ -2542,6 +2648,8 @@ async function closeTicketAsAdmin(){
     if(!db.transcripts)db.transcripts=[];
     if(!db.mail)db.mail=[];
     if(!db.feedback)db.feedback=[];
+    if(!db.securityLog)db.securityLog=[];
+    if(!db.lockouts)db.lockouts={};
     db.transcripts.unshift({
       ticketId:t.id,subject:t.subject,category:t.category,
       username:t.username,date:t.date,closedAt:nowStr(),
@@ -3114,6 +3222,9 @@ async function pollDB(){
     db.assignedForms=fresh.assignedForms||db.assignedForms;
     db.feedback=fresh.feedback||db.feedback;
     updateFeedbackBadge();
+    if(fresh.securityLog)db.securityLog=fresh.securityLog;
+    if(fresh.lockouts)db.lockouts=fresh.lockouts;
+    updateSecurityBadge();
     // Update badges
     updateBadges();
     updateTranscriptBadge();
@@ -3922,6 +4033,211 @@ async function deleteFeedback(postId){
 function updateFeedbackBadge(){
   const el=document.getElementById('badge-feedback');
   if(el)el.textContent=(db.feedback||[]).length;
+}
+
+
+/* ══ SECURITY CENTER ══ */
+
+function logSecurityEvent(type, username, text){
+  if(!db.securityLog)db.securityLog=[];
+  const entry={type,username,text,time:nowStr(),ts:Date.now()};
+  db.securityLog.unshift(entry);
+  if(db.securityLog.length>300)db.securityLog.pop();
+
+  // Brute force detection: 5+ fails on same username in 10 min
+  if(type==='fail'){
+    if(!db.lockouts)db.lockouts={};
+    const recent=db.securityLog.filter(e=>
+      e.type==='fail'&&e.username===username&&(Date.now()-e.ts)<600000
+    );
+    if(recent.length>=5&&!db.lockouts[username]){
+      // Auto temp-lockout for 30 minutes
+      db.lockouts[username]={until:Date.now()+30*60*1000,reason:'Brute force detected (5+ failed attempts in 10 min)',ts:Date.now()};
+      db.securityLog.unshift({type:'brute',username,text:'AUTO-LOCKOUT: Brute force detected on "'+username+'" — locked for 30 min',time:nowStr(),ts:Date.now()});
+      logActivity('SECURITY: Brute force detected on account "'+username+'" — auto-locked 30 min','red','SYSTEM');
+    }
+  }
+  updateSecurityBadge();
+}
+
+function updateSecurityBadge(){
+  if(!db.securityLog)return;
+  const badge=document.getElementById('badge-security');
+  if(!badge)return;
+  const alerts=getSecurityAlerts();
+  if(alerts.length>0){
+    badge.style.display='inline';
+    badge.textContent=alerts.length;
+  } else {
+    badge.style.display='none';
+  }
+}
+
+function getSecurityAlerts(){
+  const alerts=[];
+  if(!db.securityLog)return alerts;
+  const tenMinsAgo=Date.now()-600000;
+  // Recent brute force
+  const bruteEvents=db.securityLog.filter(e=>e.type==='brute'&&e.ts>tenMinsAgo);
+  bruteEvents.forEach(e=>{
+    alerts.push({icon:'🚨',text:'Brute force attack detected on "'+e.username+'"',sub:e.time,username:e.username,type:'brute'});
+  });
+  // Multiple fails from unknown usernames
+  const recentFails=db.securityLog.filter(e=>e.type==='fail'&&e.ts>tenMinsAgo);
+  const unknownFails=recentFails.filter(e=>!db.users.find(u=>u.username===e.username));
+  if(unknownFails.length>=3){
+    alerts.push({icon:'⚠️',text:unknownFails.length+' login attempts on non-existent usernames in the last 10 minutes',sub:'Possible credential stuffing or scanning',type:'scan'});
+  }
+  // Active lockouts
+  if(db.lockouts){
+    Object.entries(db.lockouts).forEach(([u,lo])=>{
+      if(Date.now()<lo.until){
+        alerts.push({icon:'🔒',text:'Account "'+u+'" is temp-locked',sub:lo.reason,username:u,type:'lockout'});
+      }
+    });
+  }
+  return alerts;
+}
+
+let _secFilter='all';
+
+function secFilter(type,btn){
+  _secFilter=type;
+  document.querySelectorAll('[id^="sec-f-"]').forEach(b=>b.style.opacity='0.5');
+  if(btn)btn.style.opacity='1';
+  renderSecEventLog();
+}
+
+function renderSecurityPage(){
+  if(!db.securityLog)db.securityLog=[];
+  if(!db.lockouts)db.lockouts={};
+
+  // Stats
+  const ok=db.securityLog.filter(e=>e.type==='ok').length;
+  const fail=db.securityLog.filter(e=>e.type==='fail').length;
+  const sus=db.securityLog.filter(e=>e.type==='brute'||e.type==='warn').length;
+  const locked=Object.values(db.lockouts).filter(lo=>Date.now()<lo.until).length;
+  document.getElementById('sec-ok').textContent=ok;
+  document.getElementById('sec-fail').textContent=fail;
+  document.getElementById('sec-sus').textContent=sus;
+  document.getElementById('sec-locked').textContent=locked;
+
+  // Alerts
+  const alerts=getSecurityAlerts();
+  const alertsEl=document.getElementById('sec-alerts');
+  if(!alerts.length){
+    alertsEl.innerHTML='<div class="empty-state" style="padding:24px 0;"><div class="empty-state-icon" style="font-size:28px;">&#128737;</div><p>No active alerts — all clear</p></div>';
+  } else {
+    alertsEl.innerHTML=alerts.map(a=>`
+      <div class="sec-alert">
+        <div class="sec-alert-icon">${a.icon}</div>
+        <div>
+          <div class="sec-alert-text">${esc(a.text)}</div>
+          <div class="sec-alert-sub">${esc(a.sub)}</div>
+        </div>
+        <div class="sec-alert-actions">
+          ${a.username?`<button class="btn btn-danger btn-sm" onclick="tempLockUser('${esc(a.username)}')">Lock</button>`:''}
+          ${a.username&&db.lockouts&&db.lockouts[a.username]?`<button class="btn btn-success btn-sm" onclick="unlockUser('${esc(a.username)}')">Unlock</button>`:''}
+        </div>
+      </div>`).join('');
+  }
+
+  // Lockouts
+  const lockoutsEl=document.getElementById('sec-lockouts');
+  const activeLockouts=Object.entries(db.lockouts).filter(([u,lo])=>Date.now()<lo.until);
+  if(!activeLockouts.length){
+    lockoutsEl.innerHTML='<div style="font-size:13px;color:var(--text-3);padding:12px 0;">No accounts currently locked out.</div>';
+  } else {
+    lockoutsEl.innerHTML=activeLockouts.map(([u,lo])=>{
+      const minsLeft=Math.ceil((lo.until-Date.now())/60000);
+      return`<div class="sec-lockout-item">
+        <div class="user-menu-avatar" style="width:32px;height:32px;font-size:12px;">${u[0].toUpperCase()}</div>
+        <div style="flex:1;">
+          <div style="font-size:13px;font-weight:600;color:var(--text-1);">${esc(u)} <span class="sec-locked-badge">LOCKED</span></div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--text-3);margin-top:2px;">${esc(lo.reason)} · ${minsLeft}m remaining</div>
+        </div>
+        <button class="btn btn-success btn-sm" onclick="unlockUser('${esc(u)}')">Unlock</button>
+        <button class="btn btn-danger btn-sm" onclick="permanentLockUser('${esc(u)}')">Close Account</button>
+      </div>`;
+    }).join('');
+  }
+
+  renderSecEventLog();
+  updateSecurityBadge();
+}
+
+function renderSecEventLog(){
+  if(!db.securityLog)return;
+  let events=[...db.securityLog];
+  if(_secFilter==='fail')events=events.filter(e=>e.type==='fail');
+  if(_secFilter==='brute')events=events.filter(e=>e.type==='brute'||e.type==='warn');
+  const el=document.getElementById('sec-event-log');
+  if(!events.length){el.innerHTML='<div class="al-empty">No events to show.</div>';return;}
+  el.innerHTML=events.map(e=>{
+    const dotClass=e.type==='ok'?'ok':e.type==='brute'?'fail':e.type==='warn'?'warn':e.type==='fail'?'fail':'info';
+    const badgeMap={ok:'',fail:'FAILED',brute:'BRUTE FORCE',warn:'WARNING',info:''};
+    const badge=badgeMap[e.type]?`<span class="sec-event-badge ${e.type==='brute'?'brute':dotClass}">${badgeMap[e.type]}</span>`:'';
+    return`<div class="sec-event">
+      <div class="sec-event-dot ${dotClass}"></div>
+      <div style="flex:1;">
+        <div class="sec-event-text">${esc(e.text)}${badge}</div>
+        <div class="sec-event-meta">${e.time} · User: ${esc(e.username||'unknown')}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function tempLockUser(username){
+  if(!db.lockouts)db.lockouts={};
+  const mins=parseInt(prompt('Lock "'+username+'" for how many minutes?','30'));
+  if(!mins||mins<1)return;
+  db.lockouts[username]={until:Date.now()+mins*60*1000,reason:'Manually locked by owner',ts:Date.now()};
+  logSecurityEvent('warn',username,'Manual temp-lock applied by owner ('+mins+' min)');
+  logActivity('SECURITY: Manual temp-lock on "'+username+'" for '+mins+' min','red');
+  showLoading(true);await saveDB();showLoading(false);
+  renderSecurityPage();
+  showToast(username+' locked for '+mins+' min','success');
+}
+
+async function unlockUser(username){
+  if(!db.lockouts)return;
+  delete db.lockouts[username];
+  logSecurityEvent('info',username,'Temp-lock removed by owner');
+  logActivity('SECURITY: Lockout removed for "'+username+'"','green');
+  showLoading(true);await saveDB();showLoading(false);
+  renderSecurityPage();
+  showToast(username+' unlocked','success');
+}
+
+async function permanentLockUser(username){
+  const reason=prompt('Close account "'+username+'" permanently? Enter reason:','Security violation — brute force attempt');
+  if(!reason)return;
+  const u=db.users.find(x=>x.username===username);
+  if(!u){showToast('User not found','error');return;}
+  u.status='closed';u.closeReason=reason;
+  if(db.lockouts)delete db.lockouts[username];
+  logSecurityEvent('warn',username,'Account permanently closed by owner: '+reason);
+  logActivity('SECURITY: Account "'+username+'" closed — '+reason,'red');
+  showLoading(true);await saveDB();showLoading(false);
+  renderSecurityPage();
+  renderUsers();
+  showToast(username+' account closed','success');
+}
+
+async function clearAllLockouts(){
+  if(!confirm('Remove all temp lockouts?'))return;
+  db.lockouts={};
+  showLoading(true);await saveDB();showLoading(false);
+  renderSecurityPage();
+  showToast('All lockouts cleared','success');
+}
+
+async function clearSecurityLog(){
+  if(!confirm('Clear the entire security log? This cannot be undone.'))return;
+  db.securityLog=[];
+  showLoading(true);await saveDB();showLoading(false);
+  renderSecurityPage();
+  showToast('Security log cleared','success');
 }
 
 /* ══ BOOT ══ */
