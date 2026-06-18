@@ -794,6 +794,57 @@ tr:last-child td{border-bottom:none;}
 .perm-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:4px;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;background:var(--accent-dim);color:var(--accent);margin-left:6px;}
 @media(max-width:500px){.perm-grid{grid-template-columns:1fr;}}
 
+
+/* ══ FLOATING TICKET DRAWER ══ */
+#ticket-drawer{
+  position:fixed;top:60px;right:0;width:380px;height:calc(100vh - 60px);
+  background:var(--bg-panel);border-left:1px solid var(--border-dim);
+  z-index:800;display:flex;flex-direction:column;
+  transform:translateX(100%);transition:transform 0.25s ease;
+  box-shadow:-4px 0 24px rgba(0,0,0,0.2);
+}
+#ticket-drawer.open{transform:translateX(0);}
+.td-header{padding:16px 18px;border-bottom:1px solid var(--border-dim);display:flex;align-items:center;gap:10px;flex-shrink:0;background:var(--bg-card);}
+.td-title{font-size:13px;font-weight:700;color:var(--text-1);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.td-status{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:0.1em;padding:3px 8px;border-radius:4px;}
+.td-status.open{background:rgba(52,211,153,0.12);color:var(--green);}
+.td-status.closed{background:rgba(139,149,169,0.12);color:var(--text-3);}
+.td-close-btn{background:none;border:none;color:var(--text-3);font-size:16px;cursor:pointer;padding:4px;line-height:1;transition:color 0.15s;flex-shrink:0;}
+.td-close-btn:hover{color:var(--text-1);}
+.td-meta{padding:10px 18px;border-bottom:1px solid var(--border-dim);display:flex;gap:10px;align-items:center;flex-wrap:wrap;flex-shrink:0;background:var(--bg-deep);}
+.td-messages{flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:10px;}
+.td-input-row{display:flex;gap:8px;padding:12px 14px;border-top:1px solid var(--border-dim);background:var(--bg-panel);flex-shrink:0;}
+.td-input{flex:1;background:var(--bg-deep);border:1px solid var(--border-dim);border-radius:8px;padding:9px 12px;font-family:var(--sans);font-size:13px;color:var(--text-1);outline:none;resize:none;max-height:80px;min-height:38px;line-height:1.4;transition:border-color 0.2s;}
+.td-input:focus{border-color:var(--accent);}
+.td-send{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:9px 14px;font-family:var(--mono);font-size:11px;font-weight:700;cursor:pointer;transition:background 0.2s;flex-shrink:0;}
+.td-send:hover{background:#4a7de0;}
+.td-send:disabled{opacity:0.4;cursor:not-allowed;}
+.td-footer{padding:10px 14px;border-top:1px solid var(--border-dim);display:flex;gap:8px;flex-shrink:0;background:var(--bg-card);}
+
+/* Drawer toggle button (floats on right edge) */
+#ticket-drawer-toggle{
+  position:fixed;top:50%;right:0;transform:translateY(-50%);
+  background:var(--accent);color:#fff;border:none;
+  writing-mode:vertical-rl;text-orientation:mixed;
+  padding:14px 8px;font-family:var(--mono);font-size:11px;font-weight:700;
+  letter-spacing:0.1em;cursor:pointer;z-index:799;
+  border-radius:8px 0 0 8px;transition:background 0.2s,right 0.25s;
+  display:none;box-shadow:-2px 0 12px rgba(91,141,239,0.35);
+}
+#ticket-drawer-toggle:hover{background:#4a7de0;}
+#ticket-drawer-toggle.drawer-open{right:380px;}
+#td-unread-pip{
+  position:absolute;top:6px;right:6px;width:8px;height:8px;
+  border-radius:50%;background:var(--red);display:none;
+}
+#td-unread-pip.show{display:block;}
+
+@media(max-width:768px){
+  #ticket-drawer{width:100%;top:0;height:100vh;top:56px;height:calc(100vh - 56px);}
+  #ticket-drawer-toggle{font-size:10px;padding:10px 6px;}
+  #ticket-drawer-toggle.drawer-open{right:100%;}
+}
+
 </style>
 </head>
 <body>
@@ -2669,16 +2720,8 @@ function renderAdminTickets(){
 }
 let _openTicketId=null;
 function openAdminTicket(id){
-  const t=(db.tickets||[]).find(x=>x.id===id);if(!t)return;
   _openTicketId=id;
-  // Mark admin-read
-  if(t.messages)t.messages.forEach(m=>{if(m.from==='user')m.readByAdmin=true;});
-  document.getElementById('admin-ticket-title').textContent=`Ticket #${t.id} — ${esc(t.subject)}`;
-  document.getElementById('admin-ticket-info').innerHTML=`<div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;"><span class="ticket-cat-badge ${t.category}">${CAT_LABELS[t.category]||t.category}</span><span class="text-muted mono">${t.date}</span><span class="badge ${t.status==='open'?'badge-accepted':'badge-pending'}">${t.status}</span><span class="text-muted" style="font-size:12px;">Note: Your identity is hidden. You appear as "Support Staff"</span></div>`;
-  document.getElementById('admin-ticket-close-btn').textContent=t.status==='open'?'Close Ticket':'Reopen Ticket';
-  renderChatMessages('admin-chat-messages',t.messages||[]);
-  document.getElementById('admin-chat-input').disabled=t.status==='closed';
-  openModal('modal-admin-ticket');
+  openTicketInDrawer(id);
 }
 async function sendAdminMsg(){
   const input=document.getElementById('admin-chat-input');
@@ -3281,14 +3324,15 @@ async function pollDB(){
     // Update badges
     updateBadges();
     updateTranscriptBadge();
-    // If admin ticket modal is open, refresh messages silently
-    if(_openTicketId&&document.getElementById('modal-admin-ticket').classList.contains('open')){
-      const t=(db.tickets||[]).find(x=>x.id===_openTicketId);
+    // If ticket drawer is open, refresh messages silently
+    if(_tdTicketId&&_tdOpen){
+      const t=(db.tickets||[]).find(x=>x.id===_tdTicketId);
       if(t){
         const newCount=(t.messages||[]).length;
-        if(newCount!==oldMsgCounts[_openTicketId]){
-          renderChatMessages('admin-chat-messages',t.messages||[]);
+        if(newCount!==oldMsgCounts[_tdTicketId]){
+          tdRenderMessages(t);
         }
+        tdUpdateUnread();
       }
     }
     // If user ticket modal is open, refresh messages silently
@@ -4369,6 +4413,132 @@ function applyAdminPageRestrictions(){
   }
 }
 
+
+/* ══ FLOATING TICKET DRAWER ══ */
+let _tdOpen = false;
+let _tdTicketId = null;
+
+function openTicketInDrawer(id){
+  const t = (db.tickets||[]).find(x=>x.id===id);
+  if(!t) return;
+  _tdTicketId = id;
+  // Mark admin-read
+  if(t.messages) t.messages.forEach(m=>{if(m.from==='user') m.readByAdmin=true;});
+  // Populate header
+  document.getElementById('td-title').textContent = '#'+t.id+' — '+t.subject;
+  const statusBadge = document.getElementById('td-status-badge');
+  statusBadge.textContent = t.status.toUpperCase();
+  statusBadge.className = 'td-status '+(t.status==='open'?'open':'closed');
+  // Meta row
+  document.getElementById('td-meta').innerHTML =
+    '<span class="ticket-cat-badge '+t.category+'">'+(CAT_LABELS[t.category]||t.category)+'</span>'+
+    '<span class="text-muted mono" style="font-size:11px;">'+t.date+'</span>'+
+    '<span style="font-size:11px;color:var(--text-3);font-family:var(--mono);">Anonymous to user</span>';
+  // Messages
+  tdRenderMessages(t);
+  // Input
+  const inputRow = document.getElementById('td-input-row');
+  const footer = document.getElementById('td-footer');
+  inputRow.style.display = t.status==='closed'?'none':'flex';
+  footer.style.display = 'flex';
+  const closeBtn = document.getElementById('td-close-ticket-btn');
+  closeBtn.textContent = t.status==='open'?'Close Ticket':'Reopen Ticket';
+  closeBtn.className = 'btn btn-sm '+(t.status==='open'?'btn-warning':'btn-success');
+  const sendBtn = document.getElementById('td-send-btn');
+  if(sendBtn) sendBtn.disabled = t.status==='closed';
+  // Open drawer
+  if(!_tdOpen) toggleTicketDrawer();
+  // Show toggle button
+  document.getElementById('ticket-drawer-toggle').style.display='block';
+  tdUpdateUnread();
+}
+
+function tdRenderMessages(t){
+  const el = document.getElementById('td-messages');
+  const msgs = t.messages||[];
+  if(!msgs.length){
+    el.innerHTML='<div style="text-align:center;color:var(--text-3);font-size:13px;padding:30px 0;">No messages yet.</div>';
+    return;
+  }
+  el.innerHTML = msgs.map(m=>{
+    const isAdmin = m.from==='admin';
+    const sender = isAdmin?'Support Staff (You)':esc(m.sender);
+    return '<div class="chat-msg '+(isAdmin?'user':'admin')+'" style="max-width:90%;">'+
+      '<div class="chat-msg-meta">'+sender+' · '+m.time+'</div>'+
+      esc(m.text)+'</div>';
+  }).join('');
+  el.scrollTop = el.scrollHeight;
+}
+
+function toggleTicketDrawer(){
+  _tdOpen = !_tdOpen;
+  document.getElementById('ticket-drawer').classList.toggle('open', _tdOpen);
+  document.getElementById('ticket-drawer-toggle').classList.toggle('drawer-open', _tdOpen);
+}
+
+async function tdSend(){
+  const input = document.getElementById('td-input');
+  const text = input.value.trim();
+  if(!text || !_tdTicketId) return;
+  const t = (db.tickets||[]).find(x=>x.id===_tdTicketId);
+  if(!t || t.status==='closed') return;
+  if(!t.messages) t.messages=[];
+  t.messages.push({from:'admin',text,time:nowStr(),sender:'Support Staff'});
+  input.value='';
+  input.style.height='auto';
+  tdRenderMessages(t);
+  showLoading(true); await saveDB(); showLoading(false);
+}
+
+async function tdCloseTicket(){
+  const t = (db.tickets||[]).find(x=>x.id===_tdTicketId);
+  if(!t) return;
+  const wasOpen = t.status==='open';
+  t.status = wasOpen?'closed':'open';
+  if(wasOpen){
+    if(!db.transcripts) db.transcripts=[];
+    if(!db.mail) db.mail=[];
+    db.transcripts.unshift({
+      ticketId:t.id,subject:t.subject,category:t.category,
+      username:t.username,date:t.date,closedAt:nowStr(),
+      messages:t.messages||[],rating:null
+    });
+    t.awaitingRating=true;
+    const msgCount=(t.messages||[]).length;
+    db.mail.push({
+      id:'M'+Date.now(),to:t.username,type:'ticket_closed',
+      subject:'Support Ticket Closed — '+t.subject,
+      body:'Your support ticket has been closed by the support team.\n\nTicket ID: '+t.id+'\nSubject: '+t.subject+'\nCategory: '+(CAT_LABELS[t.category]||t.category)+'\nOpened: '+t.date+'\nClosed: '+nowStr()+'\nMessages: '+msgCount+'\n\nIf you need further assistance, please open a new ticket.',
+      date:nowStr(),read:false
+    });
+  }
+  logActivity('Ticket #'+t.id+' '+(wasOpen?'closed':'reopened'),'yellow');
+  showLoading(true); await saveDB(); showLoading(false);
+  // Refresh drawer state
+  const statusBadge = document.getElementById('td-status-badge');
+  statusBadge.textContent = t.status.toUpperCase();
+  statusBadge.className = 'td-status '+(t.status==='open'?'open':'closed');
+  const inputRow = document.getElementById('td-input-row');
+  inputRow.style.display = t.status==='closed'?'none':'flex';
+  const closeBtn = document.getElementById('td-close-ticket-btn');
+  closeBtn.textContent = t.status==='open'?'Close Ticket':'Reopen Ticket';
+  closeBtn.className = 'btn btn-sm '+(t.status==='open'?'btn-warning':'btn-success');
+  const sendBtn = document.getElementById('td-send-btn');
+  if(sendBtn) sendBtn.disabled = t.status==='closed';
+  updateBadges(); updateTranscriptBadge();
+  if(document.getElementById('page-tickets').classList.contains('active')) renderAdminTickets();
+  showToast('Ticket '+(wasOpen?'closed':'reopened'),'success');
+}
+
+function tdUpdateUnread(){
+  if(!_tdTicketId) return;
+  const t = (db.tickets||[]).find(x=>x.id===_tdTicketId);
+  const pip = document.getElementById('td-unread-pip');
+  if(!pip||!t) return;
+  const hasUnread = t.messages&&t.messages.some(m=>m.from==='user'&&!m.readByAdmin);
+  pip.classList.toggle('show', !!hasUnread);
+}
+
 /* ══ BOOT ══ */
 (async function boot(){
   const HARDCODED_KEY='$2a$10$TO05PANXis1Ueo3ZNfC24OATctFcWl4fEFHc2.GYdvL2PN3sNbKEm';
@@ -4696,6 +4866,33 @@ document.addEventListener('input',function(e){
   </button>
 </div>
 
+
+
+<!-- ══ FLOATING TICKET DRAWER ══ -->
+<div id="ticket-drawer-toggle" onclick="toggleTicketDrawer()" title="Open ticket panel">
+  <div id="td-unread-pip"></div>
+  TICKET
+</div>
+<div id="ticket-drawer">
+  <div class="td-header">
+    <div class="td-title" id="td-title">No ticket open</div>
+    <span class="td-status" id="td-status-badge"></span>
+    <button class="td-close-btn" onclick="toggleTicketDrawer()" title="Minimise">✕</button>
+  </div>
+  <div class="td-meta" id="td-meta"></div>
+  <div class="td-messages" id="td-messages">
+    <div style="text-align:center;color:var(--text-3);font-size:13px;padding:40px 0;">Open a ticket to start chatting.</div>
+  </div>
+  <div class="td-input-row" id="td-input-row" style="display:none;">
+    <textarea class="td-input" id="td-input" placeholder="Reply as Support Staff…" rows="1"
+      oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,80)+'px'"
+      onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();tdSend();}"></textarea>
+    <button class="td-send" id="td-send-btn" onclick="tdSend()">Send</button>
+  </div>
+  <div class="td-footer" id="td-footer" style="display:none;">
+    <button class="btn btn-warning btn-sm" id="td-close-ticket-btn" onclick="tdCloseTicket()" style="flex:1;">Close Ticket</button>
+  </div>
+</div>
 
 <div id="toast-container"></div>
 </body></html>
