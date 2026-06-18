@@ -577,7 +577,7 @@ tr:last-child td{border-bottom:none;}
   .stat-card{padding:14px;}
 
   /* Dashboard bottom cards: stack vertically */
-  #page-dashboard > div[style*="grid-template-columns:1fr 1fr"]{
+  .dashboard-two-col{
     display:flex!important;flex-direction:column!important;gap:14px!important;
   }
 
@@ -847,7 +847,7 @@ tr:last-child td{border-bottom:none;}
       <div class="page-section active fade-in" id="page-dashboard">
         <div class="page-header"><div class="page-header-eyebrow">Overview</div><h1>Dashboard</h1><p>Welcome back, Administrator.</p></div>
         <div class="stat-grid" id="stat-grid"></div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+        <div class="dashboard-two-col" style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
           <div class="card">
             <div class="card-header"><div class="card-title">Recent Applications</div><button class="btn btn-ghost btn-sm" onclick="navigate('all-apps',document.getElementById('nav-all-apps'))">View All</button></div>
             <div id="recent-apps-list"></div>
@@ -984,25 +984,46 @@ tr:last-child td{border-bottom:none;}
         <div id="admin-tickets-list"></div>
       </div>
 
-      <!-- MAINTENANCE -->
+            <!-- MAINTENANCE -->
       <div class="page-section fade-in" id="page-maintenance">
-        <div class="page-header"><div class="page-header-eyebrow">System</div><h1>Maintenance Mode</h1><p>Take the portal offline for non-admins while you perform maintenance.</p></div>
+        <div class="page-header"><div class="page-header-eyebrow">System</div><h1>Maintenance Mode</h1><p>Owner-only. Password verification required to toggle.</p></div>
+        <div class="maint-status-bar online" id="maint-status-bar">
+          <div class="maint-status-dot green" id="maint-status-dot"></div>
+          <div class="maint-status-text green" id="maint-status-title">PORTAL ONLINE</div>
+          <div class="maint-status-sub" id="maint-status-sub">All systems operational</div>
+        </div>
         <div class="card" id="maintenance-card">
-          <div class="card-header">
-            <div class="card-title" id="maint-status-title">🟢 Portal is Online</div>
-            <button class="btn btn-danger btn-sm" id="maint-toggle-btn" onclick="toggleMaintenance()">Enable Maintenance</button>
-          </div>
-          <div id="maint-active-notice" style="display:none;" class="notice" style="margin-bottom:20px;">
-            <div class="notice-icon">⚠️</div>
-            <span>Maintenance mode is <b>active</b>. All non-admin users see the maintenance screen.</span>
+          <div class="card-header" style="margin-bottom:0;">
+            <div class="card-title">Maintenance Settings</div>
+            <button class="btn btn-primary btn-sm" onclick="saveMaintenance()">Save Settings</button>
           </div>
           <div class="divider"></div>
-          <div class="form-group"><label class="form-label">Reason for Maintenance</label><textarea class="form-textarea" id="maint-reason" placeholder="e.g. We are performing scheduled server upgrades and improvements." style="min-height:90px;"></textarea></div>
-          <div class="form-group"><label class="form-label">Estimated Duration</label><input class="form-input" id="maint-duration" placeholder="e.g. Approximately 30 minutes · Back by 22:00 GMT"></div>
-          <div style="display:flex;gap:10px;justify-content:flex-end;">
-            <button class="btn btn-primary" onclick="saveMaintenance()">Save Settings</button>
+          <div class="form-row" style="margin-bottom:16px;">
+            <div class="form-group" style="margin-bottom:0;"><label class="form-label">Maintenance Type</label>
+              <select class="form-select" id="maint-type">
+                <option value="scheduled">Scheduled Maintenance</option>
+                <option value="emergency">Emergency Downtime</option>
+                <option value="update">System Update</option>
+                <option value="security">Security Patch</option>
+                <option value="upgrade">Infrastructure Upgrade</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom:0;"><label class="form-label">Estimated Duration</label><input class="form-input" id="maint-duration" placeholder="e.g. 30 minutes · Back by 22:00 GMT"></div>
           </div>
-          <div style="font-family:var(--mono);font-size:11px;color:var(--green);margin-top:10px;min-height:16px;" id="maint-saved"></div>
+          <div class="form-group"><label class="form-label">Public Message</label><textarea class="form-textarea" id="maint-reason" placeholder="Message shown to users during maintenance." style="min-height:90px;"></textarea></div>
+          <div class="form-group"><label class="form-label">Internal Notes <span style="font-weight:400;color:var(--text-3);font-size:11px;">(not shown to users)</span></label><textarea class="form-textarea" id="maint-internal-notes" placeholder="e.g. DB migration in progress" style="min-height:70px;"></textarea></div>
+          <div class="form-row">
+            <div class="form-group" style="margin-bottom:0;"><label class="form-label">Contact / Support URL</label><input class="form-input" id="maint-contact" placeholder="e.g. discord.gg/yourserver"></div>
+            <div class="form-group" style="margin-bottom:0;"><label class="form-label">Expected Back Online</label><input class="form-input" id="maint-back-at" placeholder="e.g. 23:30 GMT"></div>
+          </div>
+          <div style="font-family:var(--mono);font-size:11px;color:var(--green);margin-top:14px;min-height:16px;" id="maint-saved"></div>
+        </div>
+        <div class="maint-danger-zone">
+          <div class="maint-danger-label">&#9888; Owner Verification Required</div>
+          <p style="font-size:13px;color:var(--text-2);margin-bottom:16px;">Enabling maintenance locks out all admins and users. Only the portal owner retains access.</p>
+          <div id="maint-active-notice" style="display:none;" class="notice"><div class="notice-icon">&#9888;&#65039;</div><span>Maintenance mode is <b>active</b>. All non-owner accounts are locked out.</span></div>
+          <button class="btn btn-danger" id="maint-toggle-btn" onclick="openMaintenanceAuth()">&#9881; Enable Maintenance Mode</button>
         </div>
       </div>
 
@@ -1109,7 +1130,7 @@ tr:last-child td{border-bottom:none;}
     <!-- My Applications -->
     <div class="ap-page active" id="ap-page-applications">
       <div class="ap-welcome" id="ap-welcome"></div>
-      <div class="ap-sub">Here is the current status of your application(s).</div>
+      <div class="ap-sub" id="ap-sub">Here is the current status of your application(s).</div>
       <div id="ap-apps-list"></div>
     </div>
     <!-- My Forms -->
@@ -1140,7 +1161,7 @@ tr:last-child td{border-bottom:none;}
     </div>
 
     <!-- Support / Tickets (hidden - use support widget) -->
-    <div class="ap-page" id="ap-page-support" style="display:none!important;">
+    <div class="ap-page" id="ap-page-support" style="display:none;">
       <div id="user-tickets-list"></div>
     </div>
   </div>
@@ -1725,14 +1746,15 @@ function openClosedTicket(){
       n.style.cursor='not-allowed';
     }
   });
-  // Go straight to support tab
+  // Go straight to support (hidden page — use widget instead)
   document.querySelectorAll('.ap-page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.ap-nav-item').forEach(n=>n.classList.remove('active'));
-  document.getElementById('ap-page-support').classList.add('active');
-  navItems.forEach(n=>{if(n.textContent.trim()==='Support')n.classList.add('active');});
+  // Show applicant page with empty state
+  document.getElementById('ap-page-applications').classList.add('active');
   renderUserTickets();
-  // Open new ticket modal immediately
-  setTimeout(()=>openNewTicketModal(),300);
+  // Open new ticket via support widget
+  showSupportWidget();
+  setTimeout(()=>{toggleSupportWidget();setTimeout(()=>swGoStep('cat'),200);},400);
 }
 
 /* ══ LAUNCH ══ */
@@ -2942,6 +2964,9 @@ async function pollDB(){
     (db.tickets||[]).forEach(t=>oldMsgCounts[t.id]=(t.messages||[]).length);
     db.tickets=fresh.tickets||db.tickets;
     db.transcripts=fresh.transcripts||db.transcripts;
+    db.users=fresh.users||db.users;
+    db.forms=fresh.forms||db.forms;
+    db.assignedForms=fresh.assignedForms||db.assignedForms;
     // Update badges
     updateBadges();
     updateTranscriptBadge();
@@ -3840,7 +3865,9 @@ function relTime(dateStr){
   if(!dateStr)return dateStr;
   // Try to parse "17 Jun 2026, 21:14" format
   try{
-    const d=new Date(dateStr.replace(',',''));
+    // Parse "17 Jun 2026, 21:14" → cross-browser
+    const cleaned=dateStr.replace(',','').replace(/(\d{2}) (\w{3}) (\d{4}) (\d{2}:\d{2})/,'$3-$2-$1T$4');
+    const d=new Date(cleaned)||new Date(dateStr.replace(',',''));
     if(isNaN(d.getTime()))return dateStr;
     const diff=Math.floor((Date.now()-d.getTime())/1000);
     if(diff<60)return 'just now';
