@@ -1181,7 +1181,10 @@ tr:last-child td{border-bottom:none;}
             </div>
           </div>
           <div class="form-group"><label class="form-label">Message</label><textarea class="form-textarea" id="cl-new-body" placeholder="Describe what changed or what's new…" style="min-height:100px;"></textarea></div>
+          <div class="divider"></div>
+          <div class="form-group"><label class="form-label">Discord Webhook URL <span style="font-weight:400;color:var(--text-3);font-size:11px;">(optional — auto-posts this update to a channel)</span></label><input class="form-input" id="cl-webhook" placeholder="https://discord.com/api/webhooks/..." style="font-family:var(--mono);font-size:12px;"></div>
           <div style="display:flex;gap:10px;justify-content:flex-end;">
+            <button class="btn btn-ghost btn-sm" onclick="saveChangelogWebhook()">Save Webhook</button>
             <button class="btn btn-primary" onclick="postChangelog()">📢 Post Update</button>
           </div>
         </div>
@@ -1920,6 +1923,7 @@ async function loadDB(){
     if(!db.feedback)db.feedback=[];
     if(!db.securityLog)db.securityLog=[];
     if(!db.lockouts)db.lockouts={};
+    if(db.changelogWebhookUrl===undefined)db.changelogWebhookUrl='';
     // Auto-delete denied accounts past their scheduled time
     const now=Date.now();
     const toDelete=db.users.filter(u=>u.deleteAt&&now>=u.deleteAt);
@@ -3063,6 +3067,8 @@ const CL_TAG_LABELS={update:'🔄 Update',new:'✨ New Feature',fix:'🔧 Bug Fi
 const CL_TAG_COLORS={update:'',new:'green',fix:'yellow',notice:'red'};
 
 function renderChangelogAdmin(){
+  const webhookEl=document.getElementById('cl-webhook');
+  if(webhookEl)webhookEl.value=db.changelogWebhookUrl||'';
   const posts=(db.changelog||[]);
   const el=document.getElementById('cl-admin-list');
   if(!posts.length){el.innerHTML='<div class="empty-state"><div class="empty-state-icon">📢</div><h3>No posts yet</h3><p>Post your first update above.</p></div>';return;}
@@ -3101,6 +3107,40 @@ async function postChangelog(){
   document.getElementById('cl-new-title').value='';
   document.getElementById('cl-new-body').value='';
   renderChangelogAdmin();
+  sendChangelogWebhook(title,body,tag);
+}
+
+async function saveChangelogWebhook(){
+  const webhookEl=document.getElementById('cl-webhook');
+  if(!webhookEl)return;
+  db.changelogWebhookUrl=webhookEl.value.trim();
+  showLoading(true);await saveDB();showLoading(false);
+  showToast('Changelog webhook saved','success');
+}
+
+function sendChangelogWebhook(title,body,tag){
+  const webhookUrl=(db.changelogWebhookUrl||'').trim();
+  if(!webhookUrl)return; // no webhook configured, skip silently
+
+  const tagLabels={update:'🔄 Update',new:'✨ New Feature',fix:'🔧 Bug Fix',notice:'📢 Notice'};
+  const tagColors={update:5793266,new:3066993,fix:15844367,notice:15158332};
+  const tagLabel=tagLabels[tag]||tag;
+  const color=tagColors[tag]||5793266;
+
+  const embed={
+    title:'📢 '+title,
+    description:body.substring(0,4000),
+    color:color,
+    fields:[{name:'Category',value:tagLabel,inline:true}],
+    footer:{text:'NEXUS PORTAL — Changelog'},
+    timestamp:new Date().toISOString()
+  };
+
+  fetch(webhookUrl,{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({embeds:[embed]})
+  }).catch(e=>console.warn('Changelog webhook failed (non-critical):',e));
 }
 
 async function deleteChangelog(index){
