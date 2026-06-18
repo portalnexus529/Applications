@@ -4681,6 +4681,9 @@ async function swSubmitTicket(){
   document.querySelectorAll('.sw-cat-btn').forEach(b=>b.classList.remove('selected'));
   document.querySelectorAll('.sw-pri-btn').forEach(b=>b.classList.remove('selected-low','selected-medium','selected-high'));
   updateBadges();
+  swRenderTickets();
+  renderUserTickets();
+  if(typeof svRenderTickets==='function'&&currentUser&&currentUser.role==='supervisor')svRenderTickets();
   swGoStep('success');
 }
 
