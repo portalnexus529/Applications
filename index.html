@@ -711,6 +711,40 @@ tr:last-child td{border-bottom:none;}
 }
 
 @media(max-width:768px){.hide-mobile{display:none!important;}}
+
+/* ══ FEEDBACK BOARD ══ */
+.fb-post{background:var(--bg-panel);border:1px solid var(--border-dim);border-radius:12px;padding:20px 24px;margin-bottom:14px;position:relative;box-shadow:0 1px 4px rgba(0,0,0,0.04);transition:border-color 0.2s;}
+.fb-post:hover{border-color:var(--border);}
+.fb-post::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:var(--accent);border-radius:3px 0 0 3px;}
+.fb-post.feature::before{background:var(--green);}
+.fb-post.bug::before{background:var(--red);}
+.fb-post.general::before{background:var(--yellow);}
+.fb-post.other::before{background:var(--text-3);}
+.fb-cat-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:4px;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:10px;}
+.fb-cat-badge.feature{background:rgba(52,211,153,0.12);color:var(--green);}
+.fb-cat-badge.bug{background:rgba(248,113,113,0.12);color:var(--red);}
+.fb-cat-badge.general{background:rgba(251,191,36,0.12);color:var(--yellow);}
+.fb-cat-badge.other{background:rgba(139,149,169,0.12);color:var(--text-2);}
+.fb-post-title{font-size:15px;font-weight:700;color:var(--text-1);margin-bottom:6px;}
+.fb-post-body{font-size:13px;color:var(--text-2);line-height:1.7;white-space:pre-wrap;}
+.fb-post-meta{font-family:var(--mono);font-size:10px;color:var(--text-3);margin-top:10px;letter-spacing:0.1em;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.fb-reply-section{margin-top:14px;background:var(--bg-deep);border:1px solid var(--border-dim);border-radius:8px;overflow:hidden;}
+.fb-reply-header{padding:10px 14px;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:0.2em;color:var(--text-3);text-transform:uppercase;border-bottom:1px solid var(--border-dim);cursor:pointer;display:flex;align-items:center;justify-content:space-between;}
+.fb-reply-header:hover{background:var(--bg-hover);}
+.fb-replies{padding:12px 14px;display:flex;flex-direction:column;gap:10px;}
+.fb-reply{background:var(--bg-card);border:1px solid var(--border-dim);border-radius:8px;padding:10px 14px;}
+.fb-reply.owner-reply{background:var(--accent-dim2);border-color:var(--border);}
+.fb-reply-sender{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--accent);margin-bottom:4px;letter-spacing:0.1em;}
+.fb-reply.owner-reply .fb-reply-sender{color:var(--yellow);}
+.fb-reply-text{font-size:13px;color:var(--text-1);line-height:1.6;}
+.fb-reply-time{font-family:var(--mono);font-size:9px;color:var(--text-3);margin-top:4px;}
+.fb-new-post-form{background:var(--bg-panel);border:1px solid var(--border-dim);border-radius:12px;padding:20px 24px;margin-bottom:20px;}
+.fb-filter-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
+.fb-filter-btn{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--border-dim);color:var(--text-2);background:transparent;font-family:var(--mono);letter-spacing:0.1em;transition:all 0.2s;}
+.fb-filter-btn:hover{border-color:var(--border);color:var(--text-1);}
+.fb-filter-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+@media(max-width:600px){.fb-post{padding:14px 16px;}.fb-post-body{font-size:12px;}}
+
 </style>
 </head>
 <body>
@@ -1057,6 +1091,24 @@ tr:last-child td{border-bottom:none;}
         <div id="transcripts-list"></div>
       </div>
 
+
+      <!-- FEEDBACK (ADMIN) -->
+      <div class="page-section fade-in" id="page-feedback">
+        <div class="page-header">
+          <div class="page-header-eyebrow">Community</div>
+          <h1>Feedback Board</h1>
+          <p>Suggestions and feedback from users and supervisors. Reply as the portal owner.</p>
+        </div>
+        <div class="fb-filter-row">
+          <button class="fb-filter-btn active" onclick="filterFeedback('',this)">All</button>
+          <button class="fb-filter-btn" onclick="filterFeedback('feature',this)">Feature Requests</button>
+          <button class="fb-filter-btn" onclick="filterFeedback('bug',this)">Bug Reports</button>
+          <button class="fb-filter-btn" onclick="filterFeedback('general',this)">General</button>
+          <button class="fb-filter-btn" onclick="filterFeedback('other',this)">Other</button>
+        </div>
+        <div id="admin-feedback-list"></div>
+      </div>
+
       <!-- ACTIVITY -->
       <div class="page-section fade-in" id="page-activity">
         <div class="page-header">
@@ -1104,6 +1156,7 @@ tr:last-child td{border-bottom:none;}
       <div class="ap-nav-item" onclick="apNavigate('forms',this)">My Forms</div>
 
       <div class="ap-nav-item" onclick="apNavigate('changelog',this)">Updates</div>
+      <div class="ap-nav-item" onclick="apNavigate('feedback',this)">Feedback</div>
       <div class="ap-nav-item" id="ap-nav-mail" onclick="apNavigate('mail',this)" style="display:none;">Mail<span id="ap-mail-badge" style="background:var(--red);color:#fff;font-family:var(--mono);font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;margin-left:6px;display:none;">1</span></div>
     </div>
     <div style="margin-left:auto;display:flex;align-items:center;gap:16px;">
@@ -1160,6 +1213,42 @@ tr:last-child td{border-bottom:none;}
       <div id="ap-mail-list"></div>
     </div>
 
+
+    <!-- Feedback -->
+    <div class="ap-page" id="ap-page-feedback">
+      <div style="margin-bottom:24px;">
+        <div style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--text-1);margin-bottom:4px;">Feedback</div>
+        <div style="font-size:13px;color:var(--text-2);">Share suggestions, ideas or report issues. The portal owner may reply to your post.</div>
+      </div>
+      <!-- New post form -->
+      <div class="fb-new-post-form">
+        <div style="font-size:14px;font-weight:700;color:var(--text-1);margin-bottom:14px;">Post Feedback</div>
+        <div class="form-row" style="margin-bottom:12px;">
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label">Category</label>
+            <select class="form-select" id="ap-fb-cat">
+              <option value="feature">Feature Request</option>
+              <option value="bug">Bug Report</option>
+              <option value="general">General Feedback</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label">Title</label>
+            <input class="form-input" id="ap-fb-title" placeholder="Brief summary of your feedback">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Details</label>
+          <textarea class="form-textarea" id="ap-fb-body" placeholder="Describe your idea, suggestion or issue in detail..." style="min-height:90px;"></textarea>
+        </div>
+        <div style="display:flex;justify-content:flex-end;">
+          <button class="btn btn-primary" onclick="submitFeedback()">Submit Feedback</button>
+        </div>
+      </div>
+      <div id="ap-feedback-list"></div>
+    </div>
+
     <!-- Support / Tickets (hidden - use support widget) -->
     <div class="ap-page" id="ap-page-support" style="display:none;">
       <div id="user-tickets-list"></div>
@@ -1202,6 +1291,7 @@ tr:last-child td{border-bottom:none;}
       <div class="nav-item" id="sv-nav-updates" onclick="svNavigate('updates',this)"><span class="nav-icon">📢</span>Updates</div>
       <div class="sidebar-divider"></div>
       <div class="nav-section-label">Mail</div>
+      <div class="nav-item" id="sv-nav-feedback" onclick="svNavigate('feedback',this)"><span class="nav-icon">💡</span>Feedback</div>
       <div class="nav-item" id="sv-nav-mail" onclick="svNavigate('mail',this)"><span class="nav-icon">✉</span>Mail<span id="sv-mail-badge" style="margin-left:auto;background:var(--red);color:#fff;font-family:var(--mono);font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;display:none;">0</span></div>
 
     </div>
@@ -1246,6 +1336,37 @@ tr:last-child td{border-bottom:none;}
         <div class="page-header"><div class="page-header-eyebrow">Supervisor</div><h1>Mail</h1><p>Official messages from the portal owner.</p></div>
         <div id="sv-mail-list"></div>
       </div>
+      <!-- SV FEEDBACK -->
+      <div class="page-section fade-in" id="sv-page-feedback">
+        <div class="page-header"><div class="page-header-eyebrow">Supervisor</div><h1>Feedback</h1><p>Share suggestions or ideas with the portal owner.</p></div>
+        <div class="fb-new-post-form">
+          <div style="font-size:14px;font-weight:700;color:var(--text-1);margin-bottom:14px;">Post Feedback</div>
+          <div class="form-row" style="margin-bottom:12px;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Category</label>
+              <select class="form-select" id="sv-fb-cat">
+                <option value="feature">Feature Request</option>
+                <option value="bug">Bug Report</option>
+                <option value="general">General Feedback</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Title</label>
+              <input class="form-input" id="sv-fb-title" placeholder="Brief summary of your feedback">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Details</label>
+            <textarea class="form-textarea" id="sv-fb-body" placeholder="Describe your idea, suggestion or issue..." style="min-height:90px;"></textarea>
+          </div>
+          <div style="display:flex;justify-content:flex-end;">
+            <button class="btn btn-primary" onclick="submitFeedback('sv')">Submit Feedback</button>
+          </div>
+        </div>
+        <div id="sv-feedback-list"></div>
+      </div>
+
       <!-- SV TICKETS (hidden - use support widget) -->
       <div class="page-section fade-in" id="sv-page-tickets" style="display:none!important;">
         <div id="sv-tickets-list"></div>
@@ -1570,6 +1691,26 @@ tr:last-child td{border-bottom:none;}
   </div>
 </div>
 
+
+<!-- Feedback Reply Modal (Admin) -->
+<div class="modal-overlay" id="modal-feedback-reply">
+  <div class="modal" style="width:560px;">
+    <div class="modal-header"><div class="modal-title" id="fb-reply-modal-title">Reply to Feedback</div><button class="modal-close" onclick="closeModal('modal-feedback-reply')">✕</button></div>
+    <div class="modal-body">
+      <div id="fb-reply-preview" style="margin-bottom:16px;"></div>
+      <div class="form-group">
+        <label class="form-label">Your Reply</label>
+        <textarea class="form-textarea" id="fb-reply-text" placeholder="Write your reply as the portal owner..." style="min-height:120px;"></textarea>
+      </div>
+      <div class="auth-error" id="fb-reply-error"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-feedback-reply')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitFeedbackReply()">Send Reply</button>
+    </div>
+  </div>
+</div>
+
 <div id="loading-overlay" style="position:fixed;inset:0;background:rgba(7,11,20,0.85);z-index:99999;display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px;">
   <div style="font-family:var(--sans);font-size:13px;color:var(--accent);letter-spacing:0.1em;font-weight:600;">SYNCING DATABASE…</div>
   <div style="width:200px;"><div class="loading-bar"><div class="loading-bar-fill"></div></div></div>
@@ -1603,6 +1744,7 @@ async function loadDB(){
     if(!db.changelog)db.changelog=[];
     if(!db.transcripts)db.transcripts=[];
     if(!db.mail)db.mail=[];
+    if(!db.feedback)db.feedback=[];
     // Auto-delete denied accounts past their scheduled time
     const now=Date.now();
     const toDelete=db.users.filter(u=>u.deleteAt&&now>=u.deleteAt);
@@ -1761,7 +1903,7 @@ function openClosedTicket(){
 function applyRoleRestrictions(){
   const owner=isOwner();
   // Items only owner can see
-  const ownerOnly=['nav-create-form','nav-activity','nav-maintenance','nav-changelog','nav-transcripts'];
+  const ownerOnly=['nav-create-form','nav-activity','nav-maintenance','nav-changelog','nav-transcripts','nav-feedback'];
   ownerOnly.forEach(id=>{
     const el=document.getElementById(id);
     if(el)el.style.display=owner?'':'none';
@@ -1800,6 +1942,7 @@ function apNavigate(page,el){
   if(page==='forms')renderUserAssignedForms();
   if(page==='changelog')renderChangelogUser();
   if(page==='mail')renderUserMail();
+  if(page==='feedback'){renderUserFeedback('ap-feedback-list');}
 }
 
 /* ══ APPLICANT APPS ══ */
@@ -1842,6 +1985,7 @@ function refreshPage(page){
   if(page==='changelog'){renderChangelogAdmin();}
   if(page==='transcripts')renderTranscripts();
   if(page==='form-lookup'){document.getElementById('lookup-id-input').value='';document.getElementById('lookup-result').innerHTML='';}
+  if(page==='feedback')renderAdminFeedback();
 }
 async function refreshAll(){showLoading(true);await loadDB();showLoading(false);updateBadges();renderDashboard();updateTranscriptBadge();}
 
@@ -2397,6 +2541,7 @@ async function closeTicketAsAdmin(){
   if(wasOpen){
     if(!db.transcripts)db.transcripts=[];
     if(!db.mail)db.mail=[];
+    if(!db.feedback)db.feedback=[];
     db.transcripts.unshift({
       ticketId:t.id,subject:t.subject,category:t.category,
       username:t.username,date:t.date,closedAt:nowStr(),
@@ -2967,6 +3112,8 @@ async function pollDB(){
     db.users=fresh.users||db.users;
     db.forms=fresh.forms||db.forms;
     db.assignedForms=fresh.assignedForms||db.assignedForms;
+    db.feedback=fresh.feedback||db.feedback;
+    updateFeedbackBadge();
     // Update badges
     updateBadges();
     updateTranscriptBadge();
@@ -3048,6 +3195,7 @@ function svNavigate(page,el){
   if(page==='tickets')svRenderTickets();
   if(page==='updates')svRenderUpdates();
   if(page==='mail')svRenderMail();
+  if(page==='feedback')renderUserFeedback('sv-feedback-list');
 }
 
 function svMyForms(){
@@ -3638,6 +3786,142 @@ function resendDecisionMail(username){
   document.getElementById('sv-approve-btn').style.opacity=lastMail.type==='approved'?'1':'0.4';
   document.getElementById('sv-deny-btn').style.opacity=lastMail.type==='denied'?'1':'0.4';
   openModal('modal-sv-decision');
+}
+
+
+/* ══ FEEDBACK BOARD ══ */
+const FB_CAT_LABELS={feature:'Feature Request',bug:'Bug Report',general:'General Feedback',other:'Other'};
+let _fbFilter='';
+let _fbReplyId=null;
+
+function filterFeedback(cat,btn){
+  _fbFilter=cat;
+  document.querySelectorAll('.fb-filter-btn').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  renderAdminFeedback();
+}
+
+function renderAdminFeedback(){
+  if(!db.feedback)db.feedback=[];
+  let posts=[...db.feedback].reverse();
+  if(_fbFilter)posts=posts.filter(p=>p.category===_fbFilter);
+  const el=document.getElementById('admin-feedback-list');
+  if(!el)return;
+  updateFeedbackBadge();
+  if(!posts.length){
+    el.innerHTML='<div class="empty-state"><div class="empty-state-icon">💡</div><h3>No feedback yet</h3><p>Users and supervisors can post suggestions from their portals.</p></div>';
+    return;
+  }
+  el.innerHTML=posts.map(p=>renderFeedbackPost(p,true)).join('');
+}
+
+function renderUserFeedback(listId){
+  if(!db.feedback)db.feedback=[];
+  const posts=[...db.feedback].reverse();
+  const el=document.getElementById(listId);
+  if(!el)return;
+  if(!posts.length){
+    el.innerHTML='<div class="empty-state"><div class="empty-state-icon">💡</div><h3>No feedback yet</h3><p>Be the first to share an idea or suggestion!</p></div>';
+    return;
+  }
+  el.innerHTML=posts.map(p=>renderFeedbackPost(p,false)).join('');
+}
+
+function renderFeedbackPost(p,isAdmin){
+  const catLabel=FB_CAT_LABELS[p.category]||p.category;
+  const replies=p.replies||[];
+  const hasReplies=replies.length>0;
+  const unreadReplies=replies.filter(r=>r.from==='owner'&&!r.readBy?.includes(currentUser?.username)).length;
+  return `<div class="fb-post ${p.category||'general'}">
+    <span class="fb-cat-badge ${p.category}">${catLabel}</span>
+    <div class="fb-post-title">${esc(p.title)}</div>
+    <div class="fb-post-body">${esc(p.body)}</div>
+    <div class="fb-post-meta">
+      <span>Posted by <b>${esc(p.username)}</b></span>
+      <span>${relTime(p.date)}</span>
+      ${unreadReplies>0?'<span style="color:var(--accent);font-weight:700;">'+unreadReplies+' new reply</span>':''}
+      ${isAdmin?`<span style="margin-left:auto;display:flex;gap:8px;"><button class="btn btn-ghost btn-sm" onclick="openFeedbackReply('${esc(p.id)}')">Reply</button><button class="btn btn-danger btn-sm" onclick="deleteFeedback('${esc(p.id)}')">Delete</button></span>`:''}
+    </div>
+    ${hasReplies?`
+    <div class="fb-reply-section">
+      <div class="fb-reply-header" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'flex':'none'">
+        <span>Replies (${replies.length})</span><span>▼</span>
+      </div>
+      <div class="fb-replies" style="display:flex;">
+        ${replies.map(r=>`<div class="fb-reply ${r.from==='owner'?'owner-reply':''}">
+          <div class="fb-reply-sender">${r.from==='owner'?'NEXUS PORTAL Administration':esc(r.sender)}</div>
+          <div class="fb-reply-text">${esc(r.text)}</div>
+          <div class="fb-reply-time">${relTime(r.time)}</div>
+        </div>`).join('')}
+      </div>
+    </div>`:''}
+  </div>`;
+}
+
+async function submitFeedback(prefix){
+  const catId=prefix?prefix+'-fb-cat':'ap-fb-cat';
+  const titleId=prefix?prefix+'-fb-title':'ap-fb-title';
+  const bodyId=prefix?prefix+'-fb-body':'ap-fb-body';
+  const cat=document.getElementById(catId)?.value;
+  const title=document.getElementById(titleId)?.value.trim();
+  const body=document.getElementById(bodyId)?.value.trim();
+  if(!title||!body){showToast('Please fill in all fields','error');return;}
+  if(!db.feedback)db.feedback=[];
+  const post={
+    id:'FB'+Date.now(),
+    username:currentUser.username,
+    category:cat||'general',
+    title,body,
+    date:nowStr(),
+    replies:[]
+  };
+  db.feedback.push(post);
+  logActivity('Feedback posted by '+currentUser.username+': "'+title+'"','accent');
+  showLoading(true);await saveDB();showLoading(false);
+  // Clear form
+  if(document.getElementById(titleId))document.getElementById(titleId).value='';
+  if(document.getElementById(bodyId))document.getElementById(bodyId).value='';
+  showToast('Feedback submitted!','success');
+  // Refresh list
+  if(prefix==='sv')renderUserFeedback('sv-feedback-list');
+  else renderUserFeedback('ap-feedback-list');
+  updateFeedbackBadge();
+}
+
+function openFeedbackReply(postId){
+  const p=(db.feedback||[]).find(x=>x.id===postId);if(!p)return;
+  _fbReplyId=postId;
+  document.getElementById('fb-reply-modal-title').textContent='Reply to: '+p.title;
+  document.getElementById('fb-reply-preview').innerHTML=`<div class="fb-post ${p.category}" style="margin-bottom:0;"><span class="fb-cat-badge ${p.category}">${FB_CAT_LABELS[p.category]||p.category}</span><div class="fb-post-title">${esc(p.title)}</div><div class="fb-post-body" style="max-height:80px;overflow:hidden;">${esc(p.body.substring(0,200))}${p.body.length>200?'…':''}</div></div>`;
+  document.getElementById('fb-reply-text').value='';
+  document.getElementById('fb-reply-error').textContent='';
+  openModal('modal-feedback-reply');
+}
+
+async function submitFeedbackReply(){
+  const text=document.getElementById('fb-reply-text').value.trim();
+  if(!text){document.getElementById('fb-reply-error').textContent='Please write a reply.';return;}
+  const p=(db.feedback||[]).find(x=>x.id===_fbReplyId);if(!p)return;
+  if(!p.replies)p.replies=[];
+  p.replies.push({from:'owner',sender:currentUser.username,text,time:nowStr(),readBy:[]});
+  logActivity('Admin replied to feedback: "'+p.title+'"','accent');
+  showLoading(true);await saveDB();showLoading(false);
+  closeModal('modal-feedback-reply');
+  renderAdminFeedback();
+  showToast('Reply sent','success');
+}
+
+async function deleteFeedback(postId){
+  if(!confirm('Delete this feedback post?'))return;
+  db.feedback=db.feedback.filter(p=>p.id!==postId);
+  showLoading(true);await saveDB();showLoading(false);
+  renderAdminFeedback();
+  updateFeedbackBadge();
+}
+
+function updateFeedbackBadge(){
+  const el=document.getElementById('badge-feedback');
+  if(el)el.textContent=(db.feedback||[]).length;
 }
 
 /* ══ BOOT ══ */
