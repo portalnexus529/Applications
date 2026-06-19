@@ -866,6 +866,24 @@ tr:last-child td{border-bottom:none;}
 .danger-zone-title{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:0.2em;color:var(--red);text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
 .danger-zone-desc{font-size:13px;color:var(--text-2);line-height:1.7;margin-bottom:16px;}
 
+
+/* ══ ANNOUNCEMENTS ══ */
+.ann-webhook-list{display:flex;flex-direction:column;gap:10px;margin-bottom:20px;}
+.ann-webhook-item{background:var(--bg-deep);border:1px solid var(--border-dim);border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px;}
+.ann-webhook-item.selected{border-color:var(--accent);background:var(--accent-dim2);}
+.ann-webhook-name{font-size:13px;font-weight:700;color:var(--text-1);}
+.ann-webhook-url{font-family:var(--mono);font-size:10px;color:var(--text-3);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:340px;}
+.ann-webhook-radio{accent-color:var(--accent);width:16px;height:16px;flex-shrink:0;cursor:pointer;}
+.ann-color-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:8px;margin-top:8px;}
+.ann-color-swatch{width:100%;aspect-ratio:1;border-radius:8px;cursor:pointer;border:2px solid transparent;transition:all 0.15s;}
+.ann-color-swatch:hover{transform:scale(1.08);}
+.ann-color-swatch.selected{border-color:#fff;box-shadow:0 0 0 2px var(--accent);}
+.ann-preview{background:#2b2d31;border-left:4px solid var(--accent);border-radius:6px;padding:14px 16px;margin-top:16px;}
+.ann-preview-title{font-size:14px;font-weight:700;color:#fff;margin-bottom:4px;}
+.ann-preview-desc{font-size:13px;color:#dbdee1;line-height:1.5;white-space:pre-wrap;}
+.ann-preview-img{max-width:100%;border-radius:6px;margin-top:10px;}
+.ann-preview-footer{font-size:11px;color:#949ba4;margin-top:10px;}
+
 </style>
 </head>
 <body>
@@ -997,6 +1015,7 @@ tr:last-child td{border-bottom:none;}
       <div class="nav-item" id="nav-transcripts" onclick="navigate('transcripts',this)"><span class="nav-icon">📋</span>Transcripts<span class="nav-badge" id="badge-transcripts">0</span></div>
       <div class="nav-item" id="nav-security" onclick="navigate('security',this)"><span class="nav-icon">&#128737;</span>Security<span class="nav-badge red" id="badge-security" style="display:none;">0</span></div>
       <div class="nav-item" id="nav-feedback" onclick="navigate('feedback',this)"><span class="nav-icon">💡</span>Feedback<span class="nav-badge" id="badge-feedback">0</span></div>
+      <div class="nav-item" id="nav-announcements" onclick="navigate('announcements',this)"><span class="nav-icon">📣</span>Announcements</div>
     </div>
     <div class="content">
 
@@ -1234,6 +1253,61 @@ tr:last-child td{border-bottom:none;}
           <button class="fb-filter-btn" onclick="filterFeedback('other',this)">Other</button>
         </div>
         <div id="admin-feedback-list"></div>
+      </div>
+
+
+      <!-- ANNOUNCEMENTS -->
+      <div class="page-section fade-in" id="page-announcements">
+        <div class="page-header">
+          <div class="page-header-eyebrow">Community</div>
+          <h1>Announcements</h1>
+          <p>Send custom announcements to any Discord channel via saved webhooks.</p>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><div class="card-title">Saved Webhooks</div></div>
+          <div id="ann-webhook-list" class="ann-webhook-list">
+            <div class="empty-state" style="padding:20px 0;"><div class="empty-state-icon" style="font-size:24px;">&#128279;</div><p>No webhooks saved yet</p></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group" style="margin-bottom:0;"><label class="form-label">Webhook Name</label><input class="form-input" id="ann-new-name" placeholder="e.g. General Announcements"></div>
+            <div class="form-group" style="margin-bottom:0;"><label class="form-label">Webhook URL</label><input class="form-input" id="ann-new-url" placeholder="https://discord.com/api/webhooks/..." style="font-family:var(--mono);font-size:12px;"></div>
+          </div>
+          <div style="display:flex;justify-content:flex-end;margin-top:14px;">
+            <button class="btn btn-primary btn-sm" onclick="addAnnouncementWebhook()">+ Add Webhook</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><div class="card-title">Compose Announcement</div></div>
+          <div class="form-group">
+            <label class="form-label">Title</label>
+            <input class="form-input" id="ann-title" placeholder="e.g. Server Update Tonight" oninput="updateAnnouncementPreview()">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Message</label>
+            <textarea class="form-textarea" id="ann-message" placeholder="Write your announcement..." style="min-height:120px;" oninput="updateAnnouncementPreview()"></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Image / Thumbnail URL <span style="font-weight:400;color:var(--text-3);font-size:11px;">(optional)</span></label>
+            <input class="form-input" id="ann-image" placeholder="https://example.com/image.png" style="font-family:var(--mono);font-size:12px;" oninput="updateAnnouncementPreview()">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Embed Color</label>
+            <div class="ann-color-grid" id="ann-color-grid"></div>
+          </div>
+          <div class="divider"></div>
+          <div style="font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:0.2em;color:var(--text-3);text-transform:uppercase;margin-bottom:10px;">Preview</div>
+          <div class="ann-preview" id="ann-preview-box">
+            <div class="ann-preview-title" id="ann-preview-title">Your title here</div>
+            <div class="ann-preview-desc" id="ann-preview-desc">Your message will appear here...</div>
+            <img id="ann-preview-img" class="ann-preview-img" style="display:none;">
+            <div class="ann-preview-footer">NEXUS PORTAL &middot; Announcement</div>
+          </div>
+          <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;">
+            <button class="btn btn-primary" onclick="sendAnnouncement()">&#128226; Send Announcement</button>
+          </div>
+        </div>
       </div>
 
 
@@ -2044,6 +2118,7 @@ async function loadDB(){
     if(!db.securityLog)db.securityLog=[];
     if(!db.lockouts)db.lockouts={};
     if(db.changelogWebhookUrl===undefined)db.changelogWebhookUrl='';
+    if(!db.announceWebhooks)db.announceWebhooks=[];
     // Auto-delete denied accounts past their scheduled time
     const now=Date.now();
     const toDelete=db.users.filter(u=>u.deleteAt&&now>=u.deleteAt);
@@ -2236,7 +2311,7 @@ function openClosedTicket(){
 function applyRoleRestrictions(){
   const owner=isOwner();
   // Items only owner can see
-  const ownerOnly=['nav-create-form','nav-activity','nav-maintenance','nav-changelog','nav-transcripts','nav-feedback','nav-security'];
+  const ownerOnly=['nav-create-form','nav-activity','nav-maintenance','nav-changelog','nav-transcripts','nav-feedback','nav-security','nav-announcements'];
   ownerOnly.forEach(id=>{
     const el=document.getElementById(id);
     if(el)el.style.display=owner?'':'none';
@@ -2320,6 +2395,7 @@ function refreshPage(page){
   if(page==='form-lookup'){document.getElementById('lookup-id-input').value='';document.getElementById('lookup-result').innerHTML='';}
   if(page==='feedback')renderAdminFeedback();
   if(page==='security')renderSecurityPage();
+  if(page==='announcements')renderAnnouncementsPage();
 }
 async function refreshAll(){showLoading(true);await loadDB();showLoading(false);updateBadges();renderDashboard();updateTranscriptBadge();}
 
@@ -4887,6 +4963,166 @@ async function submitDeleteOwnAccount(){
     document.getElementById('li-pass').value='';
     document.getElementById('auth-screen').classList.add('visible');
   },1200);
+}
+
+
+/* ══ ANNOUNCEMENTS ══ */
+const ANN_COLORS=[
+  {name:'Blue',hex:5793266},{name:'Green',hex:3066993},{name:'Yellow',hex:15844367},
+  {name:'Red',hex:15158332},{name:'Purple',hex:10181046},{name:'Orange',hex:15105570},
+  {name:'Teal',hex:1752220},{name:'Pink',hex:15418782},
+  {name:'Dark Blue',hex:2123412},{name:'Dark Green',hex:2067276},{name:'Dark Yellow',hex:12745742},
+  {name:'Dark Red',hex:10038562},{name:'Gray',hex:9807270},{name:'White',hex:16777215},
+  {name:'Black',hex:2303786},{name:'Navy',hex:1907997}
+];
+const ANN_COLOR_CSS={
+  5793266:'#5865F2',3066993:'#2ECC71',15844367:'#F1C40F',15158332:'#E74C3C',
+  10181046:'#9B59B6',15105570:'#E67E22',1752220:'#1ABC9C',15418782:'#EB459E',
+  2123412:'#206694',2067276:'#1F8B4C',12745742:'#C27C0E',10038562:'#992D22',
+  9807270:'#95A5A6',16777215:'#FFFFFF',2303786:'#23272A',1907997:'#1D2D44'
+};
+let _annSelectedColor=5793266;
+let _annSelectedWebhookId=null;
+
+function renderAnnouncementsPage(){
+  if(!db.announceWebhooks)db.announceWebhooks=[];
+  renderAnnWebhookList();
+  renderAnnColorGrid();
+  updateAnnouncementPreview();
+}
+
+function renderAnnWebhookList(){
+  const list=db.announceWebhooks||[];
+  const el=document.getElementById('ann-webhook-list');
+  if(!el)return;
+  if(!list.length){
+    el.innerHTML='<div class="empty-state" style="padding:20px 0;"><div class="empty-state-icon" style="font-size:24px;">&#128279;</div><p>No webhooks saved yet</p></div>';
+    _annSelectedWebhookId=null;
+    return;
+  }
+  if(!_annSelectedWebhookId||!list.find(w=>w.id===_annSelectedWebhookId)){
+    _annSelectedWebhookId=list[0].id;
+  }
+  el.innerHTML=list.map(w=>`
+    <div class="ann-webhook-item ${w.id===_annSelectedWebhookId?'selected':''}">
+      <input type="radio" class="ann-webhook-radio" name="ann-webhook-radio" ${w.id===_annSelectedWebhookId?'checked':''} onclick="selectAnnWebhook('${w.id}')">
+      <div style="flex:1;min-width:0;">
+        <div class="ann-webhook-name">${esc(w.name)}</div>
+        <div class="ann-webhook-url">${esc(w.url)}</div>
+      </div>
+      <button class="btn btn-danger btn-sm" onclick="deleteAnnouncementWebhook('${w.id}')">Delete</button>
+    </div>`).join('');
+}
+
+function selectAnnWebhook(id){
+  _annSelectedWebhookId=id;
+  renderAnnWebhookList();
+}
+
+async function addAnnouncementWebhook(){
+  const nameEl=document.getElementById('ann-new-name');
+  const urlEl=document.getElementById('ann-new-url');
+  const name=nameEl.value.trim();
+  const url=urlEl.value.trim();
+  if(!name||!url){showToast('Please fill in both name and URL','error');return;}
+  if(!db.announceWebhooks)db.announceWebhooks=[];
+  db.announceWebhooks.push({id:'wh'+Date.now(),name,url});
+  _annSelectedWebhookId=db.announceWebhooks[db.announceWebhooks.length-1].id;
+  showLoading(true);await saveDB();showLoading(false);
+  nameEl.value='';urlEl.value='';
+  renderAnnWebhookList();
+  showToast('Webhook saved: '+name,'success');
+}
+
+async function deleteAnnouncementWebhook(id){
+  if(!confirm('Delete this webhook?'))return;
+  db.announceWebhooks=(db.announceWebhooks||[]).filter(w=>w.id!==id);
+  showLoading(true);await saveDB();showLoading(false);
+  renderAnnWebhookList();
+  showToast('Webhook deleted','success');
+}
+
+function renderAnnColorGrid(){
+  const el=document.getElementById('ann-color-grid');
+  if(!el)return;
+  el.innerHTML=ANN_COLORS.map(c=>`
+    <div class="ann-color-swatch ${c.hex===_annSelectedColor?'selected':''}" style="background:${ANN_COLOR_CSS[c.hex]};" title="${c.name}" onclick="selectAnnColor(${c.hex})"></div>
+  `).join('');
+}
+
+function selectAnnColor(hex){
+  _annSelectedColor=hex;
+  renderAnnColorGrid();
+  updateAnnouncementPreview();
+}
+
+function updateAnnouncementPreview(){
+  const titleEl=document.getElementById('ann-title');
+  const msgEl=document.getElementById('ann-message');
+  const imgEl=document.getElementById('ann-image');
+  if(!titleEl)return;
+  const title=titleEl.value.trim()||'Your title here';
+  const msg=msgEl.value.trim()||'Your message will appear here...';
+  const imgUrl=imgEl.value.trim();
+
+  document.getElementById('ann-preview-title').textContent=title;
+  document.getElementById('ann-preview-desc').textContent=msg;
+  const previewImg=document.getElementById('ann-preview-img');
+  if(imgUrl){
+    previewImg.src=imgUrl;
+    previewImg.style.display='block';
+  } else {
+    previewImg.style.display='none';
+  }
+  const box=document.getElementById('ann-preview-box');
+  if(box)box.style.borderLeftColor=ANN_COLOR_CSS[_annSelectedColor]||'var(--accent)';
+}
+
+async function sendAnnouncement(){
+  const list=db.announceWebhooks||[];
+  if(!list.length){showToast('Please add a webhook first','error');return;}
+  if(!_annSelectedWebhookId){showToast('Please select a webhook','error');return;}
+  const webhook=list.find(w=>w.id===_annSelectedWebhookId);
+  if(!webhook){showToast('Selected webhook not found','error');return;}
+
+  const title=document.getElementById('ann-title').value.trim();
+  const message=document.getElementById('ann-message').value.trim();
+  const imgUrl=document.getElementById('ann-image').value.trim();
+
+  if(!title||!message){showToast('Please fill in title and message','error');return;}
+
+  const embed={
+    title:title,
+    description:message,
+    color:_annSelectedColor,
+    footer:{text:'NEXUS PORTAL — Announcement'},
+    timestamp:new Date().toISOString()
+  };
+  if(imgUrl)embed.image={url:imgUrl};
+
+  showLoading(true);
+  try{
+    const r=await fetch(webhook.url,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({embeds:[embed]})
+    });
+    showLoading(false);
+    if(!r.ok){
+      showToast('Discord webhook failed (status '+r.status+')','error');
+      return;
+    }
+    logActivity('Announcement sent to "'+webhook.name+'": "'+title+'"','accent');
+    showToast('Announcement sent to '+webhook.name+'!','success');
+    document.getElementById('ann-title').value='';
+    document.getElementById('ann-message').value='';
+    document.getElementById('ann-image').value='';
+    updateAnnouncementPreview();
+  }catch(e){
+    showLoading(false);
+    console.warn('Announcement webhook failed:',e);
+    showToast('Failed to send announcement','error');
+  }
 }
 
 /* ══ BOOT ══ */
