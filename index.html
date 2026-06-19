@@ -895,6 +895,15 @@ tr:last-child td{border-bottom:none;}
 .ann-preview-img{max-width:100%;border-radius:6px;margin-top:10px;}
 .ann-preview-footer{font-size:11px;color:#949ba4;margin-top:10px;}
 
+
+/* ══ TYPING INDICATOR ══ */
+.typing-indicator{font-family:var(--mono);font-size:11px;color:var(--text-3);padding:6px 16px;font-style:italic;min-height:20px;display:flex;align-items:center;gap:6px;}
+.typing-dots{display:inline-flex;gap:2px;}
+.typing-dots span{width:4px;height:4px;border-radius:50%;background:var(--text-3);animation:typingBounce 1.2s infinite ease-in-out;}
+.typing-dots span:nth-child(2){animation-delay:0.2s;}
+.typing-dots span:nth-child(3){animation-delay:0.4s;}
+@keyframes typingBounce{0%,60%,100%{transform:translateY(0);opacity:0.4;}30%{transform:translateY(-3px);opacity:1;}}
+
 </style>
 </head>
 <body>
@@ -1854,8 +1863,9 @@ tr:last-child td{border-bottom:none;}
       <div id="user-ticket-info" style="margin-bottom:16px;"></div>
       <div class="chat-window">
         <div class="chat-messages" id="user-chat-messages"></div>
+        <div class="typing-indicator" id="user-typing-indicator" style="display:none;"></div>
         <div class="chat-input-row" id="user-chat-input-row">
-          <input class="chat-input" id="user-chat-input" placeholder="Type a message…" onkeydown="if(event.key==='Enter')sendUserMsg()">
+          <input class="chat-input" id="user-chat-input" placeholder="Type a message…" onkeydown="if(event.key==='Enter')sendUserMsg()" oninput="notifyTyping('user')">
           <button class="btn btn-primary btn-sm" onclick="sendUserMsg()">Send</button>
         </div>
       </div>
@@ -2188,6 +2198,7 @@ async function loadDB(){
     if(db.changelogWebhookUrl===undefined)db.changelogWebhookUrl='';
     if(!db.announceWebhooks)db.announceWebhooks=[];
     if(!db.svAnnounceWebhooks)db.svAnnounceWebhooks={};
+    if(!db.typingStatus)db.typingStatus={};
     // Auto-delete denied accounts past their scheduled time
     const now=Date.now();
     const toDelete=db.users.filter(u=>u.deleteAt&&now>=u.deleteAt);
@@ -3098,6 +3109,7 @@ function openUserTicket(id){
   document.getElementById('user-ticket-info').innerHTML='<div style="display:flex;gap:12px;align-items:center;"><span class="ticket-cat-badge '+t.category+'">'+CAT_LABELS[t.category]+'</span><span class="text-muted mono">'+t.date+'</span><span class="badge '+(t.status==='open'?'badge-accepted':'badge-pending')+'">'+t.status+'</span></div>';
   renderChatMessages('user-chat-messages',t.messages||[],true);
   document.getElementById('user-chat-input-row').style.display=t.status==='closed'?'none':'flex';
+  const utInd=document.getElementById('user-typing-indicator');if(utInd)utInd.style.display='none';
   openModal('modal-user-ticket');
 }
 async function sendUserMsg(){
@@ -3723,6 +3735,7 @@ async function pollDB(){
     // Update badges
     updateBadges();
     updateTranscriptBadge();
+    if(fresh.typingStatus)db.typingStatus=fresh.typingStatus;
     // If ticket drawer is open, refresh messages silently
     if(_tdTicketId&&_tdOpen){
       const t=(db.tickets||[]).find(x=>x.id===_tdTicketId);
@@ -3732,6 +3745,7 @@ async function pollDB(){
           tdRenderMessages(t);
         }
         tdUpdateUnread();
+        renderTypingIndicator(_tdTicketId,'admin');
       }
     }
     // If user ticket modal is open, refresh messages silently
@@ -3742,6 +3756,7 @@ async function pollDB(){
         if(newCount!==oldMsgCounts[_openTicketId]){
           renderChatMessages('user-chat-messages',t.messages||[],true);
         }
+        renderTypingIndicator(_openTicketId,'user');
       }
     }
     // If ticket list is visible, refresh it
@@ -5382,6 +5397,44 @@ async function sendSvAnnouncement(){
   }
 }
 
+/* ══ TYPING INDICATOR ══ */
+// Lightweight presence signal stored per-ticket in the shared DB.
+// Each side writes "I'm typing" with a timestamp; the other side polls
+// and shows/hides an indicator based on whether that timestamp is recent.
+let _typingDebounce=null;
+
+async function notifyTyping(role){
+  // role: 'user' or 'admin' — whichever side is typing right now
+  if(!_openTicketId&&!_tdTicketId)return;
+  const ticketId=role==='admin'?_tdTicketId:_openTicketId;
+  if(!ticketId)return;
+  if(!db.typingStatus)db.typingStatus={};
+  db.typingStatus[ticketId]={role,ts:Date.now(),name:currentUser?currentUser.username:'Someone'};
+  // Debounce so we don't hammer the DB on every keystroke
+  if(_typingDebounce)return;
+  _typingDebounce=setTimeout(()=>{_typingDebounce=null;},1500);
+  try{await saveDB();}catch(e){}
+}
+
+function renderTypingIndicator(ticketId,viewerRole){
+  // viewerRole: 'user' or 'admin' — whichever side is VIEWING (so we know whose typing to show)
+  const elId=viewerRole==='admin'?'td-typing-indicator':'user-typing-indicator';
+  const el=document.getElementById(elId);
+  if(!el)return;
+  const status=(db.typingStatus||{})[ticketId];
+  const TYPING_TIMEOUT=4000; // consider stale after 4s of no new keystrokes
+  const isStale=!status||(Date.now()-status.ts)>TYPING_TIMEOUT;
+  // Only show if the OTHER side is typing (not yourself)
+  const otherRole=viewerRole==='admin'?'user':'admin';
+  if(!isStale&&status.role===otherRole){
+    const label=viewerRole==='admin'?(status.name+' is typing'):'Support Staff is typing';
+    el.innerHTML=esc(label)+'<span class="typing-dots"><span></span><span></span><span></span></span>';
+    el.style.display='flex';
+  } else {
+    el.style.display='none';
+  }
+}
+
 /* ══ BOOT ══ */
 (async function boot(){
   const HARDCODED_KEY='$2a$10$TO05PANXis1Ueo3ZNfC24OATctFcWl4fEFHc2.GYdvL2PN3sNbKEm';
@@ -5729,9 +5782,10 @@ document.addEventListener('input',function(e){
   <div class="td-messages" id="td-messages">
     <div style="text-align:center;color:var(--text-3);font-size:13px;padding:40px 0;">Open a ticket to start chatting.</div>
   </div>
+  <div class="typing-indicator" id="td-typing-indicator" style="display:none;"></div>
   <div class="td-input-row" id="td-input-row" style="display:none;">
     <textarea class="td-input" id="td-input" placeholder="Reply as Support Staff…" rows="1"
-      oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,80)+'px'"
+      oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,80)+'px';notifyTyping('admin')"
       onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();tdSend();}"></textarea>
     <button class="td-send" id="td-send-btn" onclick="tdSend()">Send</button>
   </div>
